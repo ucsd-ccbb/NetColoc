@@ -26,6 +26,9 @@ def main(num_reps=10, seed_gene_file='HC_genes/ASD_HC_no_shared_200114.tsv',int_
     
     '''
     
+    # TODO: IMPROVE GENE INPUT
+    # TODO: IMPROVE COMMENTS
+    
     
     print('number of randomizations = '+str(num_reps))
     print('background interactome = ' + int_file)

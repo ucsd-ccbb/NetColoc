@@ -21,6 +21,8 @@ import seaborn as sns # pip install seaborn
 
 # -------------------- LOCALIZATION ---------------------------------#
 
+# TODO: add netprop localization function
+
 def localization(Gint, focal_genes, num_reps = 10, sample_frac = 0.8, method = 'numedges', plot = True, print_counter = False,
                 background_list=None):
     
