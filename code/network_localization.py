@@ -1,7 +1,7 @@
 """
 -------------------------------------------
-Author: Brin Rosenthal
-Date: 7/3/19
+Author: Brin Rosenthal, Sophie Liu
+Date: 10/7/20
 -------------------------------------------
 """
 
@@ -21,8 +21,62 @@ import seaborn as sns # pip install seaborn
 
 # -------------------- LOCALIZATION ---------------------------------#
 
-# TODO: add netprop localization function
+# TODO: add netprop localization functionality (outline here- needs to be tested)
+def netprop_localization(netprop_z,Fnew_rand,seed_genes,zthresh=3,plot=True):
+    '''
+    
+    Function to calculate size of netowrk proximity, and evaluate if larger than expected by chance
+    netprop_z: netprop zscores output from netprop_zscore.py
+    Fnew_rand: random network propagation scores seeded from degree-matched input sets (output from netprop_zscore.py)
+    seed_genes: list of seed genes for z, Fnew_rand
+    zthresh: threshold to call significant subgraph
+    plot: if true plot the distribution
+    
+    '''
+    
+    # create randomized z-scores
+    z_rand = (np.log(Fnew_rand[0])-np.nanmean(np.log(Fnew_rand.T),axis=0))/np.nanstd(np.log(Fnew_rand.T),axis=0)
+    z_rand = pd.DataFrame(z_rand)
+    z_rand.columns=['z_rand']
+    
+    size_rand_pnet=[]
+    # precalculate mean and sd (should really remove focal column, but takes a long time to do this)
+    Fnew_rand_mean = np.nanmean(np.log(Fnew_rand),axis=1)
+    Fnew_rand_std = np.nanstd(np.log(Fnew_rand),axis=1)
+    for r in np.arange(len(Fnew_rand.columns)):
+        if (r%100)==0:
+            print(r)
+        # average over all colums except focal r 
+    #     Fnew_non_focal=Fnew_rand.T[~Fnew_rand.columns.isin([r])].T
+    #     zrand_temp = (np.log(Fnew_rand[r])-np.nanmean(np.log(Fnew_non_focal),axis=1))/np.nanstd(np.log(Fnew_non_focal),axis=1)
+        zrand_temp = (np.log(Fnew_rand[r])-Fnew_rand_mean)/Fnew_rand_std
+        size_rand_pnet.append(sum(zrand_temp>zthresh)-len(seed_genes)) # don't count seeds in proximal network
 
+    # calculate the size of the true subgraph
+    focal_size_pnet = sum(netprop_z['z']>zthresh)-len(seed_genes) # don't count seeds in proximal network
+    if plot==True:
+        plt.figure(figsize=(5,4))
+        dfig=sns.distplot(size_rand_pnet,label='random',kde=False)
+        plt.vlines(focal_size_pnet,ymin=0,ymax=dfig.dataLim.bounds[3],color='r',label='true gene set')
+        plt.xlabel('size of proximal network, z>'+str(zthresh),fontsize=16)
+        plt.ylabel('count',fontsize=16)
+        plt.legend(loc='upper left')
+
+    
+    return size_rand_pnet, focal_size_pnet
+
+
+
+
+# TODO: add function to call significantly proximal subgraph (outline here)
+# def proximal_subgraph(Gint,netprop_z,zthresh=3):
+#    proximal_genes = netprop_z[netprop_z['z']>zthresh].index.tolist()
+#    G_sub = nx.subgraph(Gint, proximal_genes)    
+#    return G_sub
+
+
+
+# TODO: need to rename the old localization functions, may need to simplify them to avoid confusion with netprop_localization
 def localization(Gint, focal_genes, num_reps = 10, sample_frac = 0.8, method = 'numedges', plot = True, print_counter = False,
                 background_list=None):
     

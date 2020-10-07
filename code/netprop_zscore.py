@@ -21,19 +21,28 @@ def main(num_reps=10, seed_gene_file='HC_genes/ASD_HC_no_shared_200114.tsv',int_
     
     Calculate z-scores for heat propagation
     
+    num_reps: number of random samplings to perform
+    seed_gene_file: location of seed gene file
+    int_file: location of interactome (networkx gpickle format)
+    out_name: prefix for saving output
+    rand_method: type of randomization (degree_binning should be used most often, degree_ks_test deprecated)
+    save_fnew_rand: whether to save the full randomization output (beware can be a large file if large num_reps)
+    
+    Example command:
     python netprop_zscore.py 10 HC_genes/ASD_HC_no_shared_200114.tsv ../interactomes/G_PCnet.gpickle ASD degree_binning single
 
     
     '''
     
     # TODO: IMPROVE GENE INPUT
+    # TODO: INTEGRATE OUTPUT WITH network_localization.py, and network_colocalization.py
+    # TODO: Improve efficiency (currently takes hours to run with num_reps=5000)
     # TODO: IMPROVE COMMENTS
     
     
     print('number of randomizations = '+str(num_reps))
     print('background interactome = ' + int_file)
     print('randomization method = ' + rand_method)
-    print('single or double = ' + single_or_double)
     print('save Fnew rand = '+save_fnew_rand)
     
     num_reps = int(num_reps)
@@ -133,60 +142,6 @@ def calc_zscore_heat(Gint,Wprime,genes_D1,num_reps=10,ks_sig = 0.3,rand_method =
     
     return z_score_D1, Fnew_rand_D1
 
-
-def calc_zscore_heat_double(Gint,Wprime,genes_D1,genes_D2,num_reps=10,ks_sig = 0.3,rand_method = 'degree_binning'):
-    '''
-    Helper function to calculate the z-score of heat values from two input sets of genes
-    
-    rand_method = 'degree_binning'.  (this is the only option for now 'degree_ks_test' is deprecated) 
-    '''
-    seed_D1 = list(np.intersect1d(list(genes_D1),Gint.nodes()))
-    Fnew_D1 = network_prop.network_propagation(Gint,Wprime,seed_D1,alpha=.5,num_its=20)
-    
-    seed_D2 = list(np.intersect1d(list(genes_D2),Gint.nodes()))
-    Fnew_D2 = network_prop.network_propagation(Gint,Wprime,seed_D2,alpha=.5,num_its=20)
-    
-    Fnew_both = Fnew_D1*Fnew_D2
-    
-    
-    Fnew_rand_both = np.zeros([num_reps,len(Fnew_both)])
-    if rand_method == 'degree_binning':
-        bins = get_degree_binning(Gint,10)
-        min_degree, max_degree, genes_binned = zip(*bins)
-        bin_df = pd.DataFrame({'min_degree':min_degree,'max_degree':max_degree,'genes_binned':genes_binned})
-        for r in range(num_reps):
-            if (r%50)==0:
-                print(r)
-            # UPDATE 1/30/18 -- sample from degree bins
-            seed_D1_random = []
-            for g in seed_D1:
-                degree_temp = nx.degree(Gint,g)
-                # find genes with similar degrees to focal gene degree
-                genes_temp = bin_df[(bin_df['min_degree']<=degree_temp)&(bin_df['max_degree']>=degree_temp)]['genes_binned'].tolist()[0]
-                np.random.shuffle(genes_temp) # shuffle them
-                seed_D1_random.append(genes_temp[0]) # build the seed_D1_random list
-
-            seed_D2_random = []
-            for g in seed_D2:
-                degree_temp = nx.degree(Gint,g)
-                # find genes with similar degrees to focal gene degree
-                genes_temp = bin_df[(bin_df['min_degree']<=degree_temp)&(bin_df['max_degree']>=degree_temp)]['genes_binned'].tolist()[0]
-                np.random.shuffle(genes_temp) # shuffle them
-                seed_D2_random.append(genes_temp[0]) # build the seed_D1_random list
-                
-
-            Fnew_rand_1 = network_prop.network_propagation(Gint,Wprime,seed_D1_random,alpha=.5,num_its=20)
-            Fnew_rand_1.loc[seed_D1_random]=np.nan # set seeds to nan so they don't bias results
-            
-            Fnew_rand_2 = network_prop.network_propagation(Gint,Wprime,seed_D2_random,alpha=.5,num_its=20)
-            Fnew_rand_2.loc[seed_D2_random]=np.nan # set seeds to nan so they don't bias results
-            
-            Fnew_rand_both[r] = (Fnew_rand_1*Fnew_rand_2).loc[Fnew_D1.index.tolist()]
-
-
-    z_score_both = (np.log(Fnew_both)-np.nanmean(np.log(Fnew_rand_both),axis=0))/np.nanstd(np.log(Fnew_rand_both),axis=0)
-    
-    return z_score_both, Fnew_rand_both
 
 def get_degree_binning(g, bin_size, lengths=None):
     '''
