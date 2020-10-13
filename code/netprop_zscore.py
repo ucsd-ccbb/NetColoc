@@ -110,13 +110,13 @@ def calc_zscore_heat(Gint,Wprime,genes_D1,num_reps=10,ks_sig = 0.3,rand_method =
         bins = get_degree_binning(Gint,10)
         min_degree, max_degree, genes_binned = zip(*bins)
         bin_df = pd.DataFrame({'min_degree':min_degree,'max_degree':max_degree,'genes_binned':genes_binned})
+
         # create a lookup table for degree and index
         actual_degree_to_bin_df_idx = {}
         for i in range(0, bin_df['max_degree'].max() + 1):
             idx_temp = bin_df[ (bin_df['min_degree'].lt(i + 1)) & (bin_df['max_degree'].gt(i - 1)) ].index.tolist()
             if len(idx_temp) > 0: # there are some degrees which aren't represented in the graph
                 actual_degree_to_bin_df_idx[i] = idx_temp[0]
-                
         for r in range(num_reps):
             if (r%50)==0:
                 print(r)
@@ -148,11 +148,13 @@ def get_degree_binning(g, bin_size, lengths=None):
     This function comes from network_utilities.py of emregtoobox.  
     '''
     degree_to_nodes = {}
-    for node, degree in g.degree().iteritems():
+    for node, degree in g.degree:
         if lengths is not None and node not in lengths:
             continue
         degree_to_nodes.setdefault(degree, []).append(node)
     values = degree_to_nodes.keys()
+    #Change later?
+    values = list(values)
     values.sort()
     bins = []
     i = 0
