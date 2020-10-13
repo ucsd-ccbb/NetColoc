@@ -34,7 +34,6 @@ def main(num_reps=10, seed_gene_file='HC_genes/ASD_HC_no_shared_200114.tsv',int_
     
     '''
     
-    # TODO: IMPROVE GENE INPUT
     # TODO: INTEGRATE OUTPUT WITH network_localization.py, and network_colocalization.py
     # TODO: Improve efficiency (currently takes hours to run with num_reps=5000)
     # TODO: IMPROVE COMMENTS
@@ -43,7 +42,7 @@ def main(num_reps=10, seed_gene_file='HC_genes/ASD_HC_no_shared_200114.tsv',int_
     print('number of randomizations = '+str(num_reps))
     print('background interactome = ' + int_file)
     print('randomization method = ' + rand_method)
-    print('save Fnew rand = '+save_fnew_rand)
+    print('save Fnew rand = '+str(save_fnew_rand))
     
     num_reps = int(num_reps)
     # load interactome and select focal interactome
@@ -54,8 +53,8 @@ def main(num_reps=10, seed_gene_file='HC_genes/ASD_HC_no_shared_200114.tsv',int_
 
 
     # load HC genes
-    HC_genes_temp = pd.read_csv(seed_gene_file,sep='\t',index_col='Unnamed: 0')
-    seed_HC = [str(g[1:-1]).strip("'") for g in HC_genes_temp['seed_genes'].tolist()[0][1:-1].split(', ')]
+    HC_genes_file = open(seed_gene_file, 'r')
+    seed_HC = HC_genes_file.read().split()
   
     print(seed_gene_file+':')
     print(len(seed_HC))
