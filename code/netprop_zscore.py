@@ -1,7 +1,4 @@
 import numpy as np
-#import matplotlib
-#import matplotlib.pyplot as plt
-#import seaborn as sns
 import networkx as nx
 import pandas as pd
 import random
@@ -9,152 +6,136 @@ import string
 import scipy.stats
 import network_prop
 import sys
-#import visJS2jupyter.visJS_module
-#import visJS2jupyter.visualizations
+import ndex2
+import time
 
-# for parallel processing
-#from joblib import Parallel, delayed
-#import multiprocessing
-
-def main(num_reps=10, seed_gene_file='HC_genes/ASD_HC_no_shared_200114.tsv',int_file='../interactomes/G_PCnet.gpickle', out_name='ASD',rand_method = 'degree_binning',save_fnew_rand=False):
+# TODO: Change argument order to put seed_gene_file first, since it's required? (Will break things)
+def main(seed_gene_file, num_reps=10, interactome_file=None, out_name='out', alpha=0.5, seed_gene_file_delimiter=None, interactome_uuid='f93f402c-86d4-11e7-a10d-0ac135e8bacf', ndex_server='public.ndexbio.org', ndex_user=None, ndex_password=None, save_final_heat=False, save_random_final_heats=False):
     '''
-    
     Calculate z-scores for heat propagation
     
-    num_reps: number of random samplings to perform
-    seed_gene_file: location of seed gene file
-    int_file: location of interactome (networkx gpickle format)
-    out_name: prefix for saving output
-    rand_method: type of randomization (degree_binning should be used most often, degree_ks_test deprecated)
-    save_fnew_rand: whether to save the full randomization output (beware can be a large file if large num_reps)
+    num_reps: Number of random samplings to perform
+    seed_gene_file: Location of seed gene file (delimited list of genes)
+    int_file: Location of interactome (networkx gpickle format)
+    out_name: Prefix for saving output
+    rand_method: Type of randomization (degree_binning should be used most often, degree_ks_test deprecated)
+    save_fnew_rand: Whether to save the full randomization output (beware can be a large file if large num_reps)
+    seed_gene_file_delimiter: The delimiter to use when parsing the seed gene file (default: any whitespace)
+    int_uuid: NDEx UUID of interactome (can be used instead of int_file)
+    int_server: NDEx server of interactome (default: public.ndexbio.org)
     
     Example command:
     python netprop_zscore.py 10 HC_genes/ASD_HC_no_shared_200114.tsv ../interactomes/G_PCnet.gpickle ASD degree_binning single
-
-    
     '''
-    
     # TODO: INTEGRATE OUTPUT WITH network_localization.py, and network_colocalization.py
     # TODO: Improve efficiency (currently takes hours to run with num_reps=5000)
-    # TODO: IMPROVE COMMENTS
-    
-    
-    print('number of randomizations = '+str(num_reps))
-    print('background interactome = ' + int_file)
-    print('randomization method = ' + rand_method)
-    print('save Fnew rand = '+str(save_fnew_rand))
-    
-    num_reps = int(num_reps)
-    # load interactome and select focal interactome
-    Gint = nx.Graph()
-    Gint = nx.read_gpickle(int_file)
-    if 'None' in Gint.nodes():
-        Gint.remove_node('None')
+    # TODO: IMPROVE COMMENTS  
 
+    # Process arguments
+    #num_reps
+    try:
+        num_reps = int(num_reps)
+    except:
+        raise TypeError("num_reps argument should be an integer")
+    #int_file and int_uuid
+    if interactome_file is None and interactome_uuid is None:
+        raise TypeError("Either int_file or int_uuid argument must be provided to the netprop_zscore function")
 
-    # load HC genes
-    HC_genes_file = open(seed_gene_file, 'r')
-    seed_HC = HC_genes_file.read().split()
-  
-    print(seed_gene_file+':')
-    print(len(seed_HC))
-    seed_HC = list(np.intersect1d(Gint.nodes(),seed_HC))
-    print(len(seed_HC))
-    
-    # calculate the z-score
-    # calc Wprime from Gint
-    Wprime = network_prop.normalized_adj_matrix(Gint,conserve_heat=True)
+    # Load interactome
+    if interactome_file is not None:
+        interactome = nx.Graph()
+        interactome = nx.read_gpickle(interactome_file)
+    else:
+        interactome = ndex2.create_nice_cx_from_server(
+            ndex_server, 
+            username=ndex_user, 
+            password=ndex_password, 
+            uuid=interactome_uuid
+        ).to_networkx()
+    if 'None' in interactome.nodes():
+        interactome.remove_node('None')
+    nodes = list(interactome.nodes)
 
+    # Load seed genes
+    seed_file = open(seed_gene_file, 'r')
+    seed_genes = list(np.intersect1d(nodes, seed_file.read().split(seed_gene_file_delimiter)))
 
-    print('calculating z-scores: '+seed_gene_file)
-    z_seed,Fnew_rand_seed = calc_zscore_heat(Gint,Wprime,seed_HC,num_reps=num_reps,rand_method=rand_method)
-    z_seed.to_csv('z_'+out_name+'_'+str(num_reps)+'_reps_'+rand_method+'.tsv',sep='\t')
-    if save_fnew_rand=='True': # if true, save out the vector of randoms (this can be a large file)
-        pd.DataFrame(Fnew_rand_seed).to_csv('Fnew_'+out_name+'_rand'+str(num_reps)+'_reps_'+rand_method+'.tsv',sep='\t')
+    # Calculate w_double_prime from interactome
+    w_prime = network_prop.normalized_adj_matrix(interactome, conserve_heat=True)
+    w_double_prime = network_prop.get_w_double_prime(w_prime, alpha)
 
-    
-    
-def calc_zscore_heat(Gint,Wprime,genes_D1,num_reps=10,ks_sig = 0.3,rand_method = 'degree_binning'):
+    # Calculate the z-score
+    print('Calculating z-scores: ' + seed_gene_file)
+    z_scores, final_heat, random_final_heats = calc_zscore_heat(w_double_prime, nodes, dict(interactome.degree), seed_genes, num_reps=num_reps)
+
+    # Save z-score results
+    z_scores.to_csv('z_' + out_name + '_' + str(num_reps) + '_reps_.tsv', sep='\t')
+
+    # If save_final_heat is true, save out the final heat vectore
+    if save_final_heat == 'True':
+        final_heat.to_csv('final_heat_' + out_name + '_' + str(num_reps) + '_reps_.tsv', sep='\t')
+
+    # If save_random_final_heats is true, save out the vector of randoms (this can be a large file)
+    if save_random_final_heats=='True': 
+        pd.DataFrame(random_final_heats).to_csv('Fnew_'+out_name+'_rand'+str(num_reps)+'_reps_.tsv',sep='\t')
+
+def calc_zscore_heat(w_double_prime, nodes, degrees, seed_genes, num_reps=10, alpha=0.5):
     '''
     Helper function to calculate the z-score of heat values from one input seet of genes
-    
     rand_method = 'degree_ks_test', or 'degree_binning'.  select the type of randomization
     '''
-    seed_D1 = list(np.intersect1d(list(genes_D1),Gint.nodes()))
-    Fnew_D1 = network_prop.network_propagation(Gint,Wprime,seed_D1,alpha=.5,num_its=20)
+
+    final_heat = network_prop.network_propagation(w_double_prime, nodes, seed_genes)   
+    random_final_heats = np.zeros([num_reps, len(final_heat)])
+
+    bins = get_degree_binning(degrees, 10)
+    min_degree, max_degree, genes_binned = zip(*bins)
+    bin_df = pd.DataFrame({'min_degree':min_degree,'max_degree':max_degree,'genes_binned':genes_binned})
+
+    # Create a lookup table for degree and index
+    actual_degree_to_bin_df_idx = {}
+    for i in range(0, bin_df['max_degree'].max() + 1):
+        idx_temp = bin_df[ (bin_df['min_degree'].lt(i + 1)) & (bin_df['max_degree'].gt(i - 1)) ].index.tolist()
+        if len(idx_temp) > 0: # there are some degrees which aren't represented in the graph
+            actual_degree_to_bin_df_idx[i] = idx_temp[0]
+
+    for i in range(num_reps):
+        random_seed_genes = []
+        for gene in seed_genes:
+            degree = degrees[gene]
+
+            # Find genes with similar degrees to focal gene degree
+            genes_of_similar_degree = bin_df.loc[actual_degree_to_bin_df_idx[degree]]['genes_binned']
+            np.random.shuffle(genes_of_similar_degree) # shuffle them
+
+            index = 0
+            while genes_of_similar_degree[index] in random_seed_genes: # make sure the gene isn't already in the list
+                index += 1
+            
+            random_seed_genes.append(genes_of_similar_degree[index]) # build the seed_D1_random list
+
+        random_final_heat = network_prop.network_propagation(w_double_prime, nodes, random_seed_genes)
+        random_final_heat.loc[random_seed_genes]=np.nan # set seeds to nan so they don't bias results
+        random_final_heats[i] = random_final_heat
+
+    z_scores = (np.log(final_heat) - np.nanmean(np.log(random_final_heats), axis=0)) / np.nanstd(np.log(random_final_heats), axis=0)
     
-    num_focal_edges=len(nx.subgraph(Gint,seed_D1).edges())
-    
-    Fnew_rand_D1 = np.zeros([num_reps,len(Fnew_D1)])
-    if rand_method == 'degree_ks_test':
-        for r in range(num_reps):
-            if (r%50)==0:
-                print(r)
-            # UPDATE 8/23/17 -- replace with randomly selecting seed nodes, checking for degree distribution equivalence
+    return z_scores, final_heat, random_final_heats
 
-            p=0
-            # resample until degree distributions are not significantly different
-            while p<ks_sig:
-                seed_D1_random = Gint.nodes()
-                np.random.shuffle(seed_D1_random)
-                seed_D1_random = seed_D1_random[0:len(seed_D1)]
-                ks_stat,p=scipy.stats.ks_2samp(pd.Series(Gint.degree(seed_D1)),pd.Series(Gint.degree(seed_D1_random)))
-
-
-            Fnew_rand_tmp = network_prop.network_propagation(Gint,Wprime,seed_D1_random,alpha=.5,num_its=20)
-            Fnew_rand_tmp.loc[seed_D1_random]=np.nan # set seeds to nan so they don't bias results
-            Fnew_rand_D1[r] = Fnew_rand_tmp.loc[Fnew_D1.index.tolist()]
-
-    elif rand_method == 'degree_binning':
-        bins = get_degree_binning(Gint,10)
-        min_degree, max_degree, genes_binned = zip(*bins)
-        bin_df = pd.DataFrame({'min_degree':min_degree,'max_degree':max_degree,'genes_binned':genes_binned})
-
-        # create a lookup table for degree and index
-        actual_degree_to_bin_df_idx = {}
-        for i in range(0, bin_df['max_degree'].max() + 1):
-            idx_temp = bin_df[ (bin_df['min_degree'].lt(i + 1)) & (bin_df['max_degree'].gt(i - 1)) ].index.tolist()
-            if len(idx_temp) > 0: # there are some degrees which aren't represented in the graph
-                actual_degree_to_bin_df_idx[i] = idx_temp[0]
-        for r in range(num_reps):
-            if (r%50)==0:
-                print(r)
-            # UPDATE 1/30/18 -- sample from degree bins
-            seed_D1_random = []
-            for g in seed_D1:
-                degree_temp = nx.degree(Gint,g)
-                # find genes with similar degrees to focal gene degree
-                genes_temp = bin_df.loc[actual_degree_to_bin_df_idx[degree_temp]]['genes_binned']
-                
-                np.random.shuffle(genes_temp) # shuffle them
-                while genes_temp[0] in seed_D1_random: # make sure the gene isn't already in the list
-                    np.random.shuffle(genes_temp) # shuffle them
-                seed_D1_random.append(genes_temp[0]) # build the seed_D1_random list
- 
-
-            Fnew_rand_tmp = network_prop.network_propagation(Gint,Wprime,seed_D1_random,alpha=.5,num_its=20)
-            Fnew_rand_tmp.loc[seed_D1_random]=np.nan # set seeds to nan so they don't bias results
-            Fnew_rand_D1[r] = Fnew_rand_tmp.loc[Fnew_D1.index.tolist()]
-
-
-    z_score_D1 = (np.log(Fnew_D1)-np.nanmean(np.log(Fnew_rand_D1),axis=0))/np.nanstd(np.log(Fnew_rand_D1),axis=0)
-    
-    return z_score_D1, Fnew_rand_D1
-
-
-def get_degree_binning(g, bin_size, lengths=None):
+def get_degree_binning(degrees, bin_size, lengths=None):
     '''
     This function comes from network_utilities.py of emregtoobox.  
     '''
     degree_to_nodes = {}
-    for node, degree in g.degree:
+    for node, degree in degrees.items():
         if lengths is not None and node not in lengths:
             continue
         degree_to_nodes.setdefault(degree, []).append(node)
+    
     values = degree_to_nodes.keys()
-    #Change later?
     values = list(values)
     values.sort()
+
     bins = []
     i = 0
     while i < len(values):
@@ -180,4 +161,4 @@ def get_degree_binning(g, bin_size, lengths=None):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4],sys.argv[5],sys.argv[6])
+    main(*sys.argv[1:])

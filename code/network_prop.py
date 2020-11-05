@@ -14,31 +14,31 @@ import pandas as pd
 import random
 import numpy as np
 import itertools
-#import json
+import json
 import scipy
+import time
 #import community
 #from sklearn.cluster import AffinityPropagation
 #from sklearn.cluster import AgglomerativeClustering
 
 
-def normalized_adj_matrix(G,conserve_heat=True,weighted=False):
-    
+def normalized_adj_matrix(graph, conserve_heat=True, weighted=False):    
     '''
     This function returns normalized adjacency matrix.
     
     Inputs:
-        - G: NetworkX graph from which to calculate normalized adjacency matrix
+        - graph: NetworkX graph from which to calculate normalized adjacency matrix
         - conserve_heat:
             - True: Heat will be conserved (sum of heat vector = 1).  Graph asymmetric
             - False:  Heat will not be conserved.  Graph symmetric.
     '''
-    
     wvec=[]
-    for e in G.edges(data=True):
+    node_to_degree_dict = dict(graph.degree)
+    for e in graph.edges(data=True):
         v1 = e[0]
         v2 = e[1]
-        deg1 = G.degree(v1)
-        deg2 = G.degree(v2)
+        deg1 = node_to_degree_dict[v1]
+        deg2 = node_to_degree_dict[v2]
         
         if weighted:
             weight = e[2]['weight']
@@ -60,48 +60,58 @@ def normalized_adj_matrix(G,conserve_heat=True,weighted=False):
         
     G_weighted.add_weighted_edges_from(wvec)
     
-    Wprime = nx.to_numpy_matrix(G_weighted,nodelist=G.nodes())
-    Wprime = np.array(Wprime)
+    w_prime = nx.to_numpy_matrix(G_weighted, nodelist=graph.nodes())
+    w_prime = np.array(w_prime)
     
-    return Wprime
+    return w_prime
 
-def network_propagation(G,Wprime,seed_genes,alpha=.5, num_its=20):
-    
+def get_w_double_prime(wPrime, alpha):
+    startTime = time.time()
+    value = np.linalg.inv(np.identity(wPrime.shape[0]) - alpha * wPrime) * (1 - alpha)
+    print('get_w_double_prime: ' + str(time.time() - startTime))
+    return value
+
+def network_propagation(w_double_prime, nodes, seed_genes):
+    F = np.zeros(len(nodes))
+    for gene in seed_genes:
+        F += w_double_prime[:,nodes.index(gene)]
+    F /= len(seed_genes)
+    return pd.Series(F, index=nodes)
+
+def old_network_propagation(Gnodes,Wprime,seed_genes,alpha=.5, num_its=20, epsilon=1e-9):
     '''
     This function implements network propagation, as detailed in:
     Vanunu, Oron, et al. 'Associating genes and protein complexes with disease via network propagation.'
     Inputs:
-        - G: NetworkX graph on which to run simulation
+        - Gnodes: List of nodes in graph
         - Wprime:  Normalized adjacency matrix (from normalized_adj_matrix)
         - seed_genes:  Genes on which to initialize the simulation.
         - alpha:  Heat dissipation coefficient.  Default = 0.5
         - num_its:  Number of iterations (Default = 20.  Convergence usually happens within 10)
         
     Outputs:
-        - Fnew: heat vector after propagation
-
-    
+        - F: heat vector after propagation
     '''
-    
-    nodes = G.nodes()
-    numnodes = len(nodes)
-    edges=G.edges()
-    numedges = len(edges)
-    
-    Fold = np.zeros(numnodes)
-    Fold = pd.Series(Fold,index=G.nodes())
+    numnodes = len(Gnodes)    
     Y = np.zeros(numnodes)
-    Y = pd.Series(Y,index=G.nodes())
+    Y = pd.Series(Y,index=Gnodes)
+
+    heat = 1 / float(len(seed_genes))
     for g in seed_genes:
-        Y[g] = Y[g]+1/float(len(seed_genes)) # normalize total amount of heat added, allow for replacement
+        Y[g] = heat # normalize total amount of heat added, allow for replacement
     Fold = Y.copy(deep=True)
-
-    for t in range(num_its):
-        Fnew = alpha*np.dot(Wprime,Fold) + np.multiply(1-alpha,Y)
-        Fold=Fnew
-
-    return Fnew
     
+    alpha_comp = 1 - alpha
+    for t in range(num_its):
+        Fnew = alpha * np.dot(Wprime, Fold) + alpha_comp * Y
+        #Get difference
+        #if np.sum(np.absolute(Fnew - Fold)) < epsilon:
+         #   break
+        #Fnew = alpha*np.dot(Wprime,Fold) + np.multiply(1-alpha,Y)
+        Fold = Fnew
+    return Fnew
+
+
     
 def get_corr_rand_set(G,disease_seeds,num_reps=5,alpha=.5,num_its=20,conserve_heat=True):
     '''
