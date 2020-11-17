@@ -9,7 +9,6 @@ import sys
 import ndex2
 import time
 
-# TODO: Change argument order to put seed_gene_file first, since it's required? (Will break things)
 def main(seed_gene_file, num_reps=10, interactome_file=None, out_name='out', alpha=0.5, seed_gene_file_delimiter=None, interactome_uuid='f93f402c-86d4-11e7-a10d-0ac135e8bacf', ndex_server='public.ndexbio.org', ndex_user=None, ndex_password=None, save_final_heat=False, save_random_final_heats=False):
     '''
     Calculate z-scores for heat propagation
@@ -78,7 +77,7 @@ def main(seed_gene_file, num_reps=10, interactome_file=None, out_name='out', alp
     # If save_random_final_heats is true, save out the vector of randoms (this can be a large file)
     if save_random_final_heats=='True': 
         pd.DataFrame(random_final_heats).to_csv('Fnew_'+out_name+'_rand'+str(num_reps)+'_reps_.tsv',sep='\t')
-
+    
 def calc_zscore_heat(w_double_prime, nodes, degrees, seed_genes, num_reps=10, alpha=0.5):
     '''
     Helper function to calculate the z-score of heat values from one input seet of genes
@@ -88,16 +87,8 @@ def calc_zscore_heat(w_double_prime, nodes, degrees, seed_genes, num_reps=10, al
     final_heat = network_prop.network_propagation(w_double_prime, nodes, seed_genes)   
     random_final_heats = np.zeros([num_reps, len(final_heat)])
 
-    bins = get_degree_binning(degrees, 10)
-    min_degree, max_degree, genes_binned = zip(*bins)
-    bin_df = pd.DataFrame({'min_degree':min_degree,'max_degree':max_degree,'genes_binned':genes_binned})
-
-    # Create a lookup table for degree and index
-    actual_degree_to_bin_df_idx = {}
-    for i in range(0, bin_df['max_degree'].max() + 1):
-        idx_temp = bin_df[ (bin_df['min_degree'].lt(i + 1)) & (bin_df['max_degree'].gt(i - 1)) ].index.tolist()
-        if len(idx_temp) > 0: # there are some degrees which aren't represented in the graph
-            actual_degree_to_bin_df_idx[i] = idx_temp[0]
+    start = time.time()
+    bins, actual_degree_to_bin_index = get_degree_binning(degrees, 10)
 
     for i in range(num_reps):
         random_seed_genes = []
@@ -105,14 +96,14 @@ def calc_zscore_heat(w_double_prime, nodes, degrees, seed_genes, num_reps=10, al
             degree = degrees[gene]
 
             # Find genes with similar degrees to focal gene degree
-            genes_of_similar_degree = bin_df.loc[actual_degree_to_bin_df_idx[degree]]['genes_binned']
+            genes_of_similar_degree = bins[actual_degree_to_bin_index[degree]]
             np.random.shuffle(genes_of_similar_degree) # shuffle them
 
             index = 0
             while genes_of_similar_degree[index] in random_seed_genes: # make sure the gene isn't already in the list
                 index += 1
             
-            random_seed_genes.append(genes_of_similar_degree[index]) # build the seed_D1_random list
+            random_seed_genes.append(genes_of_similar_degree[index]) # build the random_seed_genes list
 
         random_final_heat = network_prop.network_propagation(w_double_prime, nodes, random_seed_genes)
         random_final_heat.loc[random_seed_genes]=np.nan # set seeds to nan so they don't bias results
@@ -122,43 +113,49 @@ def calc_zscore_heat(w_double_prime, nodes, degrees, seed_genes, num_reps=10, al
     
     return z_scores, final_heat, random_final_heats
 
-def get_degree_binning(degrees, bin_size, lengths=None):
+def get_degree_binning(node_to_degree_dict, min_bin_size, lengths=None):
     '''
     This function comes from network_utilities.py of emregtoobox.  
     '''
     degree_to_nodes = {}
-    for node, degree in degrees.items():
+    for node, degree in node_to_degree_dict.items():
         if lengths is not None and node not in lengths:
             continue
         degree_to_nodes.setdefault(degree, []).append(node)
     
-    values = degree_to_nodes.keys()
-    values = list(values)
-    values.sort()
+    degrees = degree_to_nodes.keys()
+    degrees = list(degrees)
+    degrees.sort()
 
     bins = []
+    bins_boundaries = []
+    degree_to_bin_index = {}
     i = 0
-    while i < len(values):
-        low = values[i]
-        val = degree_to_nodes[values[i]]
-        while len(val) < bin_size:
+    while i < len(degrees):
+        low = degrees[i]
+        nodes_of_certain_degree = degree_to_nodes[low]
+        while len(nodes_of_certain_degree) < min_bin_size:
             i += 1
-            if i == len(values):
+            if i == len(degrees):
                 break
-            val.extend(degree_to_nodes[values[i]])
-        if i == len(values):
+            nodes_of_certain_degree.extend(degree_to_nodes[degrees[i]])
+        if i == len(degrees):
             i -= 1
-        high = values[i]
-        i += 1 
-        #print low, high, len(val)
-        if len(val) < bin_size:
-            low_, high_, val_ = bins[-1]
-            bins[-1] = (low_, high, val_ + val)
+        high = degrees[i]
+        if len(nodes_of_certain_degree) < min_bin_size:
+            nodes_ = bins[-1]
+            low_, high_ = bins_boundaries[-1]
+            bins[-1] = nodes_ + nodes_of_certain_degree
+            bins_boundaries[-1] = (low_, high)
+            for d in range(high_ + 1, high + 1):
+                degree_to_bin_index[d] = len(bins) - 1
         else:
-            bins.append((low, high, val))
-    return bins
-
-
+            for d in range(low, high + 1):
+                degree_to_bin_index[d] = len(bins) 
+            bins.append(nodes_of_certain_degree)
+            bins_boundaries.append((low, high))
+        i += 1 
+    return bins, degree_to_bin_index
 
 if __name__ == "__main__":
     main(*sys.argv[1:])

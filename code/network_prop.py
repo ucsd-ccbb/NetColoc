@@ -17,12 +17,13 @@ import itertools
 import json
 import scipy
 import time
+
 #import community
 #from sklearn.cluster import AffinityPropagation
 #from sklearn.cluster import AgglomerativeClustering
 
 
-def normalized_adj_matrix(graph, conserve_heat=True, weighted=False):    
+def normalized_adj_matrix(graph, conserve_heat=True, weighted=False):
     '''
     This function returns normalized adjacency matrix.
     
@@ -43,13 +44,13 @@ def normalized_adj_matrix(graph, conserve_heat=True, weighted=False):
         if weighted:
             weight = e[2]['weight']
         else:
-            weight=1
+            weight = 1
         
         if conserve_heat:
-            wvec.append((v1,v2,weight/float(deg2))) #np.sqrt(deg1*deg2)))
-            wvec.append((v2,v1,weight/float(deg1)))
+            wvec.append((v1, v2, weight / float(deg2))) #np.sqrt(deg1*deg2)))
+            wvec.append((v2, v1, weight / float(deg1)))
         else:
-            wvec.append((v1,v2,weight/np.sqrt(deg1*deg2)))
+            wvec.append((v1, v2, weight / np.sqrt(deg1 * deg2)))
     
     if conserve_heat:
         # if conserving heat, make G_weighted a di-graph (not symmetric)
@@ -62,14 +63,10 @@ def normalized_adj_matrix(graph, conserve_heat=True, weighted=False):
     
     w_prime = nx.to_numpy_matrix(G_weighted, nodelist=graph.nodes())
     w_prime = np.array(w_prime)
-    
     return w_prime
 
 def get_w_double_prime(wPrime, alpha):
-    startTime = time.time()
-    value = np.linalg.inv(np.identity(wPrime.shape[0]) - alpha * wPrime) * (1 - alpha)
-    print('get_w_double_prime: ' + str(time.time() - startTime))
-    return value
+    return np.linalg.inv(np.identity(wPrime.shape[0]) - alpha * wPrime) * (1 - alpha)
 
 def network_propagation(w_double_prime, nodes, seed_genes):
     F = np.zeros(len(nodes))
@@ -78,7 +75,7 @@ def network_propagation(w_double_prime, nodes, seed_genes):
     F /= len(seed_genes)
     return pd.Series(F, index=nodes)
 
-def old_network_propagation(Gnodes,Wprime,seed_genes,alpha=.5, num_its=20, epsilon=1e-9):
+def iterative_network_propagation(nodes, w_prime, seed_genes, alpha=0.5, num_its=20):
     '''
     This function implements network propagation, as detailed in:
     Vanunu, Oron, et al. 'Associating genes and protein complexes with disease via network propagation.'
@@ -92,24 +89,20 @@ def old_network_propagation(Gnodes,Wprime,seed_genes,alpha=.5, num_its=20, epsil
     Outputs:
         - F: heat vector after propagation
     '''
-    numnodes = len(Gnodes)    
-    Y = np.zeros(numnodes)
-    Y = pd.Series(Y,index=Gnodes)
+    numnodes = len(nodes)    
+    y = np.zeros(numnodes)
+    y = pd.Series(y, index=nodes)
 
     heat = 1 / float(len(seed_genes))
-    for g in seed_genes:
-        Y[g] = heat # normalize total amount of heat added, allow for replacement
-    Fold = Y.copy(deep=True)
+    for gene in seed_genes:
+        y[gene] = heat # normalize total amount of heat added, allow for replacement
+    f_old = y.copy(deep=True)
     
-    alpha_comp = 1 - alpha
+    alpha_y = (1 - alpha) * y
     for t in range(num_its):
-        Fnew = alpha * np.dot(Wprime, Fold) + alpha_comp * Y
-        #Get difference
-        #if np.sum(np.absolute(Fnew - Fold)) < epsilon:
-         #   break
-        #Fnew = alpha*np.dot(Wprime,Fold) + np.multiply(1-alpha,Y)
-        Fold = Fnew
-    return Fnew
+        f_new = alpha * np.dot(w_prime, f_old) + alpha_y
+        f_old = f_new
+    return f_new
 
 
     
