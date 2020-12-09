@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import scipy.stats
 import sys
 from scipy.special import ndtr
+import netprop_zscore
 
 # uncommon packages required for this analysis
 import seaborn as sns # pip install seaborn
@@ -46,9 +47,6 @@ def netprop_localization(netprop_z,Fnew_rand,seed_genes,zthresh=3,plot=True):
     for r in np.arange(len(Fnew_rand.columns)):
         if (r%100)==0:
             print(r)
-        # average over all colums except focal r 
-    #     Fnew_non_focal=Fnew_rand.T[~Fnew_rand.columns.isin([r])].T
-    #     zrand_temp = (np.log(Fnew_rand[r])-np.nanmean(np.log(Fnew_non_focal),axis=1))/np.nanstd(np.log(Fnew_non_focal),axis=1)
         zrand_temp = (np.log(Fnew_rand[r])-Fnew_rand_mean)/Fnew_rand_std
         size_rand_pnet.append(sum(zrand_temp>zthresh)-len(seed_genes)) # don't count seeds in proximal network
 
@@ -77,12 +75,11 @@ def netprop_localization(netprop_z,Fnew_rand,seed_genes,zthresh=3,plot=True):
 
 
 # TODO: need to rename the old localization functions, may need to simplify them to avoid confusion with netprop_localization
-def localization(Gint, focal_genes, num_reps = 10, sample_frac = 0.8, method = 'numedges', plot = True, print_counter = False,
-                background_list=None):
+def localization(interactome, focal_genes, num_reps=10, sample_fraction=0.8, method = 'numedges', plot=True, print_counter=False, background_list=None):
     
     """
         Function to calculate localization of an input set of genes (focal_genes) on a background network (Gint).
-        Option to compute number of edges (method = 'numedges') or largest connected component (method = 'LLC') 
+        Option to compute number of edges (method = 'numedges') or largest connected component (method = 'LCC') 
         localization analysis. Calculates by sampling sub-sections of the focal genes/random set. Percentage to sample
         is set by sample_frac. Option to plot the distributions of random and focal gene localizaiton.
         
@@ -91,7 +88,7 @@ def localization(Gint, focal_genes, num_reps = 10, sample_frac = 0.8, method = '
             focal_genes: List, set of genes to calculate localization of
             num_reps: Int, number of times to randomly sample
             sample_frac: Float, percent of sampled genes
-            method: String, to decide which type of localization analysis to run. Options: 'numedges', 'LLC', or 'both'.
+            method: String, to decide which type of localization analysis to run. Options: 'numedges', 'LCC', or 'both'.
             plot: Bool, whether to plot the distributions in the output jupyter notebook cell
             print_counter: Bool, whether to print a counter that tells you which iteration you are on (every 25 iterations).
                            Useful when the num_reps is very high.
@@ -99,88 +96,74 @@ def localization(Gint, focal_genes, num_reps = 10, sample_frac = 0.8, method = '
             
         Returns: 
             numedges_list: List, the number of edges calculated for each rep, sampling over focal genes. 
-                Empty if method = 'LLC'. 
+                Empty if method = 'LCC'. 
             numedges_rand: List, the number of edges calculated for each rep, sampling over random genes of 
-                similar degree in the background network. Empty if method = 'LLC'.
+                similar degree in the background network. Empty if method = 'LCC'.
             LCC_list: List, the size of the largest connected component, calculated for each rep, sampling over focal genes. 
                 Empty if method = 'numedges'. 
             LCC_rand: List, the size of the largest connected component, calculated for each rep, sampling over random genes of 
                 similar degree in the background network. Empty if method = 'numedges'. 
     """
 
-    # Create degree bins to sample from
-    bins = get_degree_binning(Gint, 10)
-    min_degree, max_degree, genes_binned = zip(*bins)
-    bin_df = pd.DataFrame({'min_degree':min_degree, 'max_degree':max_degree, 'genes_binned':genes_binned})
-    
-    # create a lookup table for degree and index
-    actual_degree_to_bin_df_idx = {}
-    for i in range(0, bin_df['max_degree'].max() + 1):
-        idx_temp = bin_df[ (bin_df['min_degree'].lt(i + 1)) & (bin_df['max_degree'].gt(i - 1)) ].index.tolist()
+    nodes = list(interactome.nodes)
+    degrees = dict(interactome.degree)
 
-        if len(idx_temp) > 0: # there are some degrees which aren't represented in the graph
-            actual_degree_to_bin_df_idx[i] = idx_temp[0]
+    # Create degree bins to sample from
+    bins, actual_degree_to_bin_index = netprop_zscore.get_degree_binning(degrees, 10)
     
-    focal_genes = list(np.intersect1d(focal_genes, Gint.nodes())) # only use focal_genes which are in Gint
+    focal_genes = list(np.intersect1d(focal_genes, nodes)) # only use focal_genes which are in Gint
 
     numedges_list = []
     numedges_rand = []
     LCC_list = []
     LCC_rand = []
     
-    if background_list==None:
-        background_list=Gint.nodes()
-    
-    for r in range(num_reps):
+    if background_list is None:
+        background_list = nodes
 
-        if print_counter == True:
-            # so user knows how far along the process is
-            if (r % 25) == 0:
-                print(r)
-
-        focal_80 = focal_genes
-        np.random.shuffle(focal_80)
-        focal_80 = focal_80[:int(len(focal_80)*sample_frac)]
-
-        # find genes with similar degrees to focal gene degree
-        seed_random = []
-        for g in focal_80:
-            degree_temp = nx.degree(Gint,g)
-            genes_temp = bin_df.loc[actual_degree_to_bin_df_idx[degree_temp]]['genes_binned'] # use the lookup table for speed
-            np.random.shuffle(genes_temp) # shuffle them
-            while (genes_temp[0] in seed_random) or (genes_temp[0] not in background_list): # make sure the gene isn't already in the list, but is in the background_list
-                np.random.shuffle(genes_temp) # shuffle them
-            
-            seed_random.append(genes_temp[0]) # build the seed_D1_random list
-            
-        #print(len(focal_80))
-        #print(len(seed_random))
-        #print(len(np.unique(seed_random)))
-
-        if (method == 'numedges') or (method == 'both'):
-            
-            # number edges calc on focal set
-            numedges_temp = len(nx.subgraph(Gint,focal_80).edges())
-            numedges_list.append(numedges_temp)
-            
-            # number edges calc on random sample
-            numedges_temp_rand = len(nx.subgraph(Gint,seed_random).edges())
-            numedges_rand.append(numedges_temp_rand)
-            
-        if (method == 'LCC') or (method == 'both'):
-            
-            # LLC calc on focal set
-            G_sub_temp = nx.Graph(nx.subgraph(Gint, focal_80))
-            G_sub_temp = max(nx.connected_component_subgraphs(G_sub_temp), key = len)
-            LCC_list.append(len(G_sub_temp.nodes()))
-            
-            # LLC calc on random sample
-            G_sub_temp = nx.Graph(nx.subgraph(Gint, seed_random))
-            G_sub_temp = max(nx.connected_component_subgraphs(G_sub_temp), key=len)
-            LCC_rand.append(len(G_sub_temp.nodes()))
+    sample_number = int(len(focal_genes) * sample_fraction)
+    if sample_number == len(focal_genes):
+        #Only perform determinate procedures one time
+        subgraph = nx.subgraph(interactome, focal_genes)
+        if method == 'numedges' or method == 'both':
+            numedges_list = [len(subgraph.edges())] * num_reps
+        if method == 'LCC' or method == 'both':
+            largest_connected_component = max(nx.connected_component_subgraphs(subgraph), key=len)
+            LCC_list = [max(nx.connected_component_subgraphs(subgraph), key=len)] * num_reps
+        #Random genes
+        for r in range(num_reps):
+            random_genes = get_random_genes_of_similar_degree(focal_genes, bins, actual_degree_to_bin_index, degrees, background_list)
+            #Find subgraph of random genes
+            subgraph = nx.subgraph(interactome, random_genes)
+            if method == 'numedges' or method == 'both':
+                numedges_rand.append(len(subgraph.edges()))
+            if method == 'LCC' or method == 'both':
+                largest_connected_component = max(nx.connected_component_subgraphs(subgraph), key=len)
+                LCC_rand.append(len(largest_connected_component.nodes))
+    else:
+        for r in range(num_reps):
+            #Shuffle focal genes
+            np.random.shuffle(focal_genes)
+            focal_genes_subset = focal_genes[:sample_number]
+            #Get subgraph
+            subgraph = nx.subgraph(interactome, focal_genes_subset)
+            if method == 'numedges' or method == 'both':
+                numedges_list.append(len(subgraph.edges()))
+            if method == 'LCC' or method == 'both':
+                largest_connected_component = max(nx.connected_component_subgraphs(subgraph), key=len)
+                LCC_list.append(len(largest_connected_component.nodes))
+            #Get random genes
+            random_genes = get_random_genes_of_similar_degree(focal_genes_subset, bins, actual_degree_to_bin_index, degrees, background_list)
+            #Find subgraph of random genes
+            subgraph = nx.subgraph(interactome, random_genes)
+            if method == 'numedges' or method == 'both':
+                numedges_rand.append(len(subgraph.edges()))
+            if method == 'LCC' or method == 'both':
+                largest_connected_component = max(nx.connected_component_subgraphs(subgraph), key=len)
+                LCC_rand.append(len(largest_connected_component.nodes))
     
     if plot == True:
-        if (method == 'numedges') or (method == 'both'):
+        if method == 'numedges' or method == 'both':
             fig, ax = plt.subplots(figsize = (12, 7))
             sns.distplot(numedges_list, ax = ax, hist = True, label = 'focal genes')
             sns.distplot(numedges_rand, ax = ax, hist = True, label = 'random set')
@@ -189,7 +172,7 @@ def localization(Gint, focal_genes, num_reps = 10, sample_frac = 0.8, method = '
             plt.title('Number of Edges Localization', fontsize = 18)
             plt.legend(loc = 'upper right', fontsize = 14)
                 
-        if (method == 'LCC') or (method == 'both'):
+        if method == 'LCC' or method == 'both':
             fig, ax = plt.subplots(figsize = (12, 7))
             sns.distplot(LCC_list, ax = ax, hist = True, label = 'focal genes')
             sns.distplot(LCC_rand, ax = ax, hist = True, label = 'random set')
@@ -199,6 +182,17 @@ def localization(Gint, focal_genes, num_reps = 10, sample_frac = 0.8, method = '
             plt.legend(loc = 'upper right', fontsize = 14)
             
     return numedges_list, numedges_rand, LCC_list, LCC_rand
+
+def get_random_genes_of_similar_degree(focal_genes, bins, actual_degree_to_bin_index, degrees, background_list):
+    random_genes = []
+    for gene in focal_genes:
+        genes_of_similar_degree = bins[actual_degree_to_bin_index[degrees[gene]]]
+        np.random.shuffle(genes_of_similar_degree)
+        index = 0
+        while genes_of_similar_degree[index] in random_genes or genes_of_similar_degree[index] not in background_list:
+            index += 1
+        random_genes.append(genes_of_similar_degree[index])
+    return random_genes
     
 
 def localization_full(Gint, focal_genes, 
@@ -211,7 +205,7 @@ def localization_full(Gint, focal_genes,
                        
     """
         Function to calculate localization of an input set of genes (focal_genes) on a background network (Gint).
-        Option to compute number of edges (method = 'numedges') or largest connected component (method = 'LLC') 
+        Option to compute number of edges (method = 'numedges') or largest connected component (method = 'LCC') 
         localization analysis. DOes no sub-sampling. Plots the distribution of random gene localizaiton, and 
         marks the focal set localization on distribution. Includes p-value of focal set localization.
         
@@ -219,7 +213,7 @@ def localization_full(Gint, focal_genes,
             Gint: Networkx Graph, background network to randomly sample from
             focal_genes: List, set of genes to calculate localization of
             num_reps: Int, number of times to randomly sample
-            method: String, to decide which type of localization analysis to run. Options: 'numedges', 'LLC', or 'both'.
+            method: String, to decide which type of localization analysis to run. Options: 'numedges', 'LCC', or 'both'.
             print_counter: Bool, whether to print a counter that tells you which iteration you are on (every 25 iterations).
                            Useful when the num_reps is very high.
             label: String, label for focal genes in graph legend
@@ -228,9 +222,9 @@ def localization_full(Gint, focal_genes,
             
         Returns: 
             numedges_list: List, the number of edges calculated for each rep, over focal genes. 
-                Empty if method = 'LLC'. 
+                Empty if method = 'LCC'. 
             numedges_rand: List, the number of edges calculated for each rep, over random genes of 
-                similar degree in the background network. Empty if method = 'LLC'.
+                similar degree in the background network. Empty if method = 'LCC'.
             LCC_list: List, the size of the largest connected component, calculated for each rep, over focal genes. 
                 Empty if method = 'numedges'. 
             LCC_rand: List, the size of the largest connected component, calculated for each rep, over random genes of 

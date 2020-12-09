@@ -28,7 +28,7 @@ def main(seed_gene_file, num_reps=10, interactome_file=None, out_name='out', alp
     '''
     # TODO: INTEGRATE OUTPUT WITH network_localization.py, and network_colocalization.py
     # TODO: Improve efficiency (currently takes hours to run with num_reps=5000)
-    # TODO: IMPROVE COMMENTS  
+    # TODO: IMPROVE COMMENTS
 
     # Process arguments
     #num_reps
@@ -70,13 +70,13 @@ def main(seed_gene_file, num_reps=10, interactome_file=None, out_name='out', alp
     # Save z-score results
     z_scores.to_csv('z_' + out_name + '_' + str(num_reps) + '_reps_.tsv', sep='\t')
 
-    # If save_final_heat is true, save out the final heat vectore
+    # If save_final_heat is true, save out the final heat vector
     if save_final_heat == 'True':
         final_heat.to_csv('final_heat_' + out_name + '_' + str(num_reps) + '_reps_.tsv', sep='\t')
 
     # If save_random_final_heats is true, save out the vector of randoms (this can be a large file)
-    if save_random_final_heats=='True': 
-        pd.DataFrame(random_final_heats).to_csv('Fnew_'+out_name+'_rand'+str(num_reps)+'_reps_.tsv',sep='\t')
+    if save_random_final_heats == 'True': 
+        pd.DataFrame(random_final_heats).to_csv('Fnew_' + out_name + '_rand' + str(num_reps) + '_reps_.tsv', sep='\t')
     
 def calc_zscore_heat(w_double_prime, nodes, degrees, seed_genes, num_reps=10, alpha=0.5):
     '''

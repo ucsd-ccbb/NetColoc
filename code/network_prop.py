@@ -65,8 +65,8 @@ def normalized_adj_matrix(graph, conserve_heat=True, weighted=False):
     w_prime = np.array(w_prime)
     return w_prime
 
-def get_w_double_prime(wPrime, alpha):
-    return np.linalg.inv(np.identity(wPrime.shape[0]) - alpha * wPrime) * (1 - alpha)
+def get_w_double_prime(w_prime, alpha):
+    return np.linalg.inv(np.identity(w_prime.shape[0]) - alpha * w_prime) * (1 - alpha)
 
 def network_propagation(w_double_prime, nodes, seed_genes):
     F = np.zeros(len(nodes))
