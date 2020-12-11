@@ -54,17 +54,27 @@ def main(seed_gene_file, num_reps=10, interactome_file=None, out_name='out', alp
     if 'None' in interactome.nodes():
         interactome.remove_node('None')
     nodes = list(interactome.nodes)
+    
+    # print out interactome num nodes and edges for diagnostic purposes
+    print('number of nodes:')
+    print(len(interactome.nodes))
+    print('\nnumber of edges:')
+    print(len(interactome.edges))
 
     # Load seed genes
     seed_file = open(seed_gene_file, 'r')
     seed_genes = list(np.intersect1d(nodes, seed_file.read().split(seed_gene_file_delimiter)))
+    print('\nnumber of seed genes in interactome:')
+    print(len(seed_genes))
 
     # Calculate w_double_prime from interactome
+    print('\ncalculating w_prime')
     w_prime = network_prop.normalized_adj_matrix(interactome, conserve_heat=True)
+    print('\ncalculating w_double_prime')
     w_double_prime = network_prop.get_w_double_prime(w_prime, alpha)
 
     # Calculate the z-score
-    print('Calculating z-scores: ' + seed_gene_file)
+    print('\nCalculating z-scores: ' + seed_gene_file)
     z_scores, final_heat, random_final_heats = calc_zscore_heat(w_double_prime, nodes, dict(interactome.degree), seed_genes, num_reps=num_reps)
 
     # Save z-score results
