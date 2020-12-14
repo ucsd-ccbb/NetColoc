@@ -100,7 +100,11 @@ def calc_zscore_heat(w_double_prime, nodes, degrees, seed_genes, num_reps=10, al
     start = time.time()
     bins, actual_degree_to_bin_index = get_degree_binning(degrees, 10)
 
+    t0=time.time()
     for i in range(num_reps):
+        if (i%10)==0:
+            print(i)
+            print(time.time()-t0)
         random_seed_genes = []
         for gene in seed_genes:
             degree = degrees[gene]
@@ -117,6 +121,44 @@ def calc_zscore_heat(w_double_prime, nodes, degrees, seed_genes, num_reps=10, al
 
         random_final_heat = network_prop.network_propagation(w_double_prime, nodes, random_seed_genes)
         random_final_heat.loc[random_seed_genes]=np.nan # set seeds to nan so they don't bias results
+        random_final_heats[i] = random_final_heat
+
+    z_scores = (np.log(final_heat) - np.nanmean(np.log(random_final_heats), axis=0)) / np.nanstd(np.log(random_final_heats), axis=0)
+    
+    return z_scores, final_heat, random_final_heats
+
+def calc_zscore_heat_continuous(w_double_prime, nodes, degrees, seed_genes, num_reps=10, alpha=0.5):
+    '''
+    
+    Same function, but allows continuous input
+    
+    Helper function to calculate the z-score of heat values from one input seet of genes
+    rand_method = 'degree_ks_test', or 'degree_binning'.  select the type of randomization
+    '''
+
+    final_heat = network_prop.network_propagation_continuous(w_double_prime, nodes, seed_genes)  
+    random_final_heats = np.zeros([num_reps, len(final_heat)])
+
+    start = time.time()
+    bins, actual_degree_to_bin_index = get_degree_binning(degrees, 10)
+
+    # loop over bins and shuffle seed heat values within bins
+    t0 = time.time()
+    for i in range(num_reps):
+        if (i%10)==0:
+            print(i)
+            print(time.time()-t0)
+        seed_random = pd.Series(np.zeros(len(nodes)),index=nodes)
+        for b in np.arange(len(bins)):
+            bin_genes = bins[b]
+
+            vals_temp = seed_genes.loc[bin_genes].tolist()
+            np.random.shuffle(vals_temp)
+            seed_random.loc[bin_genes]=vals_temp
+
+        #print(seed_random.head())
+        random_final_heat = network_prop.network_propagation_continuous(w_double_prime, nodes, seed_random)
+        #random_final_heat.loc[random_seed_genes]=np.nan # set seeds to nan so they don't bias results
         random_final_heats[i] = random_final_heat
 
     z_scores = (np.log(final_heat) - np.nanmean(np.log(random_final_heats), axis=0)) / np.nanstd(np.log(random_final_heats), axis=0)

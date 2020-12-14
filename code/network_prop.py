@@ -75,14 +75,56 @@ def network_propagation(w_double_prime, nodes, seed_genes):
     F /= len(seed_genes)
     return pd.Series(F, index=nodes)
 
+def network_propagation_continuous(w_double_prime, nodes, seed_genes):
+    # new version for continous prop
+    # seed_genes needs to be a Series, with index = nodes
+    
+    seed_genes = seed_genes.loc[nodes] # make sure seed_genes is in the right order
+    # this is a bottleneck... is there a faster element-wise multiplication??
+    F = pd.Series(np.sum(np.multiply(w_double_prime,seed_genes.tolist()),axis=1),index=nodes)
+    F = F/seed_genes.sum()
+    return pd.Series(F, index=nodes)
+
+#def iterative_network_propagation(nodes, w_prime, seed_genes, alpha=0.5, num_its=20):
+#    '''
+#    This function implements network propagation, as detailed in:
+#    Vanunu, Oron, et al. 'Associating genes and protein complexes with disease via network propagation.'
+#    Inputs:
+#        - Gnodes: List of nodes in graph
+#        - Wprime:  Normalized adjacency matrix (from normalized_adj_matrix)
+#        - seed_genes:  Genes on which to initialize the simulation.
+#        - alpha:  Heat dissipation coefficient.  Default = 0.5
+#        - num_its:  Number of iterations (Default = 20.  Convergence usually happens within 10)
+#        
+#    Outputs:
+#        - F: heat vector after propagation
+#    '''
+#    numnodes = len(nodes)    
+#    y = np.zeros(numnodes)
+#    y = pd.Series(y, index=nodes)
+#
+#    heat = 1 / float(len(seed_genes))
+#    for gene in seed_genes:
+#        y[gene] = heat # normalize total amount of heat added, allow for replacement
+#    f_old = y.copy(deep=True)
+#    
+#    alpha_y = (1 - alpha) * y
+#    for t in range(num_its):
+#        f_new = alpha * np.dot(w_prime, f_old) + alpha_y
+#        f_old = f_new
+#    return f_new
+
 def iterative_network_propagation(nodes, w_prime, seed_genes, alpha=0.5, num_its=20):
     '''
+    
+    UPDATED 12/11/20 to allow continuous seeds
+    
     This function implements network propagation, as detailed in:
     Vanunu, Oron, et al. 'Associating genes and protein complexes with disease via network propagation.'
     Inputs:
         - Gnodes: List of nodes in graph
         - Wprime:  Normalized adjacency matrix (from normalized_adj_matrix)
-        - seed_genes:  Genes on which to initialize the simulation.
+        - seed_genes:  Genes on which to initialize the simulation --> series with nodes in interactome as index.
         - alpha:  Heat dissipation coefficient.  Default = 0.5
         - num_its:  Number of iterations (Default = 20.  Convergence usually happens within 10)
         
@@ -90,12 +132,15 @@ def iterative_network_propagation(nodes, w_prime, seed_genes, alpha=0.5, num_its
         - F: heat vector after propagation
     '''
     numnodes = len(nodes)    
-    y = np.zeros(numnodes)
-    y = pd.Series(y, index=nodes)
-
-    heat = 1 / float(len(seed_genes))
-    for gene in seed_genes:
-        y[gene] = heat # normalize total amount of heat added, allow for replacement
+    
+    y = seed_genes # check all nodes are in Series
+    y = y/y.sum() # normalize to sum 1
+#    y = np.zeros(numnodes)
+#    y = pd.Series(y, index=nodes)
+#
+#    heat = 1 / float(len(seed_genes))
+#    for gene in seed_genes:
+#        y[gene] = heat # normalize total amount of heat added, allow for replacement
     f_old = y.copy(deep=True)
     
     alpha_y = (1 - alpha) * y
@@ -103,6 +148,7 @@ def iterative_network_propagation(nodes, w_prime, seed_genes, alpha=0.5, num_its
         f_new = alpha * np.dot(w_prime, f_old) + alpha_y
         f_old = f_new
     return f_new
+
 
 
     
