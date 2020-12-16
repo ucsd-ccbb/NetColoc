@@ -88,7 +88,7 @@ def main(seed_gene_file, num_reps=10, interactome_file=None, out_name='out', alp
     if save_random_final_heats=='True': 
         pd.DataFrame(random_final_heats).to_csv('Fnew_'+out_name+'_rand'+str(num_reps)+'_reps_.tsv',sep='\t')
     
-def calc_zscore_heat(w_double_prime, nodes, degrees, seed_genes, num_reps=10, alpha=0.5):
+def calc_zscore_heat(w_double_prime, nodes, degrees, seed_genes, num_reps=10, alpha=0.5,min_in_bin=10):
     '''
     Helper function to calculate the z-score of heat values from one input seet of genes
     rand_method = 'degree_ks_test', or 'degree_binning'.  select the type of randomization
@@ -98,11 +98,11 @@ def calc_zscore_heat(w_double_prime, nodes, degrees, seed_genes, num_reps=10, al
     random_final_heats = np.zeros([num_reps, len(final_heat)])
 
     start = time.time()
-    bins, actual_degree_to_bin_index = get_degree_binning(degrees, 10)
+    bins, actual_degree_to_bin_index = get_degree_binning(degrees, min_in_bin)
 
     t0=time.time()
     for i in range(num_reps):
-        if (i%10)==0:
+        if (i%250)==0:
             print(i)
             print(time.time()-t0)
         random_seed_genes = []
@@ -127,7 +127,7 @@ def calc_zscore_heat(w_double_prime, nodes, degrees, seed_genes, num_reps=10, al
     
     return z_scores, final_heat, random_final_heats
 
-def calc_zscore_heat_continuous(w_double_prime, nodes, degrees, seed_genes, num_reps=10, alpha=0.5):
+def calc_zscore_heat_continuous(w_double_prime, nodes, degrees, seed_genes, num_reps=10, alpha=0.5,min_in_bin=10):
     '''
     
     Same function, but allows continuous input
@@ -140,7 +140,7 @@ def calc_zscore_heat_continuous(w_double_prime, nodes, degrees, seed_genes, num_
     random_final_heats = np.zeros([num_reps, len(final_heat)])
 
     start = time.time()
-    bins, actual_degree_to_bin_index = get_degree_binning(degrees, 10)
+    bins, actual_degree_to_bin_index = get_degree_binning(degrees, min_in_bin)
 
     # loop over bins and shuffle seed heat values within bins
     t0 = time.time()
