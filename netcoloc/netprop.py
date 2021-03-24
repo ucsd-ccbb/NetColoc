@@ -12,7 +12,7 @@ def __init__(self):
     pass
 
 def get_normalized_adjacency_matrix(graph, conserve_heat=True, weighted=False):
-    '''Return normalized adjacency matrix (W'), as detailed in:
+    '''Returns normalized adjacency matrix (W'), as detailed in:
     Vanunu, Oron, et al. 'Associating genes and protein complexes with disease
     via network propagation.'
 
@@ -64,7 +64,7 @@ def get_normalized_adjacency_matrix(graph, conserve_heat=True, weighted=False):
     return w_prime
 
 def get_individual_heats_matrix(normalized_adjacency_matrix, alpha=0.5):
-    '''Return the pre-calculated contributions of each individual gene in the
+    '''Returns the pre-calculated contributions of each individual gene in the
     interactome to the final heat of each other gene in the interactome after
     propagation.
 
