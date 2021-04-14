@@ -111,7 +111,7 @@ def calculate_expected_overlap(z_scores_1, z_scores_2, gene_set_name_1='Gene Set
         high_z_temp = len(calculate_network_overlap(z_scores_1_copy, z_scores_2_copy, z_score_threshold=z_score_threshold))
         high_z_rand.append(high_z_temp)
     
-    network_overlap_size =len(calculate_network_overlap(z_scores_1, z_scores_2, zthresh=z_score_threshold))
+    network_overlap_size =len(calculate_network_overlap(z_scores_1, z_scores_2, z_score_threshold=z_score_threshold))
 
     if plot==True:
         sns.distplot(high_z_rand, label='expected network intersection size')
