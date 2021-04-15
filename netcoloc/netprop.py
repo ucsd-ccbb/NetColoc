@@ -30,8 +30,16 @@ def get_normalized_adjacency_matrix(graph, conserve_heat=True, weighted=False):
     Returns:
         numpy.ndarray: A square normalized adjacency matrix
     '''
+    # Create graph
+    if conserve_heat:
+        # If conserving heat, make G_weighted a di-graph (not symmetric)
+        graph_weighted= nx.DiGraph()
+    else:
+        # If not conserving heat, make G_weighted a simple graph (symmetric)
+        graph_weighted = nx.Graph()
 
-    wvec=[]
+    #Create edge weights
+    edge_weights = []
     node_to_degree_dict = dict(graph.degree)
     for e in graph.edges(data=True):
         v1 = e[0]
@@ -45,22 +53,18 @@ def get_normalized_adjacency_matrix(graph, conserve_heat=True, weighted=False):
             weight = 1
         
         if conserve_heat:
-            wvec.append((v1, v2, weight / float(deg2)))
-            wvec.append((v2, v1, weight / float(deg1)))
+            edge_weights.append((v1, v2, weight / float(deg2)))
+            edge_weights.append((v2, v1, weight / float(deg1)))
         else:
-            wvec.append((v1, v2, weight / np.sqrt(deg1 * deg2)))
+            edge_weights.append((v1, v2, weight / np.sqrt(deg1 * deg2)))
     
-    if conserve_heat:
-        # If conserving heat, make G_weighted a di-graph (not symmetric)
-        graph_weighted= nx.DiGraph()
-    else:
-        # If not conserving heat, make G_weighted a simple graph (symmetric)
-        graph_weighted = nx.Graph()
-        
-    graph_weighted.add_weighted_edges_from(wvec)
+    # Apply edge weights to graph
+    graph_weighted.add_weighted_edges_from(edge_weights)
     
+    # Transform graph to adjacency matrix
     w_prime = nx.to_numpy_matrix(graph_weighted, nodelist=graph.nodes())
     w_prime = np.array(w_prime)
+    
     return w_prime
 
 def get_individual_heats_matrix(normalized_adjacency_matrix, alpha=0.5):

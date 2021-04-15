@@ -9,18 +9,19 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 import os
+from tqdm.auto import tqdm
 
 # Internal module convenience imports
-from .netcoloc_utils import *
-from .netprop import *
-
+#from .netcoloc_utils import *
+#from .netprop import *
+from netcoloc_utils import *
 def __init__(self):
     pass
 
 def netprop_zscore(seed_gene_file, seed_gene_file_delimiter=None, num_reps=10, alpha=0.5, minimum_bin_size=10, 
                    interactome_file=None, interactome_uuid='f93f402c-86d4-11e7-a10d-0ac135e8bacf', 
-                   ndex_server='public.ndexbio.org', ndex_user=None, ndex_password=None, out_name='out', 
-                   save_final_heat=False, save_random_final_heats=False):
+                   ndex_server='public.ndexbio.org', ndex_user=None, ndex_password=None, out_name='out',
+                   save_z_scores=False, save_final_heat=False, save_random_final_heats=False):
     '''Performs network heat propagation on the given interactome with the given
     seed genes, then returns the z-scores of the final heat values of each node
     in the interactome.
@@ -62,10 +63,10 @@ def netprop_zscore(seed_gene_file, seed_gene_file_delimiter=None, num_reps=10, a
         out_name (str): Prefix for saving output files. (Default: out)
         save_final_heat (bool): If this is set to true, then the raw network
             propagation heat scores for the original seed gene set will be saved
-            in the form of a csv file in the current directory. (Default: False)
+            in the form of a tsv file in the current directory. (Default: False)
         save_random_final_heats (bool): If this is set to true, then the raw 
             network propagation heat scores for every repetition of the 
-            algorithm using random seed genes will be saved in the form of a csv
+            algorithm using random seed genes will be saved in the form of a tsv
             file in the current directory. (Beware: This can be a large file if 
             num_reps is large.) (Default: False)
 
@@ -77,7 +78,7 @@ def netprop_zscore(seed_gene_file, seed_gene_file_delimiter=None, num_reps=10, a
             propagation from random seed genes.
     '''
 
-    # TODO: INTEGRATE OUTPUT WITH network_localization.py, and network_colocalization.py
+    # TODO: implement logging
 
     # Process arguments
     # seed_gene_file
@@ -127,7 +128,7 @@ def netprop_zscore(seed_gene_file, seed_gene_file_delimiter=None, num_reps=10, a
 
     # Calculate the z-score
     print('\nCalculating z-scores: ' + seed_gene_file)
-    z_scores, final_heat, random_final_heats = calc_zscore_heat(
+    z_scores, final_heat, random_final_heats = calculate_heat_zscores(
         individual_heats_matrix, 
         nodes, 
         dict(interactome.degree), 
@@ -137,19 +138,26 @@ def netprop_zscore(seed_gene_file, seed_gene_file_delimiter=None, num_reps=10, a
         minimum_bin_size=minimum_bin_size)
 
     # Save z-score results
-    z_scores.to_csv('z_' + out_name + '_' + str(num_reps) + '_reps_.tsv', sep='\t')
+    if save_z_scores:
+      z_scores.to_csv(out_name + '_z_scores_' + str(num_reps) + '_reps_.tsv', sep='\t')
 
-    # If save_final_heat is true, save out the final heat vectore
-    if save_final_heat == 'True':
-        final_heat.to_csv('final_heat_' + out_name + '_' + str(num_reps) + '_reps_.tsv', sep='\t')
+    # If save_final_heat is true, save out the final heat vector
+    if save_final_heat:
+        final_heat_df = pd.DataFrame(final_heat, columns=['z-scores'])
+        final_heat_df.to_csv(out_name + '_final_heat_' + str(num_reps) + '_reps.tsv', sep='\t')
 
     # If save_random_final_heats is true, save out the vector of randoms (this can be a large file)
-    if save_random_final_heats=='True': 
-        pd.DataFrame(random_final_heats).to_csv('Fnew_'+out_name+'_rand'+str(num_reps)+'_reps_.tsv',sep='\t')
+    if save_random_final_heats: 
+        random_final_heats_df = pd.DataFrame(
+            random_final_heats.T, 
+            index=nodes, 
+            columns=range(1, random_final_heats.shape[0] + 1)
+        )
+        random_final_heats_df.to_csv(out_name + '_final_heat_random_' + str(num_reps) + '_reps.tsv', sep='\t')
 
     return z_scores, random_final_heats
     
-def calc_zscore_heat(individual_heats_matrix, nodes, degrees, seed_genes, num_reps=10, alpha=0.5, minimum_bin_size=10):
+def calculate_heat_zscores(individual_heats_matrix, nodes, degrees, seed_genes, num_reps=10, alpha=0.5, minimum_bin_size=10):
     '''Helper function to perform network heat propagation using the given
     individual heats matrix with the given seed genes and return the z-scores of
     the final heat values of each node.
@@ -199,10 +207,7 @@ def calc_zscore_heat(individual_heats_matrix, nodes, degrees, seed_genes, num_re
     bins, actual_degree_to_bin_index = get_degree_binning(degrees, minimum_bin_size)
     
     # Perform network propagation many times with random seed genes
-    for repetition in range(num_reps):
-        if repetition % 250 == 0:
-            print(repetition)
-
+    for repetition in tqdm(range(num_reps)):
         # Create list of random, degree-matched seed genes
         random_seed_genes = []
         for gene in seed_genes:
@@ -227,6 +232,5 @@ def calc_zscore_heat(individual_heats_matrix, nodes, degrees, seed_genes, num_re
 
     # Calculate z-scores
     z_scores = (np.log(final_heat) - np.nanmean(np.log(random_final_heats), axis=0)) / np.nanstd(np.log(random_final_heats), axis=0)
-    z_scores.rename('z-scores')
     
     return z_scores, final_heat, random_final_heats

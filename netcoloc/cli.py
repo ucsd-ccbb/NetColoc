@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import click
-
+#TODO: this
 @click.command()
 def main(args=None):
     """Console script for netcoloc"""
     click.echo("Replace this message by putting your code into "
                 "netcoloc.cli.main")
-    click.echo("See click documentation at http://http://click.pocoo.org/")
+    click.echo("See click documentation at http://click.pocoo.org/")
 
 
 if __name__ == "__main__":
