@@ -12,8 +12,10 @@ import os
 from tqdm.auto import tqdm
 
 # Internal module convenience imports
-from .netcoloc_utils import *
-from .netprop import *
+#from .netcoloc_utils import *
+#from .netprop import *
+from netcoloc_utils import *
+from netprop import *
 
 def __init__(self):
     pass
