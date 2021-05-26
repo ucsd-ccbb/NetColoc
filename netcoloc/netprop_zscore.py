@@ -82,6 +82,7 @@ def netprop_zscore(seed_gene_file, seed_gene_file_delimiter=None, num_reps=10, a
 
     # TODO: implement logging
 
+
     # Process arguments
     # seed_gene_file
     seed_gene_file = os.path.abspath(seed_gene_file)
@@ -159,7 +160,7 @@ def netprop_zscore(seed_gene_file, seed_gene_file_delimiter=None, num_reps=10, a
 
     return z_scores, random_final_heats
     
-def calculate_heat_zscores(individual_heats_matrix, nodes, degrees, seed_genes, num_reps=10, alpha=0.5, minimum_bin_size=10):
+def calculate_heat_zscores(individual_heats_matrix, nodes, degrees, seed_genes, num_reps=10, alpha=0.5, minimum_bin_size=10,random_seed=1):
     '''Helper function to perform network heat propagation using the given
     individual heats matrix with the given seed genes and return the z-scores of
     the final heat values of each node.
@@ -198,6 +199,10 @@ def calculate_heat_zscores(individual_heats_matrix, nodes, degrees, seed_genes, 
             contains the final heat scores for each gene from a network
             propagation from random seed genes.
     '''
+    
+        
+    # set random seed for reproducibility
+    np.random.seed(random_seed)
 
     # Calculate network propagation results given gene set
     final_heat = network_propagation(individual_heats_matrix, nodes, seed_genes)
