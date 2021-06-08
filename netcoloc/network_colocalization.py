@@ -15,7 +15,8 @@ import seaborn as sns
 def __init__(self):
     pass
 
-def calculate_network_overlap(z_scores_1, z_scores_2, z_score_threshold=3):
+def calculate_network_overlap(z_scores_1, z_scores_2, z_score_threshold=3,
+                              z1_threshold=1.5,z2_threshold=1.5):
     '''Function to determine which genes overlap. Returns a list of the 
     overlapping genes.
     
@@ -30,6 +31,13 @@ def calculate_network_overlap(z_scores_1, z_scores_2, z_score_threshold=3):
     z_score_threshold (float): The threshold to determine whether a gene is 
         a part of the network overlap or not. Genes with combined z-scores
         below this threshold will be discarded. (Default: 3)
+    z1_threshold (float): The individual z1-score threshold to determine whether a gene is 
+        a part of the network overlap or not. Genes with z1-scores
+        below this threshold will be discarded. (Default: 1.5)
+    z2_threshold (float): The individual z2-score threshold to determine whether a gene is 
+        a part of the network overlap or not. Genes with z2-scores
+        below this threshold will be discarded. (Default: 1.5)
+    
 
     Returns:
         list: List of genes in the network overlap (genes with high combined
@@ -45,13 +53,14 @@ def calculate_network_overlap(z_scores_1, z_scores_2, z_score_threshold=3):
     # get rid of unlikely genes which have low scores in either z1 or z2
     high_z_score_genes = z_scores_combined[
         (z_scores_combined >= z_score_threshold) 
-         & (z_scores_joined['z_scores_1'] > 1.5) 
-         & (z_scores_joined['z_scores_2'] > 1.5)
+         & (z_scores_joined['z_scores_1'] > z1_threshold) 
+         & (z_scores_joined['z_scores_2'] > z2_threshold)
     ].index.tolist()
     
     return high_z_score_genes
 
-def calculate_network_overlap_subgraph(interactome, z_scores_1, z_scores_2, z_score_threshold=3):
+def calculate_network_overlap_subgraph(interactome, z_scores_1, z_scores_2, z_score_threshold=3,
+                                      z1_threshold=1.5,z2_threshold=1.5):
     '''Function to return subgraph of network intersection. 
     
     Code to create subgraph is from NetworkX documentation:
@@ -69,12 +78,19 @@ def calculate_network_overlap_subgraph(interactome, z_scores_1, z_scores_2, z_sc
     z_score_threshold (float): The threshold to determine whether a gene is 
         a part of the network overlap or not. Genes with combined z-scores
         below this threshold will be discarded. (Default: 3)
+    z1_threshold (float): The individual z1-score threshold to determine whether a gene is 
+        a part of the network overlap or not. Genes with z1-scores
+        below this threshold will be discarded. (Default: 1.5)
+    z2_threshold (float): The individual z2-score threshold to determine whether a gene is 
+        a part of the network overlap or not. Genes with z2-scores
+        below this threshold will be discarded. (Default: 1.5)
 
     Returns:
         NetworkX graph: Subgraph of the interactome containing only genes that
             are in the network intersection (genes with high combined z-scores).
     '''
-    network_overlap = calculate_network_overlap(z_scores_1, z_scores_2, z_score_threshold=z_score_threshold)
+    network_overlap = calculate_network_overlap(z_scores_1, z_scores_2, z_score_threshold=z_score_threshold,
+                                               z1_threshold=z1_threshold,z2_threshold=z1_threshold)
     
     # Create subgraph that has the same type as original graph
     network_overlap_subgraph = interactome.__class__()
@@ -93,7 +109,8 @@ def calculate_network_overlap_subgraph(interactome, z_scores_1, z_scores_2, z_sc
     return network_overlap_subgraph
 
 def calculate_expected_overlap(z_scores_1, z_scores_2, gene_set_name_1='Gene Set 1', gene_set_name_2='Gene Set 2', 
-                               z_score_threshold=3, num_reps=1000, save_random_network_overlap=False, plot=False):    
+                               z_score_threshold=3, z1_threshold=1.5,z2_threshold=1.5,
+                               num_reps=1000, save_random_network_overlap=False, plot=False):    
     '''Function to determine size of expected network overlap by randomly
     shuffling gene names.
 
@@ -108,7 +125,13 @@ def calculate_expected_overlap(z_scores_1, z_scores_2, gene_set_name_1='Gene Set
         z_score_threshold (float): The threshold to determine whether a gene is 
             a part of the network overlap or not. Genes with combined z-scores
             below this threshold will be discarded. (Default: 3)
-        num_reps (int): The number of times that gene names will be shuffled.
+        z1_threshold (float): The individual z1-score threshold to determine whether a gene is 
+            a part of the network overlap or not. Genes with z1-scores
+            below this threshold will be discarded. (Default: 1.5)
+        z2_threshold (float): The individual z2-score threshold to determine whether a gene is 
+            a part of the network overlap or not. Genes with z2-scores
+            below this threshold will be discarded. (Default: 1.5)
+            num_reps (int): The number of times that gene names will be shuffled.
         plot (bool): If True, the distribution will be plotted. If False, it
             will not be plotted. (Default: False)
 
@@ -130,10 +153,12 @@ def calculate_expected_overlap(z_scores_1, z_scores_2, gene_set_name_1='Gene Set
         np.random.shuffle(gene_set_2)
         z_scores_2_copy.index = gene_set_2
 
-        random_size = len(calculate_network_overlap(z_scores_1_copy, z_scores_2_copy, z_score_threshold=z_score_threshold))
+        random_size = len(calculate_network_overlap(z_scores_1_copy, z_scores_2_copy, z_score_threshold=z_score_threshold,
+                                                   z1_threshold=z1_threshold,z2_threshold=z2_threshold))
         random_network_overlap_sizes.append(random_size)
     
-    network_overlap_size = len(calculate_network_overlap(z_scores_1, z_scores_2, z_score_threshold=z_score_threshold))
+    network_overlap_size = len(calculate_network_overlap(z_scores_1, z_scores_2, z_score_threshold=z_score_threshold,
+                                                        z1_threshold=z1_threshold,z2_threshold=z2_threshold))
 
     #TODO: clean this up
     if plot:
