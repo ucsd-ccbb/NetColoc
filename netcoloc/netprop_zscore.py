@@ -141,8 +141,9 @@ def netprop_zscore(seed_gene_file, seed_gene_file_delimiter=None, num_reps=10, a
         minimum_bin_size=minimum_bin_size)
 
     # Save z-score results
+    z_scores.name = 'z-scores'
     if save_z_scores:
-      z_scores.to_csv(out_name + '_z_scores_' + str(num_reps) + '_reps_.tsv', sep='\t')
+      z_scores.to_csv(out_name + '_z_scores_' + str(num_reps) + '_reps.tsv', sep='\t')
 
     # If save_final_heat is true, save out the final heat vector
     if save_final_heat:
