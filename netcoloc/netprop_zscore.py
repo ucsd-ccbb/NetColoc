@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 import os
 from tqdm.auto import tqdm
+import warnings
 
 # Internal module convenience imports
 #from .netcoloc_utils import *
@@ -239,6 +240,8 @@ def calculate_heat_zscores(individual_heats_matrix, nodes, degrees, seed_genes, 
         random_final_heats[repetition] = random_final_heat
 
     # Calculate z-scores
-    z_scores = (np.log(final_heat) - np.nanmean(np.log(random_final_heats), axis=0)) / np.nanstd(np.log(random_final_heats), axis=0)
+    with warnings.catch_warnings():
+      warnings.simplefilter("ignore")
+      z_scores = (np.log(final_heat) - np.nanmean(np.log(random_final_heats), axis=0)) / np.nanstd(np.log(random_final_heats), axis=0)
     
     return z_scores, final_heat, random_final_heats

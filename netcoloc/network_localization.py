@@ -10,9 +10,11 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from tqdm.auto import tqdm
+import warnings
 
 # Internal module convenience imports
-from .netcoloc_utils import *
+#from .netcoloc_utils import *
+from netcoloc_utils import *
 
 def __init__(self):
     pass
@@ -56,20 +58,25 @@ def netprop_localization(z_scores, random_final_heats, seed_genes, z_score_thres
         # Calculate mean and standard deviation, excluding focal row
         focal_row = random_final_heats[row]
         random_final_heats[row] = nan_row
-        mean = np.nanmean(np.log(random_final_heats), axis=0)
-        standard_deviation = np.nanstd(np.log(random_final_heats), axis=0)
+        log = np.log(random_final_heats)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            mean = np.nanmean(log, axis=0)
+            standard_deviation = np.nanstd(log, axis=0)
         # Calculate z-scores for each gene in random network
         random_z_score = (np.log(focal_row) - mean) / standard_deviation
         # Count gene in proximal network, not including seed genes
-        random_proximal_network_sizes.append(sum(random_z_score > z_score_threshold) - len(seed_genes))
+        random_proximal_network_sizes.append(sum((random_z_score > z_score_threshold)) - len(seed_genes))
         # Replace focal row in random final heats matrix
         random_final_heats[row] = focal_row
 
     # Calculate the size of the true proximal subgraph, not including seed genes
-    proximal_network_size = sum(z_scores > z_score_threshold) - len(seed_genes)
+    proximal_network_size = sum((z_scores > z_score_threshold).z) - len(seed_genes)
 
     # Calculate z-score
-    z_score = (np.log(proximal_network_size) - np.nanmean(np.log(random_proximal_network_sizes))) / np.nanstd(np.log(random_proximal_network_sizes))
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        z_score = (np.log(proximal_network_size) - np.nanmean(np.log(random_proximal_network_sizes))) / np.nanstd(np.log(random_proximal_network_sizes))
 
     #TODO: clean this up (ymax)
     if plot:
