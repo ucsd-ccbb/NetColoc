@@ -36,13 +36,13 @@ Installation
 
 NetColoc requires the following python packages:
 
-click
-matplotlib
-ndex2
-networkx
-numpy
-seaborn
-tqdm
+* click
+* matplotlib
+* ndex2
+* networkx
+* numpy
+* seaborn
+* tqdm
 
 Citing NetColoc
 --------
