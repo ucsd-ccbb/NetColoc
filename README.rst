@@ -45,6 +45,7 @@ NetColoc requires the following python packages:
 * tqdm
 
 Additional requirements for full functionality of example notebook (INCLUDE VERSIONS):
+
 * getpass
 * ndex2
 * scipy
