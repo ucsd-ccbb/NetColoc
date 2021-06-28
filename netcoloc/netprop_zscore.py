@@ -24,7 +24,7 @@ def __init__(self):
 def netprop_zscore(seed_gene_file, seed_gene_file_delimiter=None, num_reps=10, alpha=0.5, minimum_bin_size=10, 
                    interactome_file=None, interactome_uuid='f93f402c-86d4-11e7-a10d-0ac135e8bacf', 
                    ndex_server='public.ndexbio.org', ndex_user=None, ndex_password=None, out_name='out',
-                   save_z_scores=False, save_final_heat=False, save_random_final_heats=False):
+                   save_z_scores=False, save_final_heat=False, save_random_final_heats=False, verbose=True):
     '''Performs network heat propagation on the given interactome with the given
     seed genes, then returns the z-scores of the final heat values of each node
     in the interactome.
@@ -72,6 +72,8 @@ def netprop_zscore(seed_gene_file, seed_gene_file_delimiter=None, num_reps=10, a
             algorithm using random seed genes will be saved in the form of a tsv
             file in the current directory. (Beware: This can be a large file if 
             num_reps is large.) (Default: False)
+        verbose (bool): If this is set to true, then progress information will
+            be logged. Otherwise, nothing will be printed. (Default: True)
 
     Returns:
         z_scores (pandas.Series): Pandas Series containing the z-scores for each
@@ -80,11 +82,8 @@ def netprop_zscore(seed_gene_file, seed_gene_file_delimiter=None, num_reps=10, a
             contains the final heat scores for each gene from a network
             propagation from random seed genes.
     '''
-
-    # TODO: implement logging
-
-
     # Process arguments
+
     # seed_gene_file
     seed_gene_file = os.path.abspath(seed_gene_file)
     #num_reps
@@ -95,8 +94,11 @@ def netprop_zscore(seed_gene_file, seed_gene_file_delimiter=None, num_reps=10, a
     #int_file and int_uuid
     if interactome_file is None and interactome_uuid is None:
         raise TypeError("Either interactome_file or interactome_uuid argument must be provided")
+    
 
     # Load interactome
+    if verbose:
+        print('Loading interactome')
     if interactome_file is not None:
         interactome_file = os.path.abspath(interactome_file)
         interactome = nx.Graph()
@@ -112,23 +114,28 @@ def netprop_zscore(seed_gene_file, seed_gene_file_delimiter=None, num_reps=10, a
         interactome.remove_node('None')
     nodes = list(interactome.nodes)
         
-    # print out interactome num nodes and edges for diagnostic purposes
-    print('Number of nodes: ' + str(len(interactome.nodes)))
-    print('Number of edges: ' + str(len(interactome.edges)))
+    # Log interactome num nodes and edges for diagnostic purposes
+    if verbose:
+        print('Number of nodes: ' + str(len(interactome.nodes)))
+        print('Number of edges: ' + str(len(interactome.edges)))
 
     # Load seed genes
     seed_file = open(seed_gene_file, 'r')
     seed_genes = list(np.intersect1d(nodes, seed_file.read().split(seed_gene_file_delimiter)))
-    print('\nNumber of seed genes in interactome: ' + str(len(seed_genes)))
+    if verbose:
+        print('\nNumber of seed genes in interactome: ' + str(len(seed_genes)))
 
     # Calculate individual_heats_matrix from interactome
-    print('\nCalculating w_prime')
+    if verbose:
+        print('\nCalculating w_prime')
     w_prime = get_normalized_adjacency_matrix(interactome, conserve_heat=True)
-    print('\nCalculating individual_heats_matrix')
+    if verbose:
+        print('\nCalculating individual_heats_matrix')
     individual_heats_matrix = get_individual_heats_matrix(w_prime, alpha)
 
     # Calculate the z-score
-    print('\nCalculating z-scores: ' + seed_gene_file)
+    if verbose:
+        print('\nCalculating z-scores: ' + seed_gene_file)
     z_scores, final_heat, random_final_heats = calculate_heat_zscores(
         individual_heats_matrix, 
         nodes, 

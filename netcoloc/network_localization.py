@@ -14,8 +14,8 @@ from tqdm.auto import tqdm
 import warnings
 
 # Internal module convenience imports
-#from .netcoloc_utils import *
-from netcoloc_utils import *
+from .netcoloc_utils import *
+#from netcoloc_utils import *
 
 def __init__(self):
     pass
@@ -74,7 +74,6 @@ def netprop_localization(z_scores, random_final_heats, seed_genes, z_score_thres
     # Calculate the size of the true proximal subgraph, not including seed genes
     proximal_network_size = sum((z_scores > z_score_threshold)) - len(seed_genes)
 
-    print(random_proximal_network_sizes)
     # Calculate z-score
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
