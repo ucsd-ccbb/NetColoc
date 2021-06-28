@@ -34,7 +34,27 @@ For a quick-start on NetColoc's functionality, please see the example notebooks 
 Installation
 --------
 
-NetColoc requires the following software:
+NetColoc requires the following python packages:
+
+* click
+* matplotlib
+* ndex2
+* networkx
+* numpy
+* seaborn
+* tqdm
+
+Additional requirements for full functionality of example notebook (INCLUDE VERSIONS):
+
+* getpass
+* ndex2
+* scipy
+* json
+* cdapsutil
+* ddot
+* requests
+* mygene
+* gprofiler
 
 Citing NetColoc
 --------
