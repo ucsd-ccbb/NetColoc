@@ -4,6 +4,7 @@
 '''
 
 # External library imports
+import copy
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
@@ -56,32 +57,33 @@ def netprop_localization(z_scores, random_final_heats, seed_genes, z_score_thres
     random_proximal_network_sizes = []
     for row in tqdm(range(len(random_final_heats))):
         # Calculate mean and standard deviation, excluding focal row
-        focal_row = random_final_heats[row]
+        focal_row = copy.deepcopy(random_final_heats[row])
         random_final_heats[row] = nan_row
-        log = np.log(random_final_heats)
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
+            log = np.log(random_final_heats)
             mean = np.nanmean(log, axis=0)
             standard_deviation = np.nanstd(log, axis=0)
-        # Calculate z-scores for each gene in random network
-        random_z_score = (np.log(focal_row) - mean) / standard_deviation
+            # Calculate z-scores for each gene in random network
+            random_z_score = (np.log(focal_row) - mean) / standard_deviation
         # Count gene in proximal network, not including seed genes
         random_proximal_network_sizes.append(sum((random_z_score > z_score_threshold)) - len(seed_genes))
         # Replace focal row in random final heats matrix
-        random_final_heats[row] = focal_row
+        random_final_heats[row] = copy.deepcopy(focal_row)
 
     # Calculate the size of the true proximal subgraph, not including seed genes
-    proximal_network_size = sum((z_scores > z_score_threshold).z) - len(seed_genes)
+    proximal_network_size = sum((z_scores > z_score_threshold)) - len(seed_genes)
 
+    print(random_proximal_network_sizes)
     # Calculate z-score
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         z_score = (np.log(proximal_network_size) - np.nanmean(np.log(random_proximal_network_sizes))) / np.nanstd(np.log(random_proximal_network_sizes))
 
-    #TODO: clean this up (ymax)
+    # Plot figure
     if plot:
         plt.figure(figsize=(5, 4))
-        dfig = sns.distplot(random_proximal_network_sizes, label='random', kde=False)
+        dfig = sns.histplot(random_proximal_network_sizes, label='Random')
         plt.vlines(proximal_network_size, ymin=0, ymax=dfig.dataLim.bounds[3], color='r', label='True gene set')
         plt.xlabel('Size of proximal network, z > ' + str(z_score_threshold), fontsize=16)
         plt.ylabel('Count', fontsize=16) 

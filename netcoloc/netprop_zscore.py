@@ -113,21 +113,18 @@ def netprop_zscore(seed_gene_file, seed_gene_file_delimiter=None, num_reps=10, a
     nodes = list(interactome.nodes)
         
     # print out interactome num nodes and edges for diagnostic purposes
-    print('number of nodes:')
-    print(len(interactome.nodes))
-    print('\nnumber of edges:')
-    print(len(interactome.edges))
+    print('Number of nodes: ' + str(len(interactome.nodes)))
+    print('Number of edges: ' + str(len(interactome.edges)))
 
     # Load seed genes
     seed_file = open(seed_gene_file, 'r')
     seed_genes = list(np.intersect1d(nodes, seed_file.read().split(seed_gene_file_delimiter)))
-    print('\nnumber of seed genes in interactome:')
-    print(len(seed_genes))
+    print('\nNumber of seed genes in interactome: ' + str(len(seed_genes)))
 
     # Calculate individual_heats_matrix from interactome
-    print('\ncalculating w_prime')
+    print('\nCalculating w_prime')
     w_prime = get_normalized_adjacency_matrix(interactome, conserve_heat=True)
-    print('\ncalculating individual_heats_matrix')
+    print('\nCalculating individual_heats_matrix')
     individual_heats_matrix = get_individual_heats_matrix(w_prime, alpha)
 
     # Calculate the z-score
@@ -207,6 +204,7 @@ def calculate_heat_zscores(individual_heats_matrix, nodes, degrees, seed_genes, 
     np.random.seed(random_seed)
 
     # Calculate network propagation results given gene set
+    seed_genes = list(np.intersect1d(nodes, seed_genes))
     final_heat = network_propagation(individual_heats_matrix, nodes, seed_genes)
 
     # Initialize empty matrix for results of random network propagations

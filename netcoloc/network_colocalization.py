@@ -160,11 +160,11 @@ def calculate_expected_overlap(z_scores_1, z_scores_2, gene_set_name_1='Gene Set
     network_overlap_size = len(calculate_network_overlap(z_scores_1, z_scores_2, z_score_threshold=z_score_threshold,
                                                         z1_threshold=z1_threshold,z2_threshold=z2_threshold))
 
-    #TODO: clean this up
     if plot:
-        sns.distplot(random_network_overlap_sizes, label='expected network intersection size')
-        plt.plot([network_overlap_size, network_overlap_size], [0, 0.015], label='observed ' + gene_set_name_1 + '-' + gene_set_name_2 + ' network intersection size')
-        plt.xlabel('size of proximal subgraph, z >= ' + str(z_score_threshold), fontsize=16)
+        plt.figure(figsize=(5, 4))
+        dfig = sns.histplot(random_network_overlap_sizes, label='Expected network intersection size')
+        plt.vlines(network_overlap_size, ymin=0, ymax=dfig.dataLim.bounds[3], color='r', label='Observed network intersection size')
+        plt.xlabel('Size of proximal subgraph, z > ' + str(z_score_threshold), fontsize=16)
         plt.legend(fontsize=12)
     
     return network_overlap_size, random_network_overlap_sizes
