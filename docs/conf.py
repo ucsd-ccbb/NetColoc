@@ -210,7 +210,7 @@ latex_elements = {
 latex_documents = [
     ('index', 'netcoloc.tex',
      u'netcoloc Documentation',
-     u'Sophie Liu', 'manual'),
+     u'Brin Rosenthal, Sophie Liu', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at

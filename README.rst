@@ -18,7 +18,7 @@ NetColoc
 
 
 Description
---------
+-----------
 
 * Free software: MIT license
 * Documentation: https://netcoloc.readthedocs.io.
@@ -27,12 +27,12 @@ Here we introduce NetColoc, a tool which evaluates the extent to which two gene 
 
 
 Documentation
---------
+-------------
 
 For a quick-start on NetColoc's functionality, please see the example notebooks (LINK). 
 
 Installation
---------
+------------
 
 NetColoc requires the following python packages:
 
@@ -57,11 +57,11 @@ Additional requirements for full functionality of example notebook (INCLUDE VERS
 * gprofiler
 
 Citing NetColoc
---------
+---------------
 
 
 Credits
----------
+-------
 
 This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
 
