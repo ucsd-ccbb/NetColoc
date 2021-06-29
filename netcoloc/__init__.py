@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
 
-__author__ = 'Sophie Liu'
-__email__ = 'sol015@ucsd.edu'
-__version__ = '0.1.0'
+__author__ = 'Brin Rosenthal, Sophie Liu'
+__email__ = 'sbrosenthal@health.ucsd.edu, sol015@ucsd.edu'
+__version__ = '0.1.0a1'

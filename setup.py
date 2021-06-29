@@ -17,8 +17,7 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
-    'Click>=6.0',
-    # TODO: put package requirements here
+    'Click>=6.0'
 ]
 
 test_requirements = [
@@ -28,11 +27,11 @@ test_requirements = [
 setup(
     name='netcoloc',
     version=version,
-    description="Description of netcoloc",
+    description="",
     long_description=readme + '\n\n' + history,
-    author="Sophie Liu",
-    author_email='sol015@ucsd.edu',
-    url='https://github.com/ceofy/netcoloc',
+    author="Brin Rosenthal, Sophie Liu",
+    author_email='sbrosenthal@health.ucsd.edu, sol015@ucsd.edu',
+    url='https://github.com/ucsd-ccbb/netcoloc',
     packages=[
         'netcoloc',
     ],
