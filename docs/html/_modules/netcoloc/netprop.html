@@ -1,0 +1,212 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>netcoloc.netprop &#8212; netcoloc 0.1.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">netcoloc 0.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">netcoloc.netprop</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for netcoloc.netprop</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="sd">&#39;&#39;&#39;Functions for performing network propagation</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="c1"># External library imports</span>
+<span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+<div class="viewcode-block" id="get_normalized_adjacency_matrix"><a class="viewcode-back" href="../../netcoloc.html#netcoloc.netprop.get_normalized_adjacency_matrix">[docs]</a><span class="k">def</span> <span class="nf">get_normalized_adjacency_matrix</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">conserve_heat</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">weighted</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Returns normalized adjacency matrix (W&#39;), as detailed in:</span>
+<span class="sd">    Vanunu, Oron, et al. &#39;Associating genes and protein complexes with disease</span>
+<span class="sd">    via network propagation.&#39;</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        graph (NetworkX graph): Interactome from which to calculate normalized</span>
+<span class="sd">            adjacency matrix.</span>
+<span class="sd">        conserve_heat (bool): If this is set to True, heat will be conserved</span>
+<span class="sd">            (ie. the sum of the heat vector will be equal to 1), and the graph</span>
+<span class="sd">            will be asymmetric. Otherwise, heat will not be conserved, and the</span>
+<span class="sd">            graph will be symmetric. (Default: True)</span>
+<span class="sd">        weighted (bool): If this is set to true, then the graph&#39;s edge weights</span>
+<span class="sd">            will be taken into account. Otherwise, all edge weights will be set </span>
+<span class="sd">            to 1. (Default: False)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        numpy.ndarray: A square normalized adjacency matrix</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># Create graph</span>
+    <span class="k">if</span> <span class="n">conserve_heat</span><span class="p">:</span>
+        <span class="c1"># If conserving heat, make G_weighted a di-graph (not symmetric)</span>
+        <span class="n">graph_weighted</span><span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># If not conserving heat, make G_weighted a simple graph (symmetric)</span>
+        <span class="n">graph_weighted</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>
+
+    <span class="c1">#Create edge weights</span>
+    <span class="n">edge_weights</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">node_to_degree_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">degree</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">v1</span> <span class="o">=</span> <span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">v2</span> <span class="o">=</span> <span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">deg1</span> <span class="o">=</span> <span class="n">node_to_degree_dict</span><span class="p">[</span><span class="n">v1</span><span class="p">]</span>
+        <span class="n">deg2</span> <span class="o">=</span> <span class="n">node_to_degree_dict</span><span class="p">[</span><span class="n">v2</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="n">weighted</span><span class="p">:</span>
+            <span class="n">weight</span> <span class="o">=</span> <span class="n">e</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">weight</span> <span class="o">=</span> <span class="mi">1</span>
+        
+        <span class="k">if</span> <span class="n">conserve_heat</span><span class="p">:</span>
+            <span class="n">edge_weights</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">,</span> <span class="n">weight</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">deg2</span><span class="p">)))</span>
+            <span class="n">edge_weights</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">v2</span><span class="p">,</span> <span class="n">v1</span><span class="p">,</span> <span class="n">weight</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">deg1</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">edge_weights</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">,</span> <span class="n">weight</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">deg1</span> <span class="o">*</span> <span class="n">deg2</span><span class="p">)))</span>
+    
+    <span class="c1"># Apply edge weights to graph</span>
+    <span class="n">graph_weighted</span><span class="o">.</span><span class="n">add_weighted_edges_from</span><span class="p">(</span><span class="n">edge_weights</span><span class="p">)</span>
+    
+    <span class="c1"># Transform graph to adjacency matrix</span>
+    <span class="n">w_prime</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">to_numpy_matrix</span><span class="p">(</span><span class="n">graph_weighted</span><span class="p">,</span> <span class="n">nodelist</span><span class="o">=</span><span class="n">graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">())</span>
+    <span class="n">w_prime</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">w_prime</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">w_prime</span></div>
+
+<div class="viewcode-block" id="get_individual_heats_matrix"><a class="viewcode-back" href="../../netcoloc.html#netcoloc.netprop.get_individual_heats_matrix">[docs]</a><span class="k">def</span> <span class="nf">get_individual_heats_matrix</span><span class="p">(</span><span class="n">normalized_adjacency_matrix</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Returns the pre-calculated contributions of each individual gene in the</span>
+<span class="sd">    interactome to the final heat of each other gene in the interactome after</span>
+<span class="sd">    propagation.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        normalized_adjacency_matrix (numpy.ndarray): A square normalized </span>
+<span class="sd">            adjacency matrix from netprop.get_normalized_adjacency_matrix()</span>
+<span class="sd">        alpha (float): A heat dissapation coefficient between 1 and 0. The </span>
+<span class="sd">           contribution of the heat propagated from adjacent nodes in </span>
+<span class="sd">           determining the final heat of a node, as opposed to the contribution </span>
+<span class="sd">           from being a part of the gene set initially. (Default: 0.5)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        numpy.ndarray: A square individual heats matrix.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">normalized_adjacency_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> 
+        <span class="o">-</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">normalized_adjacency_matrix</span>
+    <span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="network_propagation"><a class="viewcode-back" href="../../netcoloc.html#netcoloc.netprop.network_propagation">[docs]</a><span class="k">def</span> <span class="nf">network_propagation</span><span class="p">(</span><span class="n">individual_heats_matrix</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">seed_genes</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Implements network propagation, as detailed in: Vanunu, Oron, et al. </span>
+<span class="sd">    &#39;Associating genes and protein complexes with disease via network </span>
+<span class="sd">    propagation.&#39;</span>
+
+<span class="sd">    Using this function, the final heat of the network is calculated directly, </span>
+<span class="sd">    instead of iteratively. This method is faster when many different </span>
+<span class="sd">    propagations need to be performed on the same network (with different seed </span>
+<span class="sd">    gene sets). It is slower than netprop.iterative_network_propagation() for a </span>
+<span class="sd">    single propagation.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        individual_heats_matrix (numpy.ndarray): Square matrix that is the </span>
+<span class="sd">            output of netprop.get_individual_heats_matrix().</span>
+<span class="sd">        nodes (list): List of nodes in the network represented by the</span>
+<span class="sd">            individual_heats_matrix, in the same order in which they were </span>
+<span class="sd">            supplied to netprop.get_individual_heats_matrix().</span>
+
+<span class="sd">    Returns: </span>
+<span class="sd">        pandas.Series: Final heat of each node after propagation, with the name</span>
+<span class="sd">            of the nodes as the index.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="c1"># Remove genes that are not in network</span>
+    <span class="n">seed_genes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">intersect1d</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">seed_genes</span><span class="p">))</span>
+
+    <span class="c1"># Initialize results vector</span>
+    <span class="n">F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">))</span>
+
+    <span class="c1"># Add up resulting heats from each gene in seed genes set</span>
+    <span class="k">for</span> <span class="n">gene</span> <span class="ow">in</span> <span class="n">seed_genes</span><span class="p">:</span>
+        <span class="n">F</span> <span class="o">+=</span> <span class="n">individual_heats_matrix</span><span class="p">[:,</span><span class="n">nodes</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">gene</span><span class="p">)]</span>
+
+    <span class="c1"># Normalize results by number of seed genes</span>
+    <span class="n">F</span> <span class="o">/=</span> <span class="nb">len</span><span class="p">(</span><span class="n">seed_genes</span><span class="p">)</span>
+
+    <span class="c1">#Return as pandas series</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">F</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">nodes</span><span class="p">)</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">netcoloc 0.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">netcoloc.netprop</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021, Sophie Liu.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.1.1.
+    </div>
+  </body>
+</html>

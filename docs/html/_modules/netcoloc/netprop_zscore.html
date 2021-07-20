@@ -1,0 +1,336 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>netcoloc.netprop_zscore &#8212; netcoloc 0.1.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">netcoloc 0.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">netcoloc.netprop_zscore</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for netcoloc.netprop_zscore</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+
+<span class="sd">&#39;&#39;&#39;Functions for getting z-scores from network propagation.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="c1"># External library imports</span>
+<span class="kn">import</span> <span class="nn">ndex2</span>
+<span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">tqdm.auto</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="c1"># Internal module convenience imports</span>
+<span class="kn">from</span> <span class="nn">.netcoloc_utils</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">.netprop</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="c1">#from netcoloc_utils import *</span>
+<span class="c1">#from netprop import *</span>
+
+<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+<div class="viewcode-block" id="netprop_zscore"><a class="viewcode-back" href="../../netcoloc.html#netcoloc.netprop_zscore.netprop_zscore">[docs]</a><span class="k">def</span> <span class="nf">netprop_zscore</span><span class="p">(</span><span class="n">seed_gene_file</span><span class="p">,</span> <span class="n">seed_gene_file_delimiter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_reps</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">minimum_bin_size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> 
+                   <span class="n">interactome_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interactome_uuid</span><span class="o">=</span><span class="s1">&#39;f93f402c-86d4-11e7-a10d-0ac135e8bacf&#39;</span><span class="p">,</span> 
+                   <span class="n">ndex_server</span><span class="o">=</span><span class="s1">&#39;public.ndexbio.org&#39;</span><span class="p">,</span> <span class="n">ndex_user</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ndex_password</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out_name</span><span class="o">=</span><span class="s1">&#39;out&#39;</span><span class="p">,</span>
+                   <span class="n">save_z_scores</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">save_final_heat</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">save_random_final_heats</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Performs network heat propagation on the given interactome with the given</span>
+<span class="sd">    seed genes, then returns the z-scores of the final heat values of each node</span>
+<span class="sd">    in the interactome.</span>
+
+<span class="sd">    The z-scores are calculated based on a null model, which is built by running</span>
+<span class="sd">    the network propagation multiple times using randomly selected seed genes</span>
+<span class="sd">    with similar degree distributions to the original seed gene set.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        seed_gene_file (str): Location of file containing a delimited list of </span>
+<span class="sd">            seed genes.</span>
+<span class="sd">        seed_gene_file_delimiter (str): Delimiter used to separate genes in seed</span>
+<span class="sd">            gene file. (Default: any whitespace)</span>
+<span class="sd">        num_reps (int): Number of times the network propagation algorithm should</span>
+<span class="sd">            be run using random seed genes in order to build the null model.</span>
+<span class="sd">            (Default: 10)</span>
+<span class="sd">        alpha (float): Number between 0 and 1. Denotes the importance of the </span>
+<span class="sd">            propagation step in the network propagation, as opposed to the step</span>
+<span class="sd">            where heat is added to seed genes only. Recommended to be 0.5 or</span>
+<span class="sd">            greater. (Default: 0.5)</span>
+<span class="sd">        minimum_bin_size (int): The minimum number of genes that should be in</span>
+<span class="sd">            each degree matching bin. (Default: 10)</span>
+<span class="sd">        interactome_file (str): Location of file containing the interactome in</span>
+<span class="sd">            NetworkX gpickle format. Either the interactome_file argument or the</span>
+<span class="sd">            interactome_uuid argument must be defined.</span>
+<span class="sd">        interactome_uuid (str): UUID of the interactome on NDEx. Either the</span>
+<span class="sd">            interactome_file argument or the interactome_uuid argument must be</span>
+<span class="sd">            defined. (Default: The UUID of PCNet, the Parsimonious Composite</span>
+<span class="sd">            Network: f93f402c-86d4-11e7-a10d-0ac135e8bacf)</span>
+<span class="sd">        ndex_server (str): The NDEx server on which the interactome is stored.</span>
+<span class="sd">            Only needs to be defined if interactome_uuid is defined. (Default: </span>
+<span class="sd">            ndexbio.org)</span>
+<span class="sd">        ndex_user (str): The NDEx user that the interactome belongs to. Only</span>
+<span class="sd">            needs to be defined if interactome_uuid is defined, and the </span>
+<span class="sd">            interactome is private.</span>
+<span class="sd">        ndex_password (str): The password of the NDEx user&#39;s account. Only needs</span>
+<span class="sd">            to be defined if interactome_uuid is defined, and the interactome is</span>
+<span class="sd">            private.</span>
+<span class="sd">        out_name (str): Prefix for saving output files. (Default: out)</span>
+<span class="sd">        save_final_heat (bool): If this is set to true, then the raw network</span>
+<span class="sd">            propagation heat scores for the original seed gene set will be saved</span>
+<span class="sd">            in the form of a tsv file in the current directory. (Default: False)</span>
+<span class="sd">        save_random_final_heats (bool): If this is set to true, then the raw </span>
+<span class="sd">            network propagation heat scores for every repetition of the </span>
+<span class="sd">            algorithm using random seed genes will be saved in the form of a tsv</span>
+<span class="sd">            file in the current directory. (Beware: This can be a large file if </span>
+<span class="sd">            num_reps is large.) (Default: False)</span>
+<span class="sd">        verbose (bool): If this is set to true, then progress information will</span>
+<span class="sd">            be logged. Otherwise, nothing will be printed. (Default: True)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        z_scores (pandas.Series): Pandas Series containing the z-scores for each</span>
+<span class="sd">            gene. Gene names comprise the index column.</span>
+<span class="sd">        random_final_heats (numpy.ndarray): Square matrix in which each row </span>
+<span class="sd">            contains the final heat scores for each gene from a network</span>
+<span class="sd">            propagation from random seed genes.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># Process arguments</span>
+
+    <span class="c1"># seed_gene_file</span>
+    <span class="n">seed_gene_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">seed_gene_file</span><span class="p">)</span>
+    <span class="c1">#num_reps</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">num_reps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">num_reps</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;The num_reps argument should be an integer&quot;</span><span class="p">)</span>
+    <span class="c1">#int_file and int_uuid</span>
+    <span class="k">if</span> <span class="n">interactome_file</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">interactome_uuid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Either interactome_file or interactome_uuid argument must be provided&quot;</span><span class="p">)</span>
+    
+
+    <span class="c1"># Load interactome</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Loading interactome&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">interactome_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">interactome_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">interactome_file</span><span class="p">)</span>
+        <span class="n">interactome</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">()</span>
+        <span class="n">interactome</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">read_gpickle</span><span class="p">(</span><span class="n">interactome_file</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">interactome</span> <span class="o">=</span> <span class="n">ndex2</span><span class="o">.</span><span class="n">create_nice_cx_from_server</span><span class="p">(</span>
+            <span class="n">ndex_server</span><span class="p">,</span> 
+            <span class="n">username</span><span class="o">=</span><span class="n">ndex_user</span><span class="p">,</span> 
+            <span class="n">password</span><span class="o">=</span><span class="n">ndex_password</span><span class="p">,</span> 
+            <span class="n">uuid</span><span class="o">=</span><span class="n">interactome_uuid</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">to_networkx</span><span class="p">()</span>
+    <span class="k">if</span> <span class="s1">&#39;None&#39;</span> <span class="ow">in</span> <span class="n">interactome</span><span class="o">.</span><span class="n">nodes</span><span class="p">():</span>
+        <span class="n">interactome</span><span class="o">.</span><span class="n">remove_node</span><span class="p">(</span><span class="s1">&#39;None&#39;</span><span class="p">)</span>
+    <span class="n">nodes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">interactome</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span>
+        
+    <span class="c1"># Log interactome num nodes and edges for diagnostic purposes</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Number of nodes: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">interactome</span><span class="o">.</span><span class="n">nodes</span><span class="p">)))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Number of edges: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">interactome</span><span class="o">.</span><span class="n">edges</span><span class="p">)))</span>
+
+    <span class="c1"># Load seed genes</span>
+    <span class="n">seed_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">seed_gene_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">seed_genes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">intersect1d</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">seed_file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">seed_gene_file_delimiter</span><span class="p">)))</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Number of seed genes in interactome: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">seed_genes</span><span class="p">)))</span>
+
+    <span class="c1"># Calculate individual_heats_matrix from interactome</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Calculating w_prime&#39;</span><span class="p">)</span>
+    <span class="n">w_prime</span> <span class="o">=</span> <span class="n">get_normalized_adjacency_matrix</span><span class="p">(</span><span class="n">interactome</span><span class="p">,</span> <span class="n">conserve_heat</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Calculating individual_heats_matrix&#39;</span><span class="p">)</span>
+    <span class="n">individual_heats_matrix</span> <span class="o">=</span> <span class="n">get_individual_heats_matrix</span><span class="p">(</span><span class="n">w_prime</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)</span>
+
+    <span class="c1"># Calculate the z-score</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Calculating z-scores: &#39;</span> <span class="o">+</span> <span class="n">seed_gene_file</span><span class="p">)</span>
+    <span class="n">z_scores</span><span class="p">,</span> <span class="n">final_heat</span><span class="p">,</span> <span class="n">random_final_heats</span> <span class="o">=</span> <span class="n">calculate_heat_zscores</span><span class="p">(</span>
+        <span class="n">individual_heats_matrix</span><span class="p">,</span> 
+        <span class="n">nodes</span><span class="p">,</span> 
+        <span class="nb">dict</span><span class="p">(</span><span class="n">interactome</span><span class="o">.</span><span class="n">degree</span><span class="p">),</span> 
+        <span class="n">seed_genes</span><span class="p">,</span> 
+        <span class="n">num_reps</span><span class="o">=</span><span class="n">num_reps</span><span class="p">,</span> 
+        <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> 
+        <span class="n">minimum_bin_size</span><span class="o">=</span><span class="n">minimum_bin_size</span><span class="p">)</span>
+
+    <span class="c1"># Save z-score results</span>
+    <span class="n">z_scores</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;z-scores&#39;</span>
+    <span class="k">if</span> <span class="n">save_z_scores</span><span class="p">:</span>
+      <span class="n">z_scores</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">out_name</span> <span class="o">+</span> <span class="s1">&#39;_z_scores_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">num_reps</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_reps.tsv&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="c1"># If save_final_heat is true, save out the final heat vector</span>
+    <span class="k">if</span> <span class="n">save_final_heat</span><span class="p">:</span>
+        <span class="n">final_heat_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">final_heat</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;z-scores&#39;</span><span class="p">])</span>
+        <span class="n">final_heat_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">out_name</span> <span class="o">+</span> <span class="s1">&#39;_final_heat_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">num_reps</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_reps.tsv&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="c1"># If save_random_final_heats is true, save out the vector of randoms (this can be a large file)</span>
+    <span class="k">if</span> <span class="n">save_random_final_heats</span><span class="p">:</span> 
+        <span class="n">random_final_heats_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+            <span class="n">random_final_heats</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> 
+            <span class="n">index</span><span class="o">=</span><span class="n">nodes</span><span class="p">,</span> 
+            <span class="n">columns</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">random_final_heats</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">random_final_heats_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">out_name</span> <span class="o">+</span> <span class="s1">&#39;_final_heat_random_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">num_reps</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_reps.tsv&#39;</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">z_scores</span><span class="p">,</span> <span class="n">random_final_heats</span></div>
+    
+<div class="viewcode-block" id="calculate_heat_zscores"><a class="viewcode-back" href="../../netcoloc.html#netcoloc.netprop_zscore.calculate_heat_zscores">[docs]</a><span class="k">def</span> <span class="nf">calculate_heat_zscores</span><span class="p">(</span><span class="n">individual_heats_matrix</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">degrees</span><span class="p">,</span> <span class="n">seed_genes</span><span class="p">,</span> <span class="n">num_reps</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">minimum_bin_size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span><span class="n">random_seed</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Helper function to perform network heat propagation using the given</span>
+<span class="sd">    individual heats matrix with the given seed genes and return the z-scores of</span>
+<span class="sd">    the final heat values of each node.</span>
+
+<span class="sd">    The z-scores are calculated based on a null model, which is built by running</span>
+<span class="sd">    the network propagation multiple times using randomly selected seed genes</span>
+<span class="sd">    with similar degree distributions to the original seed gene set.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        individual_heats_matrix (numpy.ndarray): The output of the</span>
+<span class="sd">            netprop.get_individual_heats_matrix. A square matrix containing the</span>
+<span class="sd">            final heat contributions of each gene.</span>
+<span class="sd">        nodes (list): List of nodes, in the order in which they were supplied to</span>
+<span class="sd">            the netprop.get_normalized_adjacency_matrix() method which returns</span>
+<span class="sd">            the precursor to the individual_heats_matrix.</span>
+<span class="sd">        degrees (dict): A dictionary mapping node names to node degrees.</span>
+<span class="sd">        seed_genes (list): The list of genes to use for network propagation. The</span>
+<span class="sd">            results of this network propagation will be compared to a set of</span>
+<span class="sd">            random results in order to obtain z-scores.</span>
+<span class="sd">        num_reps (int): Number of times the network propagation algorithm should</span>
+<span class="sd">            be run using random seed genes in order to build the null model.</span>
+<span class="sd">            (Default: 10)</span>
+<span class="sd">        alpha (float): Number between 0 and 1. Denotes the importance of the </span>
+<span class="sd">            propagation step in the network propagation, as opposed to the step</span>
+<span class="sd">            where heat is added to seed genes only. Recommended to be 0.5 or</span>
+<span class="sd">            greater. (Default: 0.5)</span>
+<span class="sd">        minimum_bin_size (int): The minimum number of genes that should be in</span>
+<span class="sd">            each degree matching bin. (Default: 10)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        z_scores (pandas.Series): Pandas Series containing the z-scores for each</span>
+<span class="sd">            gene. Gene names comprise the index column.</span>
+<span class="sd">        final_heats (pandas.Series): Pandas Series containing the final heat</span>
+<span class="sd">            scores for each gene. Gene names comprise the index column.</span>
+<span class="sd">        random_final_heats (numpy.ndarray): Square matrix in which each row </span>
+<span class="sd">            contains the final heat scores for each gene from a network</span>
+<span class="sd">            propagation from random seed genes.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    
+        
+    <span class="c1"># set random seed for reproducibility</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">random_seed</span><span class="p">)</span>
+
+    <span class="c1"># Calculate network propagation results given gene set</span>
+    <span class="n">seed_genes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">intersect1d</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">seed_genes</span><span class="p">))</span>
+    <span class="n">final_heat</span> <span class="o">=</span> <span class="n">network_propagation</span><span class="p">(</span><span class="n">individual_heats_matrix</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">seed_genes</span><span class="p">)</span>
+
+    <span class="c1"># Initialize empty matrix for results of random network propagations</span>
+    <span class="n">random_final_heats</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">num_reps</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">final_heat</span><span class="p">)])</span>
+
+    <span class="c1"># Create bins containing genes of similar degree</span>
+    <span class="n">bins</span><span class="p">,</span> <span class="n">actual_degree_to_bin_index</span> <span class="o">=</span> <span class="n">get_degree_binning</span><span class="p">(</span><span class="n">degrees</span><span class="p">,</span> <span class="n">minimum_bin_size</span><span class="p">)</span>
+    
+    <span class="c1"># Perform network propagation many times with random seed genes</span>
+    <span class="k">for</span> <span class="n">repetition</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">num_reps</span><span class="p">)):</span>
+        <span class="c1"># Create list of random, degree-matched seed genes</span>
+        <span class="n">random_seed_genes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">gene</span> <span class="ow">in</span> <span class="n">seed_genes</span><span class="p">:</span>
+            <span class="c1"># Find genes with similar degrees to focal gene degree</span>
+            <span class="n">degree</span> <span class="o">=</span> <span class="n">degrees</span><span class="p">[</span><span class="n">gene</span><span class="p">]</span>
+            <span class="n">genes_of_similar_degree</span> <span class="o">=</span> <span class="n">bins</span><span class="p">[</span><span class="n">actual_degree_to_bin_index</span><span class="p">[</span><span class="n">degree</span><span class="p">]]</span>
+            <span class="c1"># Shuffle the genes in the bin</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">genes_of_similar_degree</span><span class="p">)</span>
+
+            <span class="c1"># Add genes to list that haven&#39;t already been added</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">while</span> <span class="n">genes_of_similar_degree</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="ow">in</span> <span class="n">random_seed_genes</span><span class="p">:</span> 
+                <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">random_seed_genes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">genes_of_similar_degree</span><span class="p">[</span><span class="n">index</span><span class="p">])</span>
+
+        <span class="c1"># Perform network propagation with random seed genes</span>
+        <span class="n">random_final_heat</span> <span class="o">=</span> <span class="n">network_propagation</span><span class="p">(</span><span class="n">individual_heats_matrix</span><span class="p">,</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">random_seed_genes</span><span class="p">)</span>
+        <span class="c1"># Set seeds to NaN so they don&#39;t bias results</span>
+        <span class="n">random_final_heat</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">random_seed_genes</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="c1"># Add results to random_final_heats matrix</span>
+        <span class="n">random_final_heats</span><span class="p">[</span><span class="n">repetition</span><span class="p">]</span> <span class="o">=</span> <span class="n">random_final_heat</span>
+
+    <span class="c1"># Calculate z-scores</span>
+    <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+      <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+      <span class="n">z_scores</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">final_heat</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">random_final_heats</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">nanstd</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">random_final_heats</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">z_scores</span><span class="p">,</span> <span class="n">final_heat</span><span class="p">,</span> <span class="n">random_final_heats</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">netcoloc 0.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">netcoloc.netprop_zscore</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021, Sophie Liu.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.1.1.
+    </div>
+  </body>
+</html>
