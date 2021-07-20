@@ -5,9 +5,8 @@
 
 def get_degree_binning(node_to_degree_dict, min_bin_size, lengths=None):
     '''
-    Groups nodes by degree into similarly sized bins. This function comes from
-    network_utilities.py of emregtoobox.
-
+    Groups nodes by degree into similarly sized bins. This function comes from network_utilities.py of emregtoobox.
+    
     Args:
         node_to_degree_dict (dict): Dictionary mapping nodes to their degrees.
         min_bin_size (int): The minimum number of nodes each bin should contain.
