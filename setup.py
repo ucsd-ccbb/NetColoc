@@ -17,7 +17,14 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
-    'Click>=6.0'
+    'Click>=6.0',
+    'ndex2',
+    'networkx>=2.0',
+    'numpy',
+    'pandas',
+    'tqdm',
+    'matplotlib',
+    'seaborn'
 ]
 
 test_requirements = [
