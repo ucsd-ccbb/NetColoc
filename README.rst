@@ -12,10 +12,6 @@ NetColoc
         :target: https://netcoloc.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
-.. image:: https://requires.io/github/ceofy/netcoloc/requirements.svg?branch=master
-        :target: https://requires.io/github/ceofy/netcoloc/requirements?branch=master
-        :alt: Dependencies
-
 
 Description
 -----------
