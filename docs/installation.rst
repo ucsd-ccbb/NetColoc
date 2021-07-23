@@ -24,19 +24,19 @@ you through the process.
 From sources
 ------------
 
-The sources for netcoloc can be downloaded from the `Github repo`_.
+The sources for NetColoc can be downloaded from the `Github repo`_.
 
 You can either clone the public repository:
 
 .. code-block:: console
 
-    $ git clone git://github.com/ceofy/netcoloc
+    $ git clone git://github.com/ucsd-ccbb/NetColoc
 
 Or download the `tarball`_:
 
 .. code-block:: console
 
-    $ curl  -OL https://github.com/ceofy/netcoloc/tarball/master
+    $ curl  -OL https://github.com/ucsd-ccbb/NetColoc/tarball/master
 
 Once you have a copy of the source, you can install it with:
 
@@ -45,5 +45,5 @@ Once you have a copy of the source, you can install it with:
     $ python setup.py install
 
 
-.. _Github repo: https://github.com/ceofy/netcoloc
-.. _tarball: https://github.com/ceofy/netcoloc/tarball/master
+.. _Github repo: https://github.com/ucsd-ccbb/NetColoc
+.. _tarball: https://github.com/ucsd-ccbb/NetColoc/tarball/master
