@@ -3,7 +3,7 @@
 
 import os
 import re
-from setuptools import setup
+from setuptools import setup, find_packages
 
 with open(os.path.join('netcoloc', '__init__.py')) as ver_file:
     for line in ver_file:
@@ -39,9 +39,7 @@ setup(
     author="Brin Rosenthal, Sophie Liu",
     author_email='sbrosenthal@health.ucsd.edu, sol015@ucsd.edu',
     url='https://github.com/ucsd-ccbb/netcoloc',
-    packages=[
-        'netcoloc',
-    ],
+    packages=find_packages(include=['netcoloc']),
     package_dir={'netcoloc':
                  'netcoloc'},
     entry_points={
