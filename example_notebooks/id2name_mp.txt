@@ -3005,8 +3005,8 @@ MP:0000144	vertebral transformation
 MP:0000145	vertebral transformation
 MP:0000146	vertebral transformation
 MP:0000147	vertebral transformation
-MP:0003037	increased myocardial infarction size
-MP:0003038	decreased myocardial infarction size
+MP:0003037	increased myocardial infarct size
+MP:0003038	decreased myocardial infarct size
 MP:0003039	increased time of peak ischemic contracture
 MP:0003040	decreased time of peak ischemic contracture
 MP:0003041	increased time of onset of induced ischemic contracture
@@ -5694,9 +5694,9 @@ MP:0006054	spinal hemorrhage
 MP:0006055	abnormal vascular endothelial cell morphology
 MP:0006056	increased vascular endothelial cell number
 MP:0006057	decreased vascular endothelial cell number
-MP:0006058	decreased cerebral infarction size
+MP:0006058	decreased cerebral infarct size
 MP:0006059	decreased susceptibility to ischemic brain injury
-MP:0006060	increased cerebral infarction size
+MP:0006060	increased cerebral infarct size
 MP:0006061	right atrial isomerism
 MP:0006062	abnormal vena cava morphology
 MP:0006063	abnormal inferior vena cava morphology
@@ -11801,7 +11801,7 @@ MP:0013871	abnormal stapedial artery topology
 MP:0013872	abnormal jugular vein morphology
 MP:0013873	abnormal ductus venosus morphology
 MP:0013874	abnormal ductus venosus topology
-MP:0013875	trigeminal neuroma
+MP:0013875	increased trigeminal neuroma incidence
 MP:0013876	absent ductus venosus valve
 MP:0013877	abnormal ductus venosus valve morphology
 MP:0013878	abnormal ductus venosus valve topology
@@ -13159,6 +13159,22 @@ MP:0020997	abnormal subcutaneous adipose tissue amount
 MP:0020998	abnormal epididymal fat pad weight
 MP:0020999	abnormal small intestine length
 MP:0021000	abnormal cecum weight
+MP:0021001	impaired neuron physiology
+MP:0021002	brain lesion
+MP:0021003	cerebral infarct
+MP:0021004	cerebral microinfarct
+MP:0021005	cerebral cortex microinfarct
+MP:0021006	hippocampal microfinfarct
+MP:0021007	amygdala microinfarct
+MP:0021008	temporal lobe atrophy
+MP:0021009	abnormal synaptic physiology
+MP:0021010	impaired synaptic physiology
+MP:0021011	parietal cortex atrophy
+MP:0021012	decreased acetylcholine level
+MP:0021013	abnormal synaptic vesicle endocytosis
+MP:0021014	abnormal tau protein phosphorylation
+MP:0021015	increased tau protein phosphorylation
+MP:0021016	decreased tau protein phosphorylation
 MP:0030000	abnormal subglottis morphology
 MP:0030001	subglottis stenosis
 MP:0030002	increased lung apoptosis
@@ -14430,6 +14446,16 @@ MP:0031271	increased susceptibility to age-related hepatic steatosis
 MP:0031272	abnormal susceptibility to induced aneurysm formation
 MP:0031273	decreased susceptibility to induced aneurysm formation
 MP:0031274	increased susceptibility to induced aneurysm formation
+MP:0031275	abnormal heme metabolism
+MP:0031276	abnormal stress erythropoiesis
+MP:0031277	pectus carinatum
+MP:0031278	decreased osteosarcoma incidence
+MP:0031279	abnormal susceptibility to aneurysm induced morbidity/mortality
+MP:0031280	decreased susceptibility to aneurysm induced morbidity/mortality
+MP:0031281	increased susceptibility to aneurysm induced morbidity/mortality
+MP:0031282	decreased enchondroma incidence
+MP:0031283	increased enchondroma incidence
+MP:0031284	abdominal situs abnormality
 MP:3000001	abnormal gastrula morphology
 MP:3000002	obsolete abnormal skull morphology
 MP:3000003	abnormal Ebner's gland morphology

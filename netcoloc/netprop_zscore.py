@@ -13,10 +13,10 @@ from tqdm.auto import tqdm
 import warnings
 
 # Internal module convenience imports
-from .netcoloc_utils import *
-from .netprop import *
-#from netcoloc_utils import *
-#from netprop import *
+#from .netcoloc_utils import *
+#from .netprop import *
+from netcoloc_utils import *
+from netprop import *
 
 def __init__(self):
     pass
