@@ -16,15 +16,31 @@ NetColoc
 Description
 -----------
 
-* Free software: MIT license
+Here we introduce NetColoc, a tool which evaluates the extent to
+which two gene sets are related in network space, i.e. the extent
+to which they are colocalized in a molecular interaction network,
+and interrogates the underlying biological pathways and processes
+using multiscale community detection.
 
-Here we introduce NetColoc, a tool which evaluates the extent to which two gene sets are related in network space, i.e. the extent to which they are colocalized in a molecular interaction network, and interrogates the underlying biological pathways and processes using multiscale community detection. This framework may be applied to any number of scenarios in which gene sets have been associated with a phenotype or condition, including rare and common variants within the same disease, genes associated with two comorbid diseases, genetically correlated GWAS phenotypes, GWAS across two different species, or gene expression changes after treatment with two different drugs, to name a few. NetColoc relies on a dual network propagation approach to identify the region of network space which is significantly proximal to both input gene sets, and as such is highly effective for small to medium input gene sets.
+This framework may be applied to any number of scenarios in which
+gene sets have been associated with a phenotype or condition,
+including rare and common variants within the same disease,
+genes associated with two comorbid diseases, genetically
+correlated GWAS phenotypes, GWAS across two different species,
+or gene expression changes after treatment with two different
+drugs, to name a few.
+
+NetColoc relies on a dual network propagation
+approach to identify the region of network space which is
+significantly proximal to both input gene sets, and as such is
+highly effective for small to medium input gene sets.
 
 
 Documentation
 -------------
 
-For a quick-start on NetColoc's functionality, please see the example notebooks (LINK). 
+For a quick-start on NetColoc's functionality, please see the
+`example notebooks <https://github.com/ucsd-ccbb/NetColoc/tree/main/example_notebooks>`__.
 
 Installation
 ------------
@@ -51,9 +67,15 @@ Additional requirements for full functionality of example notebook (INCLUDE VERS
 * mygene
 * gprofiler
 
+License
+--------
+
+* Free software: MIT license
+
 Citing NetColoc
 ---------------
 
+Coming soon...
 
 Credits
 -------
