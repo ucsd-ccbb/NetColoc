@@ -55,17 +55,16 @@ NetColoc requires the following python packages:
 * seaborn
 * tqdm
 
-Additional requirements for full functionality of example notebook (INCLUDE VERSIONS):
+Additional requirements for full functionality of example notebook:
 
-* getpass
-* ndex2
-* scipy
-* json
-* cdapsutil
-* ddot
-* requests
-* mygene
-* gprofiler
+* getpass ??
+* scipy = 1.5.3
+* json = 2.0.9
+* cdapsutil = 0.2.0a1
+* ddot ??
+* requests = 2.22.0
+* mygene = 3.2.2
+* gprofiler = 1.0.0
 
 License
 --------
