@@ -62,7 +62,7 @@ Additional requirements for full functionality of example notebook:
 * `cdapsutil >= 0.2.0a1 <https://pypi.org/project/cdapsutil/>`__
 * ddot (NEED TO ADD LINK HERE)
 * `mygene >= 3.2.2 <https://pypi.org/project/mygene/>`__
-* `gprofiler >= 1.0.0 <https://pypi.org/project/gprofiler/>`__
+* `gprofiler >= 1.0.0 <https://pypi.org/project/gprofiler-official/>`__
 * `statsmodels <https://pypi.org/project/statsmodels/>`__
 
 Installation
