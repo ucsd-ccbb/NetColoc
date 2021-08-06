@@ -42,8 +42,8 @@ Documentation
 For a quick-start on NetColoc's functionality, please see the
 `example notebooks <https://github.com/ucsd-ccbb/NetColoc/tree/main/example_notebooks>`__.
 
-Installation
-------------
+Dependencies
+--------------
 
 NetColoc requires the following python packages:
 
@@ -65,6 +65,15 @@ Additional requirements for full functionality of example notebook:
 * requests = 2.22.0
 * mygene = 3.2.2
 * gprofiler = 1.0.0
+
+Installation
+--------------
+
+NetColoc is available on `PyPI <https://pypi.org/>`__
+
+::
+
+     pip install netcoloc
 
 License
 --------
