@@ -4,25 +4,22 @@
 '''
 
 # External library imports
-import ndex2
-import networkx as nx
-import numpy as np
-import pandas as pd
-import os
-from tqdm.auto import tqdm
-import warnings
 
+import os
+import warnings
+from tqdm.auto import tqdm
+import ndex2
 # Internal module convenience imports
-#from .netcoloc_utils import *
-#from .netprop import *
-from netcoloc_utils import *
-from netprop import *
+from netcoloc.netcoloc_utils import *
+from netcoloc.netprop import *
+
 
 def __init__(self):
     pass
 
-def netprop_zscore(seed_gene_file, seed_gene_file_delimiter=None, num_reps=10, alpha=0.5, minimum_bin_size=10, 
-                   interactome_file=None, interactome_uuid='f93f402c-86d4-11e7-a10d-0ac135e8bacf', 
+
+def netprop_zscore(seed_gene_file, seed_gene_file_delimiter=None, num_reps=10, alpha=0.5, minimum_bin_size=10,
+                   interactome_file=None, interactome_uuid='f93f402c-86d4-11e7-a10d-0ac135e8bacf',
                    ndex_server='public.ndexbio.org', ndex_user=None, ndex_password=None, out_name='out',
                    save_z_scores=False, save_final_heat=False, save_random_final_heats=False, verbose=True):
     '''Performs network heat propagation on the given interactome with the given
@@ -34,14 +31,14 @@ def netprop_zscore(seed_gene_file, seed_gene_file_delimiter=None, num_reps=10, a
     with similar degree distributions to the original seed gene set.
 
     Args:
-        seed_gene_file (str): Location of file containing a delimited list of 
+        seed_gene_file (str): Location of file containing a delimited list of
             seed genes.
         seed_gene_file_delimiter (str): Delimiter used to separate genes in seed
             gene file. (Default: any whitespace)
         num_reps (int): Number of times the network propagation algorithm should
             be run using random seed genes in order to build the null model.
             (Default: 10)
-        alpha (float): Number between 0 and 1. Denotes the importance of the 
+        alpha (float): Number between 0 and 1. Denotes the importance of the
             propagation step in the network propagation, as opposed to the step
             where heat is added to seed genes only. Recommended to be 0.5 or
             greater. (Default: 0.5)
@@ -55,10 +52,10 @@ def netprop_zscore(seed_gene_file, seed_gene_file_delimiter=None, num_reps=10, a
             defined. (Default: The UUID of PCNet, the Parsimonious Composite
             Network: f93f402c-86d4-11e7-a10d-0ac135e8bacf)
         ndex_server (str): The NDEx server on which the interactome is stored.
-            Only needs to be defined if interactome_uuid is defined. (Default: 
+            Only needs to be defined if interactome_uuid is defined. (Default:
             ndexbio.org)
         ndex_user (str): The NDEx user that the interactome belongs to. Only
-            needs to be defined if interactome_uuid is defined, and the 
+            needs to be defined if interactome_uuid is defined, and the
             interactome is private.
         ndex_password (str): The password of the NDEx user's account. Only needs
             to be defined if interactome_uuid is defined, and the interactome is
@@ -67,10 +64,10 @@ def netprop_zscore(seed_gene_file, seed_gene_file_delimiter=None, num_reps=10, a
         save_final_heat (bool): If this is set to true, then the raw network
             propagation heat scores for the original seed gene set will be saved
             in the form of a tsv file in the current directory. (Default: False)
-        save_random_final_heats (bool): If this is set to true, then the raw 
-            network propagation heat scores for every repetition of the 
+        save_random_final_heats (bool): If this is set to true, then the raw
+            network propagation heat scores for every repetition of the
             algorithm using random seed genes will be saved in the form of a tsv
-            file in the current directory. (Beware: This can be a large file if 
+            file in the current directory. (Beware: This can be a large file if
             num_reps is large.) (Default: False)
         verbose (bool): If this is set to true, then progress information will
             be logged. Otherwise, nothing will be printed. (Default: True)
@@ -78,7 +75,7 @@ def netprop_zscore(seed_gene_file, seed_gene_file_delimiter=None, num_reps=10, a
     Returns:
         z_scores (pandas.Series): Pandas Series containing the z-scores for each
             gene. Gene names comprise the index column.
-        random_final_heats (numpy.ndarray): Square matrix in which each row 
+        random_final_heats (numpy.ndarray): Square matrix in which each row
             contains the final heat scores for each gene from a network
             propagation from random seed genes.
     '''
@@ -94,7 +91,7 @@ def netprop_zscore(seed_gene_file, seed_gene_file_delimiter=None, num_reps=10, a
     #int_file and int_uuid
     if interactome_file is None and interactome_uuid is None:
         raise TypeError("Either interactome_file or interactome_uuid argument must be provided")
-    
+
 
     # Load interactome
     if verbose:
@@ -105,15 +102,15 @@ def netprop_zscore(seed_gene_file, seed_gene_file_delimiter=None, num_reps=10, a
         interactome = nx.read_gpickle(interactome_file)
     else:
         interactome = ndex2.create_nice_cx_from_server(
-            ndex_server, 
-            username=ndex_user, 
-            password=ndex_password, 
+            ndex_server,
+            username=ndex_user,
+            password=ndex_password,
             uuid=interactome_uuid
         ).to_networkx()
     if 'None' in interactome.nodes():
         interactome.remove_node('None')
     nodes = list(interactome.nodes)
-        
+
     # Log interactome num nodes and edges for diagnostic purposes
     if verbose:
         print('Number of nodes: ' + str(len(interactome.nodes)))
@@ -137,12 +134,12 @@ def netprop_zscore(seed_gene_file, seed_gene_file_delimiter=None, num_reps=10, a
     if verbose:
         print('\nCalculating z-scores: ' + seed_gene_file)
     z_scores, final_heat, random_final_heats = calculate_heat_zscores(
-        individual_heats_matrix, 
-        nodes, 
-        dict(interactome.degree), 
-        seed_genes, 
-        num_reps=num_reps, 
-        alpha=alpha, 
+        individual_heats_matrix,
+        nodes,
+        dict(interactome.degree),
+        seed_genes,
+        num_reps=num_reps,
+        alpha=alpha,
         minimum_bin_size=minimum_bin_size)
 
     # Save z-score results
@@ -156,16 +153,16 @@ def netprop_zscore(seed_gene_file, seed_gene_file_delimiter=None, num_reps=10, a
         final_heat_df.to_csv(out_name + '_final_heat_' + str(num_reps) + '_reps.tsv', sep='\t')
 
     # If save_random_final_heats is true, save out the vector of randoms (this can be a large file)
-    if save_random_final_heats: 
+    if save_random_final_heats:
         random_final_heats_df = pd.DataFrame(
-            random_final_heats.T, 
-            index=nodes, 
+            random_final_heats.T,
+            index=nodes,
             columns=range(1, random_final_heats.shape[0] + 1)
         )
         random_final_heats_df.to_csv(out_name + '_final_heat_random_' + str(num_reps) + '_reps.tsv', sep='\t')
 
     return z_scores, random_final_heats
-    
+
 def calculate_heat_zscores(individual_heats_matrix, nodes, degrees, seed_genes, num_reps=10, alpha=0.5, minimum_bin_size=10,random_seed=1):
     '''
     Helper function to perform network heat propagation using the given
@@ -190,7 +187,7 @@ def calculate_heat_zscores(individual_heats_matrix, nodes, degrees, seed_genes, 
         num_reps (int): Number of times the network propagation algorithm should
             be run using random seed genes in order to build the null model.
             (Default: 10)
-        alpha (float): Number between 0 and 1. Denotes the importance of the 
+        alpha (float): Number between 0 and 1. Denotes the importance of the
             propagation step in the network propagation, as opposed to the step
             where heat is added to seed genes only. Recommended to be 0.5 or
             greater. (Default: 0.5)
@@ -202,12 +199,12 @@ def calculate_heat_zscores(individual_heats_matrix, nodes, degrees, seed_genes, 
             gene. Gene names comprise the index column.
         final_heats (pandas.Series): Pandas Series containing the final heat
             scores for each gene. Gene names comprise the index column.
-        random_final_heats (numpy.ndarray): Square matrix in which each row 
+        random_final_heats (numpy.ndarray): Square matrix in which each row
             contains the final heat scores for each gene from a network
             propagation from random seed genes.
     '''
-    
-        
+
+
     # set random seed for reproducibility
     np.random.seed(random_seed)
 
@@ -220,7 +217,7 @@ def calculate_heat_zscores(individual_heats_matrix, nodes, degrees, seed_genes, 
 
     # Create bins containing genes of similar degree
     bins, actual_degree_to_bin_index = get_degree_binning(degrees, minimum_bin_size)
-    
+
     # Perform network propagation many times with random seed genes
     for repetition in tqdm(range(num_reps)):
         # Create list of random, degree-matched seed genes
@@ -234,7 +231,7 @@ def calculate_heat_zscores(individual_heats_matrix, nodes, degrees, seed_genes, 
 
             # Add genes to list that haven't already been added
             index = 0
-            while genes_of_similar_degree[index] in random_seed_genes: 
+            while genes_of_similar_degree[index] in random_seed_genes:
                 index += 1
             random_seed_genes.append(genes_of_similar_degree[index])
 
@@ -249,5 +246,5 @@ def calculate_heat_zscores(individual_heats_matrix, nodes, degrees, seed_genes, 
     with warnings.catch_warnings():
       warnings.simplefilter("ignore")
       z_scores = (np.log(final_heat) - np.nanmean(np.log(random_final_heats), axis=0)) / np.nanstd(np.log(random_final_heats), axis=0)
-    
+
     return z_scores, final_heat, random_final_heats
