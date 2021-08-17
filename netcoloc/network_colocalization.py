@@ -11,6 +11,15 @@ import pandas as pd
 import random
 import seaborn as sns
 
+# need ddot to parse the ontology
+import ddot
+from ddot import Ontology
+
+# annotate the clusters
+# gprofiler prelim annotation
+from gprofiler import GProfiler
+gp = GProfiler("MyToolName/0.1")
+
 
 def __init__(self):
     pass
@@ -246,6 +255,7 @@ def transform_edges(G,method='cosine_sim',edge_weight_threshold=0.95):
     print(len(G_transf.edges())) 
     
     return G_transf
+
 
 
 
