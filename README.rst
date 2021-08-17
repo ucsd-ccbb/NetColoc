@@ -54,14 +54,13 @@ NetColoc requires the following python packages:
 * numpy
 * seaborn
 * tqdm
+* `ddot <https://github.com/Ceofy/ddot>`__
+* `mygene >= 3.2.2 <https://pypi.org/project/mygene/>`__
+* `scipy >= 1.5.3 <https://pypi.org/project/scipy/>`__
 
 Additional requirements for full functionality of example notebook:
 
-
-* `scipy >= 1.5.3 <https://pypi.org/project/scipy/>`__
 * `cdapsutil >= 0.2.0a1 <https://pypi.org/project/cdapsutil/>`__
-* `ddot <https://github.com/Ceofy/ddot>`__
-* `mygene >= 3.2.2 <https://pypi.org/project/mygene/>`__
 * `gprofiler-official >= 1.0.0 <https://pypi.org/project/gprofiler-official/>`__
 * `statsmodels <https://pypi.org/project/statsmodels/>`__
 
