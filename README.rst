@@ -47,7 +47,7 @@ Dependencies
 
 NetColoc requires the following python packages:
 
-.. note:: All of the following packages minus `DDOT <https://github.com/idekerlab/ddot>`__ will be automatically installed via ``pip install netcoloc``
+.. note:: All of the following packages minus `DDOT <https://github.com/idekerlab/ddot>`__ and `cdapsutil <https://pypi.org/project/cdapsutil>`__ will be automatically installed via ``pip install netcoloc``
 
 * `click <https://pypi.org/project/click>`__
 * `matplotlib <https://pypi.org/project/matplotlib>`__
