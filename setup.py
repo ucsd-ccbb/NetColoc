@@ -20,6 +20,8 @@ requirements = [
     'click>=6.0',
     'ndex2',
     'networkx>=2.0',
+    'mygene>=3.2.2',
+    'scipy>=1.5.3',
     'numpy',
     'pandas',
     'tqdm',
