@@ -80,7 +80,7 @@ NetColoc requires the following python packages:
         python setup.py bdist_wheel
         pip install dist/ddot*py3*whl
 
-  2. To `DDOT <https://github.com/idekerlab/ddot>`__ by cloning the repo:
+  2. To install `DDOT <https://github.com/idekerlab/ddot>`__ by cloning the repo:
 
      .. code-block::
 
@@ -88,8 +88,6 @@ NetColoc requires the following python packages:
         cd ddot
         python setup.py bdist_wheel
         pip install dist/ddot*py3*whl
-
-
 
 
 Additional requirements for full functionality of example notebook:
