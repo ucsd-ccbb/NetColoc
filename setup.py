@@ -26,7 +26,8 @@ requirements = [
     'pandas',
     'tqdm',
     'matplotlib',
-    'seaborn'
+    'seaborn',
+    'statsmodels'
 ]
 
 test_requirements = [
