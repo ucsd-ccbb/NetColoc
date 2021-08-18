@@ -3,13 +3,10 @@
 '''Functions for performing validation of NetColoc subgraph
 '''
 
-# External library imports
-import matplotlib.pyplot as plt
-import networkx as nx
+
 import numpy as np
 import pandas as pd
-import random
-import seaborn as sns
+
 import requests
 from statsmodels.stats import contingency_tables
 
@@ -22,18 +19,18 @@ import mygene
 mg = mygene.MyGeneInfo()
 
 def load_MGI_mouseKO_data(url = 'http://www.informatics.jax.org/downloads/reports/MGI_PhenoGenoMP.rpt'):
-    
+
     '''Function to parse and load mouse knockout data from MGI.
-    
+
     Args:
     url (string): location of MGI knockout data (default = 'http://www.informatics.jax.org/downloads/reports/MGI_PhenoGenoMP.rpt')
-    
+
 
     Returns:
     mgi_df (pandas.DataFrame): parsed MGI knockout dataframe, including column for human orthologs
-    
+
     '''
-    
+
     # download MGI phenotype data
     r = requests.get(url,allow_redirects=True)
     open('MGI_PhenoGenoMP.rpt','wb').write(r.content)
@@ -60,22 +57,22 @@ def load_MGI_mouseKO_data(url = 'http://www.informatics.jax.org/downloads/report
     mg_mapped.head()
 
     mgi_df['human_ortholog']=mgi_df['gene_name'].map(dict(mg_mapped['symbol']))
-    
+
     return mgi_df
-    
+
 def load_MPO(url = 'http://www.informatics.jax.org/downloads/reports/MPheno_OBO.ontology'):
-    
+
     '''Function to parse and load mouse phenotype ontology, using DDOT's ontology module.
-    
+
     Args:
     url (string): location of MPO ontology file (default = 'http://www.informatics.jax.org/downloads/reports/MPheno_OBO.ontology')
-    
+
 
     Returns:
     MPO (ddot.Ontology.Ontology): MPO parsed using DDOT
-    
+
     '''
-    
+
     # download the mammalian phenotype ontology, parse with ddot
     r = requests.get(url,allow_redirects=True)
     open('MPheno_OBO.ontology','wb').write(r.content)
@@ -116,9 +113,9 @@ def load_MPO(url = 'http://www.informatics.jax.org/downloads/reports/MPheno_OBO.
     return MPO
 
 def MPO_enrichment_root(hier_df,MPO,mgi_df,MP_focal_list,G_int,verbose=True):
-    
+
     '''Function to test for enrichment of genes resulting in selected phenotypes when knocked out in root node of NetColoc hierarchy.
-    
+
     Args:
     hier_df (pandas.DataFrame): NetColoc systems map (processed output from cdaps_util)
     MP_focal_list (list of strings): List of MPO phenotypes to check for enrichment against
@@ -126,7 +123,7 @@ def MPO_enrichment_root(hier_df,MPO,mgi_df,MP_focal_list,G_int,verbose=True):
     mgi_df (pandas.DataFrame): parsed MGI knockout dataframe
     G_int (networkx.classes.graph.Graph): Background interactome
     verbose (bool): If true, print out some progress
-    
+
 
     Returns:
     root_KO_df (pandas.DataFrame): Dataframe containing enrichment results, with the following columns:
@@ -136,10 +133,10 @@ def MPO_enrichment_root(hier_df,MPO,mgi_df,MP_focal_list,G_int,verbose=True):
         - log_OR_CI_upper: upper 95% confidence interval on log_OR
         - num_genes_in_term: nubmer of genes in MPO term
         - MP_description: description of MPO phenotype
-    
-    
+
+
     '''
-    
+
     # test for enrichment in root node
     OR_p_list,OR_CI_list,log_OR_list = [],[],[]
     num_genes_in_term_list=[]
@@ -169,13 +166,13 @@ def MPO_enrichment_root(hier_df,MPO,mgi_df,MP_focal_list,G_int,verbose=True):
         mgi_temp = mgi_df[mgi_df['MP'].isin(focal_terms)]
         mgi_temp = mgi_temp.dropna(subset=['human_ortholog'])
         mgi_genes = list(np.unique(mgi_temp['human_ortholog']))
-        mgi_genes = list(np.intersect1d(mgi_genes,G_int_nodes)) 
+        mgi_genes = list(np.intersect1d(mgi_genes,G_int_nodes))
 
         if (len(mgi_genes)>10) and (len(mgi_genes)<2000): # only test if there are at least 10 genes, and fewer than 2000 genes
-            
+
 
             q00 = len(np.intersect1d(mgi_genes,focal_genes))
-            
+
             q01 = len(mgi_genes)-q00
             q10 = len(focal_genes)-q00
             q11 = len(G_int_nodes)-q00-q01-q10
@@ -185,7 +182,7 @@ def MPO_enrichment_root(hier_df,MPO,mgi_df,MP_focal_list,G_int,verbose=True):
             OR_p_temp = CT.log_oddsratio_pvalue()
             OR_CI_temp = CT.log_oddsratio_confint()
             log_OR_temp = CT.log_oddsratio
-            
+
 
             OR_p_list.append(OR_p_temp)
             OR_CI_list.append(OR_CI_temp)
@@ -193,7 +190,7 @@ def MPO_enrichment_root(hier_df,MPO,mgi_df,MP_focal_list,G_int,verbose=True):
             num_genes_in_term_list.append(len(mgi_genes))
 
             MP_keep_list.append(MP_focal)
-            
+
             if verbose:
                 print('\n'+MP_desc_focal)
                 print('number of genes in root node = '+str(len(focal_genes)))
@@ -210,22 +207,22 @@ def MPO_enrichment_root(hier_df,MPO,mgi_df,MP_focal_list,G_int,verbose=True):
                                'log_OR_CI_lower':OR_CI_lower,'log_OR_CI_upper':OR_CI_upper,
                               'num_genes_in_term':num_genes_in_term_list},
                               index=MP_keep_list)
-    
+
     root_KO_df['MP_description']=root_KO_df.index.map(dict(MPO.node_attr['description']))
-    
+
     return root_KO_df
 
 def MPO_enrichment_full(hier_df,MPO,mgi_df,MP_focal_list,G_int):
-    
+
     '''Function to test for enrichment of genes resulting in selected phenotypes when knocked out in every NetColoc system (not just root).
-    
+
     Args:
     hier_df (pandas.DataFrame): NetColoc systems map (processed output from cdaps_util)
     MP_focal_list (list of strings): List of MPO phenotypes to check for enrichment against
     MPO (ddot.ontology.Ontology): DDOT ontology containing the parsed mammalian phenotype ontology
     mgi_df (pandas.DataFrame): parsed MGI knockout dataframe
     G_int (networkx.classes.graph.Graph): Background interactome
-    
+
 
     Returns:
     MP_full_results_df (pandas.DataFrame): Dataframe containing enrichment results, with the following columns, for each phenotype in 'MP_focal_list':
@@ -233,8 +230,8 @@ def MPO_enrichment_full(hier_df,MPO,mgi_df,MP_focal_list,G_int):
         - log_OR: natural log odds ratio
         - num_genes: number of genes in MPO term overlapping with focal system
         - gene_ids: list of overlapping genes between MPO term and focal system
-    
-    
+
+
     '''
 
     MP_full_results_df=pd.DataFrame(index=hier_df.index.tolist())
@@ -267,7 +264,7 @@ def MPO_enrichment_full(hier_df,MPO,mgi_df,MP_focal_list,G_int):
             mgi_temp = mgi_df[mgi_df['MP'].isin(focal_terms)]
             mgi_temp = mgi_temp.dropna(subset=['human_ortholog'])
             mgi_genes = list(np.unique(mgi_temp['human_ortholog']))
-            new_index=[g.upper() for g in mgi_temp.index.tolist()] 
+            new_index=[g.upper() for g in mgi_temp.index.tolist()]
             mgi_temp.index=new_index
 
             N=len(np.intersect1d(list(np.unique(mgi_temp.index.tolist())),list(G_int.nodes()))) # only keep genes in PCnet
@@ -318,5 +315,5 @@ def MPO_enrichment_full(hier_df,MPO,mgi_df,MP_focal_list,G_int):
         # check that the column isn't already present in MP_full_results_df
         if MP_desc_focal+':-log(OR_p)' not in MP_full_results_df.columns.tolist():
             MP_full_results_df=MP_full_results_df.join(MP_focal_df)
-            
+
     return MP_full_results_df
