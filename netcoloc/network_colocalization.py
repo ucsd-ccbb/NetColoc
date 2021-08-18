@@ -11,8 +11,8 @@ import pandas as pd
 import seaborn as sns
 
 # need ddot to parse the ontology
-import ddot
-from ddot import Ontology
+import ddotkit
+from ddotkit import Ontology
 
 # annotate the clusters
 # gprofiler prelim annotation

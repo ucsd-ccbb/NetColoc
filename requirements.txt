@@ -9,3 +9,5 @@ tqdm
 matplotlib
 seaborn
 statsmodels
+ddotkit
+gprofiler-official

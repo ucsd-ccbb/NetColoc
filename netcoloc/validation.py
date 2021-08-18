@@ -11,8 +11,8 @@ import requests
 from statsmodels.stats import contingency_tables
 
 # need ddot to parse the ontology
-import ddot
-from ddot import Ontology
+import ddotkit
+from ddotkit import Ontology
 
 # find human orthologs of mouse genes
 import mygene
@@ -69,14 +69,14 @@ def load_MPO(url = 'http://www.informatics.jax.org/downloads/reports/MPheno_OBO.
 
 
     Returns:
-    MPO (ddot.Ontology.Ontology): MPO parsed using DDOT
+    MPO (ddotkit.Ontology.Ontology): MPO parsed using DDOT
 
     '''
 
     # download the mammalian phenotype ontology, parse with ddot
     r = requests.get(url,allow_redirects=True)
     open('MPheno_OBO.ontology','wb').write(r.content)
-    ddot.parse_obo('MPheno_OBO.ontology',
+    ddotkit.parse_obo('MPheno_OBO.ontology',
                    'parsed_mp.txt',
                   'id2name_mp.txt',
                   'id2namespace_mp.txt',
@@ -119,7 +119,7 @@ def MPO_enrichment_root(hier_df,MPO,mgi_df,MP_focal_list,G_int,verbose=True):
     Args:
     hier_df (pandas.DataFrame): NetColoc systems map (processed output from cdaps_util)
     MP_focal_list (list of strings): List of MPO phenotypes to check for enrichment against
-    MPO (ddot.ontology.Ontology): DDOT ontology containing the parsed mammalian phenotype ontology
+    MPO (ddotkit.ontology.Ontology): DDOT ontology containing the parsed mammalian phenotype ontology
     mgi_df (pandas.DataFrame): parsed MGI knockout dataframe
     G_int (networkx.classes.graph.Graph): Background interactome
     verbose (bool): If true, print out some progress
@@ -219,7 +219,7 @@ def MPO_enrichment_full(hier_df,MPO,mgi_df,MP_focal_list,G_int):
     Args:
     hier_df (pandas.DataFrame): NetColoc systems map (processed output from cdaps_util)
     MP_focal_list (list of strings): List of MPO phenotypes to check for enrichment against
-    MPO (ddot.ontology.Ontology): DDOT ontology containing the parsed mammalian phenotype ontology
+    MPO (ddotkit.ontology.Ontology): DDOT ontology containing the parsed mammalian phenotype ontology
     mgi_df (pandas.DataFrame): parsed MGI knockout dataframe
     G_int (networkx.classes.graph.Graph): Background interactome
 
