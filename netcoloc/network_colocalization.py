@@ -8,7 +8,6 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 import pandas as pd
-import random
 import seaborn as sns
 
 # need ddot to parse the ontology
@@ -26,27 +25,27 @@ def __init__(self):
 
 def calculate_network_overlap(z_scores_1, z_scores_2, z_score_threshold=3,
                               z1_threshold=1.5,z2_threshold=1.5):
-    '''Function to determine which genes overlap. Returns a list of the 
+    '''Function to determine which genes overlap. Returns a list of the
     overlapping genes.
-    
+
     Args:
-    z_scores_1 (pandas.Series): Pandas Series resulting from the 
+    z_scores_1 (pandas.Series): Pandas Series resulting from the
         netprop_zscore.netprop_zscore or netprop_zscore.calc_zscore_heat
         methods, containing the z-scores of each gene following network
         propagation. The index consists of gene names.
     z_scores_2 (pandas.Series): Similar to z_scores_1. The two pandas Series
         must contain the same genes (ie. come from the same interactome
         network).
-    z_score_threshold (float): The threshold to determine whether a gene is 
+    z_score_threshold (float): The threshold to determine whether a gene is
         a part of the network overlap or not. Genes with combined z-scores
         below this threshold will be discarded. (Default: 3)
-    z1_threshold (float): The individual z1-score threshold to determine whether a gene is 
+    z1_threshold (float): The individual z1-score threshold to determine whether a gene is
         a part of the network overlap or not. Genes with z1-scores
         below this threshold will be discarded. (Default: 1.5)
-    z2_threshold (float): The individual z2-score threshold to determine whether a gene is 
+    z2_threshold (float): The individual z2-score threshold to determine whether a gene is
         a part of the network overlap or not. Genes with z2-scores
         below this threshold will be discarded. (Default: 1.5)
-    
+
 
     Returns:
         list: List of genes in the network overlap (genes with high combined
@@ -55,42 +54,42 @@ def calculate_network_overlap(z_scores_1, z_scores_2, z_score_threshold=3,
     z_scores_1 = z_scores_1.to_frame(name='z_scores_1')
     z_scores_2 = z_scores_2.to_frame(name='z_scores_2')
     z_scores_joined = z_scores_1.join(z_scores_2)
-    z_scores_combined = (z_scores_joined['z_scores_1'] 
-                        * z_scores_joined['z_scores_2'] 
-                        * (z_scores_joined['z_scores_1'] > 0) 
+    z_scores_combined = (z_scores_joined['z_scores_1']
+                        * z_scores_joined['z_scores_2']
+                        * (z_scores_joined['z_scores_1'] > 0)
                         * (z_scores_joined['z_scores_2'] > 0))
     # get rid of unlikely genes which have low scores in either z1 or z2
     high_z_score_genes = z_scores_combined[
-        (z_scores_combined >= z_score_threshold) 
-         & (z_scores_joined['z_scores_1'] > z1_threshold) 
+        (z_scores_combined >= z_score_threshold)
+         & (z_scores_joined['z_scores_1'] > z1_threshold)
          & (z_scores_joined['z_scores_2'] > z2_threshold)
     ].index.tolist()
-    
+
     return high_z_score_genes
 
 def calculate_network_overlap_subgraph(interactome, z_scores_1, z_scores_2, z_score_threshold=3,
                                       z1_threshold=1.5,z2_threshold=1.5):
-    '''Function to return subgraph of network intersection. 
-    
+    '''Function to return subgraph of network intersection.
+
     Code to create subgraph is from NetworkX documentation:
     https://networkx.org/documentation/stable/reference/classes/generated/networkx.Graph.subgraph.html
 
     Args:
     interactome (NetworkX graph): The network whose subgraph will be returned.
-    z_scores_1 (pandas.Series): Pandas Series resulting from the 
+    z_scores_1 (pandas.Series): Pandas Series resulting from the
         netprop_zscore.netprop_zscore or netprop_zscore.calc_zscore_heat
         methods, containing the z-scores of each gene following network
         propagation. The index consists of gene names.
     z_scores_2 (pandas.Series): Similar to z_scores_1. The two pandas Series
         must contain the same genes (ie. come from the same interactome
         network).
-    z_score_threshold (float): The threshold to determine whether a gene is 
+    z_score_threshold (float): The threshold to determine whether a gene is
         a part of the network overlap or not. Genes with combined z-scores
         below this threshold will be discarded. (Default: 3)
-    z1_threshold (float): The individual z1-score threshold to determine whether a gene is 
+    z1_threshold (float): The individual z1-score threshold to determine whether a gene is
         a part of the network overlap or not. Genes with z1-scores
         below this threshold will be discarded. (Default: 1.5)
-    z2_threshold (float): The individual z2-score threshold to determine whether a gene is 
+    z2_threshold (float): The individual z2-score threshold to determine whether a gene is
         a part of the network overlap or not. Genes with z2-scores
         below this threshold will be discarded. (Default: 1.5)
 
@@ -100,7 +99,7 @@ def calculate_network_overlap_subgraph(interactome, z_scores_1, z_scores_2, z_sc
     '''
     network_overlap = calculate_network_overlap(z_scores_1, z_scores_2, z_score_threshold=z_score_threshold,
                                                z1_threshold=z1_threshold,z2_threshold=z1_threshold)
-    
+
     # Create subgraph that has the same type as original graph
     network_overlap_subgraph = interactome.__class__()
     network_overlap_subgraph.add_nodes_from((node, interactome.nodes[node]) for node in network_overlap)
@@ -114,30 +113,30 @@ def calculate_network_overlap_subgraph(interactome, z_scores_1, z_scores_2, z_sc
             for node, neighbors in interactome.adj.items() if node in network_overlap
             for neighbor, dictionary in neighbors.items() if neighbor in network_overlap)
     network_overlap_subgraph.graph.update(interactome.graph)
-    
+
     return network_overlap_subgraph
 
-def calculate_expected_overlap(z_scores_1, z_scores_2, gene_set_name_1='Gene Set 1', gene_set_name_2='Gene Set 2', 
+def calculate_expected_overlap(z_scores_1, z_scores_2, gene_set_name_1='Gene Set 1', gene_set_name_2='Gene Set 2',
                                z_score_threshold=3, z1_threshold=1.5,z2_threshold=1.5,
-                               num_reps=1000, save_random_network_overlap=False, plot=False):    
+                               num_reps=1000, save_random_network_overlap=False, plot=False):
     '''Function to determine size of expected network overlap by randomly
     shuffling gene names.
 
     Args:
-        z_scores_1 (pandas.Series): Pandas Series resulting from the 
+        z_scores_1 (pandas.Series): Pandas Series resulting from the
             netprop_zscore.netprop_zscore or netprop_zscore.calc_zscore_heat
             methods, containing the z-scores of each gene following network
             propagation. The index consists of gene names.
         z_scores_2 (pandas.Series): Similar to z_scores_1. The two pandas Series
             must contain the same genes (ie. come from the same interactome
             network).
-        z_score_threshold (float): The threshold to determine whether a gene is 
+        z_score_threshold (float): The threshold to determine whether a gene is
             a part of the network overlap or not. Genes with combined z-scores
             below this threshold will be discarded. (Default: 3)
-        z1_threshold (float): The individual z1-score threshold to determine whether a gene is 
+        z1_threshold (float): The individual z1-score threshold to determine whether a gene is
             a part of the network overlap or not. Genes with z1-scores
             below this threshold will be discarded. (Default: 1.5)
-        z2_threshold (float): The individual z2-score threshold to determine whether a gene is 
+        z2_threshold (float): The individual z2-score threshold to determine whether a gene is
             a part of the network overlap or not. Genes with z2-scores
             below this threshold will be discarded. (Default: 1.5)
             num_reps (int): The number of times that gene names will be shuffled.
@@ -145,7 +144,7 @@ def calculate_expected_overlap(z_scores_1, z_scores_2, gene_set_name_1='Gene Set
             will not be plotted. (Default: False)
 
     Returns:
-        float: 
+        float:
 
     '''
     # Build a distribution of expected network overlap sizes by shuffling node names
@@ -165,7 +164,7 @@ def calculate_expected_overlap(z_scores_1, z_scores_2, gene_set_name_1='Gene Set
         random_size = len(calculate_network_overlap(z_scores_1_copy, z_scores_2_copy, z_score_threshold=z_score_threshold,
                                                    z1_threshold=z1_threshold,z2_threshold=z2_threshold))
         random_network_overlap_sizes.append(random_size)
-    
+
     network_overlap_size = len(calculate_network_overlap(z_scores_1, z_scores_2, z_score_threshold=z_score_threshold,
                                                         z1_threshold=z1_threshold,z2_threshold=z2_threshold))
 
@@ -175,7 +174,7 @@ def calculate_expected_overlap(z_scores_1, z_scores_2, gene_set_name_1='Gene Set
         plt.vlines(network_overlap_size, ymin=0, ymax=dfig.dataLim.bounds[3], color='r', label='Observed network intersection size')
         plt.xlabel('Size of proximal subgraph, z > ' + str(z_score_threshold), fontsize=16)
         plt.legend(fontsize=12)
-    
+
     return network_overlap_size, random_network_overlap_sizes
 
 from scipy.spatial import distance
@@ -190,9 +189,9 @@ def transform_edges(G,method='cosine_sim',edge_weight_threshold=0.95):
     edge_weight_threshold (float): Transformed edges will be returned which have values greater than this. Default=0.95.
 
     Returns:
-        NetworkX graph: Graph with nodes identical to input G, but with transformed edges (values > edge_weight_threshold). 
+        NetworkX graph: Graph with nodes identical to input G, but with transformed edges (values > edge_weight_threshold).
     '''
-    
+
     if not method in ['cosine_sim']: # update this if we add more methods
         print('Error: ' + method + ' method not yet implemented')
         return
@@ -202,7 +201,7 @@ def transform_edges(G,method='cosine_sim',edge_weight_threshold=0.95):
     adj_temp = pd.DataFrame(nx.to_numpy_matrix(G))
     adj_temp.index=G.nodes()
     adj_temp.columns=G.nodes()
-    
+
     nodelist = list(G.nodes())
 
     # compute the cosine similarity
@@ -240,20 +239,20 @@ def transform_edges(G,method='cosine_sim',edge_weight_threshold=0.95):
 
     # remove self edges
     sim_rank.values[[np.arange(sim_rank.shape[0])]*2] = 0
-    
+
     sim_rank['gene_temp']=sim_rank.index.tolist()
     sim_rank_EL=sim_rank.melt(id_vars=['gene_temp'])
     sim_rank_EL.columns=['node1','node2','sim']
     sim_rank_EL = sim_rank_EL[sim_rank_EL['sim']>edge_weight_threshold]
-    
-    
+
+
     G_transf=nx.Graph()
     G_transf.add_nodes_from(G)
     G_transf.add_weighted_edges_from(zip(sim_rank_EL['node1'],sim_rank_EL['node2'],sim_rank_EL['sim']))
-    
+
     print('number of transformed edges returned = ')
-    print(len(G_transf.edges())) 
-    
+    print(len(G_transf.edges()))
+
     return G_transf
 
 
