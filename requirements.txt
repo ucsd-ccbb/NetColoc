@@ -9,3 +9,4 @@ tqdm
 matplotlib
 seaborn
 statsmodels
+gprofiler-official>=1.0.0

@@ -47,24 +47,54 @@ Dependencies
 
 NetColoc requires the following python packages:
 
-* click
-* matplotlib
-* ndex2
-* networkx
-* numpy
-* seaborn
-* tqdm
-* `ddot <https://github.com/Ceofy/ddot>`__
+.. note::
+
+   All of the following packages minus `DDOT <https://github.com/idekerlab/ddot>`__
+   will be automatically installed via ``pip install netcoloc``
+
+* `click <https://pypi.org/project/click>`__
+* `matplotlib <https://pypi.org/project/matplotlib>`__
+* `ndex2 <https://pypi.org/project/ndex2>`__
+* `networkx <https://pypi.org/project/networkx>`__
+* `numpy <https://pypi.org/project/numpy>`__
+* `seaborn <https://pypi.org/project/seaborn>`__
+* `tqdm <https://pypi.org/project/tqdm>`__
 * `mygene >= 3.2.2 <https://pypi.org/project/mygene/>`__
 * `scipy >= 1.5.3 <https://pypi.org/project/scipy/>`__
 * `statsmodels <https://pypi.org/project/statsmodels/>`__
+* `gprofiler-official >= 1.0.0 <https://pypi.org/project/gprofiler-official/>`__
+
+* `python3 branch of DDOT <https://github.com/idekerlab/ddot/tree/python3>`__
+
+  `DDOT <https://github.com/idekerlab/ddot>`__ can be installed one of
+  two ways:
+
+  1. To install `DDOT <https://github.com/idekerlab/ddot>`__ by downloading
+     the zip file of the source tree:
+
+     .. code-block::
+
+        wget https://github.com/idekerlab/ddot/archive/refs/heads/python3.zip
+        unzip python3.zip
+        cd ddot-python3
+        python setup.py bdist_wheel
+        pip install dist/ddot*py3*whl
+
+  2. To `DDOT <https://github.com/idekerlab/ddot>`__ by cloning the repo:
+
+     .. code-block::
+
+        git clone --branch python3 https://github.com/idekerlab/ddot.git
+        cd ddot
+        python setup.py bdist_wheel
+        pip install dist/ddot*py3*whl
+
+
+
 
 Additional requirements for full functionality of example notebook:
 
 * `cdapsutil >= 0.2.0a1 <https://pypi.org/project/cdapsutil/>`__
-* `gprofiler-official >= 1.0.0 <https://pypi.org/project/gprofiler-official/>`__
-
-
 
 
 Installation

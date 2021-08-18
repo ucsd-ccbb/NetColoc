@@ -2,6 +2,13 @@
 History
 =======
 
+0.1.3 (2021-08-18)
+--------------------
+
+* Added dependency `gprofiler-official <https://pypi.org/project/gprofiler-official>`__
+  to ``setup.py`` and ``requirements.txt`` because this is used by
+  ``network_colocalization.py``
+
 0.1.2 (2021-08-17)
 --------------------
 

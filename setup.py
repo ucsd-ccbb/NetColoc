@@ -27,7 +27,8 @@ requirements = [
     'tqdm',
     'matplotlib',
     'seaborn',
-    'statsmodels'
+    'statsmodels',
+    'gprofiler-official>=1.0.0'
 ]
 
 test_requirements = [
