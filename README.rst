@@ -89,6 +89,7 @@ NetColoc requires the following python packages:
 
 Additional requirements for full functionality of example notebook:
 
+* `ipywidgets <https://pypi.org/project/ipywidgets>`__
 * `cdapsutil >= 0.2.0a1 <https://pypi.org/project/cdapsutil/>`__
 
 
