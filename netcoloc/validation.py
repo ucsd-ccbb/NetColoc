@@ -245,7 +245,9 @@ def MPO_enrichment_full(hier_df,MPO,mgi_df,MP_focal_list,G_int):
             MPO_focal = MPO.focus(MP_focal)
             focal_terms = MPO_focal.terms
         else: # if the term has no children, just look at that term
-            focal_terms=MP_focal
+            focal_terms=[MP_focal]
+        #print(len(focal_terms))
+        #print(focal_terms)
 
 
 
