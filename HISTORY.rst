@@ -2,7 +2,7 @@
 History
 =======
 
-0.1.4 (TBD)
+0.1.4 (2021-08-31)
 --------------------
 
 * If import of DDOT package fails, only a warning message will be
