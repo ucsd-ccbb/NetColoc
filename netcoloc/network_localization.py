@@ -21,36 +21,43 @@ def __init__(self):
 
 # -------------------- LOCALIZATION ---------------------------------#
 
-def netprop_localization(z_scores, random_final_heats, seed_genes, z_score_threshold=3, plot=True):
-    '''Calculates the size of a gene set's network proximity based on the
+
+def netprop_localization(z_scores, random_final_heats,
+                         seed_genes, z_score_threshold=3, plot=True):
+    """
+    Calculates the size of a gene set's network proximity based on the
     z-score results of network propagation, and evaluates if it is larger than
     chance by repeating the algorithm using random degree-matched seed genes.
     Returns a z-score.
 
-    Args:
-        z_scores (pandas.Series): The output of the
-            netprop_zscore.netprop_zscore() method. A pandas Series where the
-            index contains gene names, and the data contains the z-scores
-            associated with each gene after network propagation.
-        random_final_heats (numpy.ndarray): The output of the
-            netprop_zscore.netprop_zscore() method. A matrix containing
-            z_scores, where each column corresponds to a gene, and each row
-            corresponds to a network propagation performed using random seed
-            genes.
-        seed_genes (list): The list of seed genes used to generate the z_scores
+    :param z_scores: The output of the
+                     :py:func:`~netcoloc.netprop_zscore.netprop_zscore`
+                     method. A pandas Series where the index
+                     contains gene names, and the data contains
+                     the z-scores associated with each gene after
+                     network propagation.
+    :type z_scores: :py:class:`pandas.Series`
+    :param random_final_heats: The output of the
+                               :py:func:`~netcoloc.netprop_zscore.netprop_zscore`
+                               method. A matrix containing ``z_scores``,
+                               where each column corresponds to a gene, and
+                               each row corresponds to a network propagation
+                               performed using random seed genes.
+    :type random_final_heats: :py:class:`numpy.ndarray`
+    :param seed_genes: list of seed genes used to generate the z_scores
             and random_final_heats arguments.
-        z_score_threshold (float): The threshold after which genes are
-            considered significantly proximal to each other. (Default: 3)
-        save_localization_scores (bool): If True, then the results of the random
-            localization trials will be saved as a tsv file in the current
-            directory. If False, the file will not be saved. (Default: False)
-        plot (bool): If True, then the distribution will be plotted. If False,
-            it will not be plotted. (Default: False)
-
-    Returns:
-        float: The z-score representing how much larger the network proximity of
-            this seed gene is than would be expected by chance.
-    '''
+    :type seed_genes: list
+    :param z_score_threshold: The threshold after which genes are
+                              considered significantly proximal to each
+                              other.
+    :type z_score_threshold: float
+    :param plot: If True, then the distribution will be plotted
+    :type plot: bool
+    :return: The z-score representing how much larger the network
+             proximity of this seed gene is than would be expected
+             by chance.
+    :rtype: float
+    """
     nan_row = [np.nan] * len(random_final_heats[0])
 
     random_proximal_network_sizes = []
