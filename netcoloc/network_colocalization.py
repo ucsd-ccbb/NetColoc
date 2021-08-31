@@ -9,19 +9,18 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from scipy.spatial import distance
 
-# need ddot to parse the ontology
-import ddot
-from ddot import Ontology
-
-# annotate the clusters
 # gprofiler prelim annotation
 from gprofiler import GProfiler
+
+
 gp = GProfiler("MyToolName/0.1")
 
 
 def __init__(self):
     pass
+
 
 def calculate_network_overlap(z_scores_1, z_scores_2, z_score_threshold=3,
                               z1_threshold=1.5,z2_threshold=1.5):
@@ -66,6 +65,7 @@ def calculate_network_overlap(z_scores_1, z_scores_2, z_score_threshold=3,
     ].index.tolist()
 
     return high_z_score_genes
+
 
 def calculate_network_overlap_subgraph(interactome, z_scores_1, z_scores_2, z_score_threshold=3,
                                       z1_threshold=1.5,z2_threshold=1.5):
@@ -115,6 +115,7 @@ def calculate_network_overlap_subgraph(interactome, z_scores_1, z_scores_2, z_sc
     network_overlap_subgraph.graph.update(interactome.graph)
 
     return network_overlap_subgraph
+
 
 def calculate_expected_overlap(z_scores_1, z_scores_2, gene_set_name_1='Gene Set 1', gene_set_name_2='Gene Set 2',
                                z_score_threshold=3, z1_threshold=1.5,z2_threshold=1.5,
@@ -177,7 +178,6 @@ def calculate_expected_overlap(z_scores_1, z_scores_2, gene_set_name_1='Gene Set
 
     return network_overlap_size, random_network_overlap_sizes
 
-from scipy.spatial import distance
 
 def transform_edges(G,method='cosine_sim',edge_weight_threshold=0.95):
     '''Function to transform binary edges using selected method (currently only cosine similarity is implemented).
@@ -244,7 +244,6 @@ def transform_edges(G,method='cosine_sim',edge_weight_threshold=0.95):
     sim_rank_EL=sim_rank.melt(id_vars=['gene_temp'])
     sim_rank_EL.columns=['node1','node2','sim']
     sim_rank_EL = sim_rank_EL[sim_rank_EL['sim']>edge_weight_threshold]
-
 
     G_transf=nx.Graph()
     G_transf.add_nodes_from(G)
