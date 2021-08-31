@@ -50,7 +50,8 @@ extensions = ['sphinx_rtd_theme', 'sphinx.ext.autodoc', 'sphinx.ext.viewcode',
 intersphinx_mapping = {"python": ("https://docs.python.org/3", None),
                        "ddot": ("https://ddot.readthedocs.io/en/latest", None),
                        "networkx": ("https://networkx.org/documentation/stable", None),
-                       "pandas": ("https://pandas.pydata.org/docs/", None)}
+                       "pandas": ("https://pandas.pydata.org/docs/", None),
+                       "numpy": ("http://docs.scipy.org/doc/numpy", None)}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
