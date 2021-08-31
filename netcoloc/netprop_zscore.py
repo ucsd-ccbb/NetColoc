@@ -22,7 +22,8 @@ def netprop_zscore(seed_gene_file, seed_gene_file_delimiter=None, num_reps=10, a
                    interactome_file=None, interactome_uuid='f93f402c-86d4-11e7-a10d-0ac135e8bacf',
                    ndex_server='public.ndexbio.org', ndex_user=None, ndex_password=None, out_name='out',
                    save_z_scores=False, save_final_heat=False, save_random_final_heats=False, verbose=True):
-    '''Performs network heat propagation on the given interactome with the given
+    """
+    Performs network heat propagation on the given interactome with the given
     seed genes, then returns the z-scores of the final heat values of each node
     in the interactome.
 
@@ -30,55 +31,69 @@ def netprop_zscore(seed_gene_file, seed_gene_file_delimiter=None, num_reps=10, a
     the network propagation multiple times using randomly selected seed genes
     with similar degree distributions to the original seed gene set.
 
-    Args:
-        seed_gene_file (str): Location of file containing a delimited list of
-            seed genes.
-        seed_gene_file_delimiter (str): Delimiter used to separate genes in seed
-            gene file. (Default: any whitespace)
-        num_reps (int): Number of times the network propagation algorithm should
-            be run using random seed genes in order to build the null model.
-            (Default: 10)
-        alpha (float): Number between 0 and 1. Denotes the importance of the
+    This method returns a tuple containing the following:
+
+    * :py:class:`pandas.Series` containing z-scores for each gene. Gene names comprise the index column
+    * :py:class:`numpy.ndarray` containing square matrix where each row contains the final heat scores
+      for each gene from a network propagation from random seed genes
+
+    :param seed_gene_file: Location of file containing a delimited list of
+            seed genes
+    :type seed_gene_file: str
+    :param seed_gene_file_delimiter: Delimiter used to separate genes in seed
+                                     gene file. Default any whitespace
+    :type seed_gene_file_delimiter: str
+    :param num_reps: Number of times the network propagation algorithm should
+            be run using random seed genes in order to build the null model
+    :type num_reps: int
+    :param alpha: Number between 0 and 1. Denotes the importance of the
             propagation step in the network propagation, as opposed to the step
             where heat is added to seed genes only. Recommended to be 0.5 or
-            greater. (Default: 0.5)
-        minimum_bin_size (int): The minimum number of genes that should be in
-            each degree matching bin. (Default: 10)
-        interactome_file (str): Location of file containing the interactome in
+            greater
+    :type alpha: float
+    :param minimum_bin_size: minimum number of genes that should be in
+            each degree matching bin.
+    :type minimum_bin_size: int
+    :param interactome_file: Location of file containing the interactome in
             NetworkX gpickle format. Either the interactome_file argument or the
             interactome_uuid argument must be defined.
-        interactome_uuid (str): UUID of the interactome on NDEx. Either the
+    :type interactome_file: str
+    :param interactome_uuid: UUID of the interactome on NDEx. Either the
             interactome_file argument or the interactome_uuid argument must be
             defined. (Default: The UUID of PCNet, the Parsimonious Composite
             Network: f93f402c-86d4-11e7-a10d-0ac135e8bacf)
-        ndex_server (str): The NDEx server on which the interactome is stored.
-            Only needs to be defined if interactome_uuid is defined. (Default:
-            ndexbio.org)
-        ndex_user (str): The NDEx user that the interactome belongs to. Only
+    :type interactome_uuid: str
+    :param ndex_server: NDEx server on which the interactome is stored.
+            Only needs to be defined if interactome_uuid is defined
+    :type ndex_server: str
+    :param ndex_user: NDEx user that the interactome belongs to. Only
             needs to be defined if interactome_uuid is defined, and the
-            interactome is private.
-        ndex_password (str): The password of the NDEx user's account. Only needs
+            interactome is private
+    :type ndex_user: str
+    :param ndex_password: password of the NDEx user's account. Only needs
             to be defined if interactome_uuid is defined, and the interactome is
-            private.
-        out_name (str): Prefix for saving output files. (Default: out)
-        save_final_heat (bool): If this is set to true, then the raw network
+            private
+    :type ndex_password: str
+    :param out_name: Prefix for saving output files
+    :type out_name: str
+    :param save_z_scores:
+    :param save_final_heat: If ``True``, then the raw network
             propagation heat scores for the original seed gene set will be saved
-            in the form of a tsv file in the current directory. (Default: False)
-        save_random_final_heats (bool): If this is set to true, then the raw
+            in the form of a tsv file in the current directory
+    :type save_final_heat: bool
+    :param save_random_final_heats: If ``True``, then the raw
             network propagation heat scores for every repetition of the
             algorithm using random seed genes will be saved in the form of a tsv
             file in the current directory. (Beware: This can be a large file if
-            num_reps is large.) (Default: False)
-        verbose (bool): If this is set to true, then progress information will
-            be logged. Otherwise, nothing will be printed. (Default: True)
-
-    Returns:
-        z_scores (pandas.Series): Pandas Series containing the z-scores for each
-            gene. Gene names comprise the index column.
-        random_final_heats (numpy.ndarray): Square matrix in which each row
-            contains the final heat scores for each gene from a network
-            propagation from random seed genes.
-    '''
+            num_reps is large.)
+    :type save_random_final_heats: bool
+    :param verbose: If ``True``, then progress information will
+            be logged. Otherwise, nothing will be printed
+    :return: (:py:class:`pandas.Series`, :py:class:`numpy.ndarray`)
+    :rtype: tuple
+    :raises TypeError: If neither interactome_file or interactome_uuid is provided or if
+                       **num_reps** is not an ``int``
+    """
     # Process arguments
 
     # seed_gene_file
@@ -91,7 +106,6 @@ def netprop_zscore(seed_gene_file, seed_gene_file_delimiter=None, num_reps=10, a
     #int_file and int_uuid
     if interactome_file is None and interactome_uuid is None:
         raise TypeError("Either interactome_file or interactome_uuid argument must be provided")
-
 
     # Load interactome
     if verbose:
@@ -163,8 +177,9 @@ def netprop_zscore(seed_gene_file, seed_gene_file_delimiter=None, num_reps=10, a
 
     return z_scores, random_final_heats
 
+
 def calculate_heat_zscores(individual_heats_matrix, nodes, degrees, seed_genes, num_reps=10, alpha=0.5, minimum_bin_size=10,random_seed=1):
-    '''
+    """
     Helper function to perform network heat propagation using the given
     individual heats matrix with the given seed genes and return the z-scores of
     the final heat values of each node.
@@ -173,38 +188,41 @@ def calculate_heat_zscores(individual_heats_matrix, nodes, degrees, seed_genes, 
     the network propagation multiple times using randomly selected seed genes
     with similar degree distributions to the original seed gene set.
 
-    Args:
-        individual_heats_matrix (numpy.ndarray): The output of the
+    The returned tuple contains the following:
+
+    * :py:class:`pandas.Series` containing z-scores for each gene. Gene names comprise the index column
+    * :py:class:`pandas.Series` containing the final heat scores for each gene. Gene names comprise the index column,
+    * :py:class:`numpy.ndarray` containing square matrix in which each row contains the final heat scores for each gene from a network propagation from random seed genes)
+
+    :param individual_heats_matrix: output of the
             netprop.get_individual_heats_matrix. A square matrix containing the
-            final heat contributions of each gene.
-        nodes (list): List of nodes, in the order in which they were supplied to
-            the netprop.get_normalized_adjacency_matrix() method which returns
-            the precursor to the individual_heats_matrix.
-        degrees (dict): A dictionary mapping node names to node degrees.
-        seed_genes (list): The list of genes to use for network propagation. The
+            final heat contributions of each gene
+    :type individual_heats_matrix: :py:class:`numpy.ndarray`
+    :param nodes: nodes, in the order in which they were supplied to
+            the :py:func:`~netcoloc.netprop.get_normalized_adjacency_matrix` method
+            which returns the precursor to the individual_heats_matrix
+    :type nodes: list
+    :param degrees: Mapping of node names to node degrees
+    :type degrees: dict
+    :param seed_genes: list of genes to use for network propagation. The
             results of this network propagation will be compared to a set of
-            random results in order to obtain z-scores.
-        num_reps (int): Number of times the network propagation algorithm should
-            be run using random seed genes in order to build the null model.
-            (Default: 10)
-        alpha (float): Number between 0 and 1. Denotes the importance of the
+            random results in order to obtain z-scores
+    :type seed_genes: list
+    :param num_reps: Number of times the network propagation algorithm should
+            be run using random seed genes in order to build the null model
+    :type num_reps: int
+    :param alpha: Number between 0 and 1. Denotes the importance of the
             propagation step in the network propagation, as opposed to the step
             where heat is added to seed genes only. Recommended to be 0.5 or
-            greater. (Default: 0.5)
-        minimum_bin_size (int): The minimum number of genes that should be in
-            each degree matching bin. (Default: 10)
-
-    Returns:
-        z_scores (pandas.Series): Pandas Series containing the z-scores for each
-            gene. Gene names comprise the index column.
-        final_heats (pandas.Series): Pandas Series containing the final heat
-            scores for each gene. Gene names comprise the index column.
-        random_final_heats (numpy.ndarray): Square matrix in which each row
-            contains the final heat scores for each gene from a network
-            propagation from random seed genes.
-    '''
-
-
+            greater
+    :type alpha: float
+    :param minimum_bin_size: minimum number of genes that should be in
+            each degree matching bin
+    :type minimum_bin_size: int
+    :param random_seed:
+    :return: (:py:class:`pandas.Series`, :py:class:`pandas.Series`, :py:class:`numpy.ndarray`)
+    :rtype: tuple
+    """
     # set random seed for reproducibility
     np.random.seed(random_seed)
 
