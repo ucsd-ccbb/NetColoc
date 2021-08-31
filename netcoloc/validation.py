@@ -3,16 +3,22 @@
 '''Functions for performing validation of NetColoc subgraph
 '''
 
-
+import warnings
 import numpy as np
 import pandas as pd
 
 import requests
+from scipy.stats import hypergeom
 from statsmodels.stats import contingency_tables
 
-# need ddot to parse the ontology
-import ddot
-from ddot import Ontology
+try:
+    # need ddot to parse the ontology
+    import ddot
+    from ddot import Ontology
+    DDOT_LOADED = True
+except ImportError as ie:
+    warnings.warn('Import of ddot failed. NetColoc will not work properly: + ' + str(ie))
+    DDOT_LOADED = False
 
 # find human orthologs of mouse genes
 import mygene
@@ -60,22 +66,23 @@ def load_MGI_mouseKO_data(url = 'http://www.informatics.jax.org/downloads/report
 
     return mgi_df
 
-def load_MPO(url = 'http://www.informatics.jax.org/downloads/reports/MPheno_OBO.ontology'):
 
-    '''Function to parse and load mouse phenotype ontology, using DDOT's ontology module.
+def load_MPO(url='http://www.informatics.jax.org/downloads/reports/MPheno_OBO.ontology'):
+    """
+    Function to parse and load mouse phenotype ontology, using DDOT's ontology module
 
-    Args:
-    url (string): location of MPO ontology file (default = 'http://www.informatics.jax.org/downloads/reports/MPheno_OBO.ontology')
-
-
-    Returns:
-    MPO (ddot.Ontology.Ontology): MPO parsed using DDOT
-
-    '''
+    :param url: URL containing MPO ontology file
+    :type url: str
+    :return: MPO parsed using DDOT
+    :rtype: :py:class:`ddot.Ontology`
+    :raises ImportError: If DDOT package is not found
+    """
 
     # download the mammalian phenotype ontology, parse with ddot
     r = requests.get(url,allow_redirects=True)
     open('MPheno_OBO.ontology','wb').write(r.content)
+    if DDOT_LOADED is False:
+        raise ImportError('ddot package is required to use this method')
     ddot.parse_obo('MPheno_OBO.ontology',
                    'parsed_mp.txt',
                   'id2name_mp.txt',
@@ -259,8 +266,6 @@ def MPO_enrichment_full(hier_df,MPO,mgi_df,MP_focal_list,G_int):
         for focal_cluster in hier_df.index.tolist():
             mFocal_genes = hier_df['CD_MemberList'].loc[focal_cluster].split(' ')
 
-
-            from scipy.stats import hypergeom
             M=len(list(G_int.nodes())) # only keep genes in PCnet
             # Look up all entries matching focal_terms, and mFocal_genes
             mgi_temp = mgi_df[mgi_df['MP'].isin(focal_terms)]
