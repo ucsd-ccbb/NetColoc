@@ -9,6 +9,9 @@ History
   displayed unless user invokes ``netcoloc.validation.load_MPO()``
   in which case an ``ImportError`` is raised
 
+* Fixed bug where ``z1_threshold`` parameter was being passed to ``z2_threshold`` parameter in
+  ``netcoloc.network_cololcalization.calcualte_network_overlap`` method called by ``netcoloc.network_colocalization.calculate_network_overlap_subgraph`` method
+
 0.1.3 (2021-08-18)
 --------------------
 
