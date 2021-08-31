@@ -1,16 +1,6 @@
 netcoloc package
 ================
 
-Submodules
-----------
-
-netcoloc.cli module
--------------------
-
-.. automodule:: netcoloc.cli
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 netcoloc.netcoloc\_utils module
 -------------------------------
