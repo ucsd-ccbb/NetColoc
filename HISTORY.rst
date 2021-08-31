@@ -2,6 +2,13 @@
 History
 =======
 
+0.1.4 (TBD)
+--------------------
+
+* If import of DDOT package fails, only a warning message will be
+  displayed unless user invokes ``netcoloc.validation.load_MPO()``
+  in which case an ``ImportError`` is raised
+
 0.1.3 (2021-08-18)
 --------------------
 
