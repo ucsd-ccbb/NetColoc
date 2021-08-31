@@ -20,8 +20,6 @@ def get_degree_binning(node_to_degree_dict, min_bin_size, lengths=None):
     :param node_to_degree_dict: Map of nodes to their degrees
     :type node_to_degree_dict: dict
     :param min_bin_size: minimum number of nodes each bin should contain.
-        lengths (list): List of nodes to bin. If lengths is equal to None, then
-            all nodes will be binned.
     :type min_bin_size: int
     :param lengths: List of nodes to bin. If lengths is equal to None, then
                     all nodes will be binned
