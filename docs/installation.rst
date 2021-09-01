@@ -1,9 +1,31 @@
-.. highlight:: shell
-
 ============
 Installation
 ============
 
+netcoloc depends on `DDOT`_ which has
+to be manually installed.
+
+`DDOT`_ can be installed one of two ways:
+
+  1. To install `DDOT`_ by downloading
+     the zip file of the source tree:
+
+     .. code-block::
+
+        wget https://github.com/idekerlab/ddot/archive/refs/heads/python3.zip
+        unzip python3.zip
+        cd ddot-python3
+        python setup.py bdist_wheel
+        pip install dist/ddot*py3*whl
+
+  2. To install `DDOT`_ by cloning the repo:
+
+     .. code-block::
+
+        git clone --branch python3 https://github.com/idekerlab/ddot.git
+        cd ddot
+        python setup.py bdist_wheel
+        pip install dist/ddot*py3*whl
 
 Stable release
 --------------
@@ -47,3 +69,4 @@ Once you have a copy of the source, you can install it with:
 
 .. _Github repo: https://github.com/ucsd-ccbb/NetColoc
 .. _tarball: https://github.com/ucsd-ccbb/NetColoc/tarball/master
+.. _DDOT: https://github.com/idekerlab/ddot
