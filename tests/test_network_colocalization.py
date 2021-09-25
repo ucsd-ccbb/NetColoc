@@ -9,20 +9,18 @@ Tests for `netcoloc` module.
 """
 
 
+import os
 import sys
 import unittest
-from contextlib import contextmanager
-from click.testing import CliRunner
+import json
+import ndex2
+import networkx as nx
+import pandas as pd
 
-#from netcoloc import netcoloc
-from netcoloc import cli
-from netcoloc import netprop
-from netcoloc import netprop_zscore
-from netcoloc import network_localization
 from netcoloc import network_colocalization
-from netcoloc import netcoloc_utils
 
-class TestNetcoloc(unittest.TestCase):
+
+class TestNetworkColocalization(unittest.TestCase):
 
     def setUp(self):
         pass
@@ -30,17 +28,57 @@ class TestNetcoloc(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def test_000_something(self):
-        pass
+    def _get_5node_network(self):
+        """
+        Gets testppi.cx from data directory
+        under tests
+        :return:
+        """
+        testdir = os.path.dirname(__file__)
+        return os.path.join(testdir, 'data',
+                            '5node.cx')
 
-    #def test_command_line_interface(self):
-     #   runner = CliRunner()
-      #  result = runner.invoke(cli.main)
-       # assert result.exit_code == 0
-        #assert 'netcoloc.cli.main' in result.output
-        #help_result = runner.invoke(cli.main, ['--help'])
-        #assert help_result.exit_code == 0
-        #assert '--help  Show this message and exit.' in help_result.output
+    def _get_testppi_network(self):
+        """
+        Gets testppi.cx from data directory
+        under tests
+        :return: 
+        """
+        testdir = os.path.dirname(__file__)
+        return os.path.join(testdir, 'data',
+                            'testppi.cx')
+
+    def test_transform_edges_5node_network(self):
+        net = ndex2.create_nice_cx_from_file(self._get_5node_network())
+
+        g = net.to_networkx(mode='default')
+
+        name_dict = {}
+        for entry in g.nodes.data():
+            name_dict[entry[1]['name']] = entry[0]
+
+        res = network_colocalization.transform_edges(g)
+
+        self.assertEqual(2, len(list(res.edges())))
+        self.assertEqual(5, len(list(res.nodes())))
+        self.assertEqual(1.125, res.get_edge_data(name_dict['B'],
+                                                  name_dict['D'])['weight'])
+        self.assertEqual(1.0, res.get_edge_data(name_dict['A'],
+                                                name_dict['E'])['weight'])
+
+    @unittest.skip('Tests overlap network from notebook. Too slow...')
+    def test_transform_edges_testppi_network(self):
+        net = ndex2.create_nice_cx_from_file(self._get_testppi_network())
+
+        g = net.to_networkx(mode='default')
+
+        name_dict = {}
+        for entry in g.nodes.data():
+            name_dict[entry[1]['name']] = entry[0]
+
+        res = network_colocalization.transform_edges(g)
+        self.assertEqual(7862, len(list(res.edges())))
+        self.assertEqual(773, len(list(res.nodes())))
 
 
 if __name__ == '__main__':
