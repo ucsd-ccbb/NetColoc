@@ -7,6 +7,7 @@
 import networkx as nx
 import numpy as np
 import pandas as pd
+import warnings
 
 
 def __init__(self):
@@ -38,38 +39,42 @@ def get_normalized_adjacency_matrix(graph, conserve_heat=True, weighted=False):
     # Create graph
     if conserve_heat:
         # If conserving heat, make G_weighted a di-graph (not symmetric)
-        graph_weighted= nx.DiGraph()
+        graph_weighted = nx.DiGraph()
     else:
         # If not conserving heat, make G_weighted a simple graph (symmetric)
         graph_weighted = nx.Graph()
 
-    #Create edge weights
+    # Create edge weights
     edge_weights = []
     node_to_degree_dict = dict(graph.degree)
+    if weighted and not nx.is_weighted(G=graph):
+        warnings.warn("Input graph is not weighted. All edge weights will be set to 1.")
+
     for e in graph.edges(data=True):
         v1 = e[0]
         v2 = e[1]
         deg1 = node_to_degree_dict[v1]
         deg2 = node_to_degree_dict[v2]
-        
-        if weighted:
+
+        if weighted and nx.is_weighted(G=graph):
             weight = e[2]['weight']
         else:
             weight = 1
-        
+
         if conserve_heat:
+            # created asymmetrically weighted edges - each directed edge u->v normalized by the degree of v
             edge_weights.append((v1, v2, weight / float(deg2)))
             edge_weights.append((v2, v1, weight / float(deg1)))
         else:
+            # normalize single undirected edge by the degree of both endpoints as per Vanunu, Oron, et al. 2010
             edge_weights.append((v1, v2, weight / np.sqrt(deg1 * deg2)))
-    
+
     # Apply edge weights to graph
     graph_weighted.add_weighted_edges_from(edge_weights)
-    
-    # Transform graph to adjacency matrix
-    w_prime = nx.to_numpy_matrix(graph_weighted, nodelist=graph.nodes())
-    w_prime = np.array(w_prime)
-    
+
+    # Transform graph to adjacency array
+    w_prime = nx.to_numpy_array(graph_weighted, nodelist=graph.nodes())
+
     return w_prime
 
 
@@ -91,7 +96,7 @@ def get_individual_heats_matrix(normalized_adjacency_matrix, alpha=0.5):
     :rtype: :py:class:`numpy.ndarray`
     """
     return np.linalg.inv(
-        np.identity(normalized_adjacency_matrix.shape[0]) 
+        np.identity(normalized_adjacency_matrix.shape[0])
         - alpha * normalized_adjacency_matrix
     ) * (1 - alpha)
 
@@ -136,4 +141,5 @@ def network_propagation(individual_heats_matrix, nodes, seed_genes):
     F /= len(seed_genes)
 
     #Return as pandas series
+    # TODO does this need to be a pandas series?
     return pd.Series(F, index=nodes)
