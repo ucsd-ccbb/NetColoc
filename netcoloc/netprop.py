@@ -64,8 +64,8 @@ def get_normalized_adjacency_matrix(graph, conserve_heat=True, weighted=False):
 
         if conserve_heat:
             # created asymmetrically weighted edges - each directed edge u->v normalized by the degree of v
-            edge_weights.append((v1, v2, weight / float(deg2)))
-            edge_weights.append((v2, v1, weight / float(deg1)))
+            edge_weights.append((v1, v2, weight / float(deg1)))
+            edge_weights.append((v2, v1, weight / float(deg2)))
         else:
             # normalize single undirected edge by the degree of both endpoints as per Vanunu, Oron, et al. 2010
             edge_weights.append((v1, v2, weight / np.sqrt(deg1 * deg2)))
@@ -99,9 +99,11 @@ def get_individual_heats_matrix(normalized_adjacency_matrix, alpha=0.5):
     :return: square individual heats matrix
     :rtype: :py:class:`numpy.ndarray`
     """
+    normalized_adjacency_matrix_transpose = np.transpose(normalized_adjacency_matrix)
+
     return np.linalg.inv(
-        np.identity(normalized_adjacency_matrix.shape[0])
-        - alpha * normalized_adjacency_matrix
+        np.identity(normalized_adjacency_matrix_transpose.shape[0])
+        - alpha * normalized_adjacency_matrix_transpose
     ) * (1 - alpha)
 
 
