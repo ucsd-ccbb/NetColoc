@@ -15,21 +15,28 @@ import os
 import ndex2
 import networkx as nx
 import numpy as np
-from contextlib import contextmanager
-from click.testing import CliRunner
 
-#from netcoloc import netcoloc
-from netcoloc import cli
 from netcoloc import netprop
-from netcoloc import netprop_zscore
-from netcoloc import network_localization
-from netcoloc import network_colocalization
-from netcoloc import netcoloc_utils
+
 
 class TestNetcoloc(unittest.TestCase):
 
     def setUp(self):
-        pass
+        """
+        Create directed and undirected toy example networks.
+        :return:
+        """
+        net = ndex2.create_nice_cx_from_file(self._get_5node_network())
+        self.g = net.to_networkx(mode='default')
+        graph_undirected = nx.Graph()
+        graph_undirected.add_nodes_from([1, 2, 3])
+        graph_undirected.add_edges_from([(1, 2), (2, 3)])
+        self.undirected = graph_undirected
+        graph_directed = nx.DiGraph()
+        graph_directed.add_nodes_from([1, 2, 3])
+        graph_directed.add_weighted_edges_from([(1, 2, 1), (2, 1, 0.5), (2, 3, 0.5), (3, 2, 1)])
+        self.directed = graph_directed
+
 
     def tearDown(self):
         pass
@@ -57,70 +64,119 @@ class TestNetcoloc(unittest.TestCase):
     def test_000_something(self):
         assert 'one' == 'one'
 
-    def test_normalize_adj_unweighted(self):
+    def test_netprop_undirected(self):
         """
-        Tests for correct normalization of an unweighted input graph under all parameter options
+        Test that method returns correct result for undirected graph i.e. symmetrical adjacency matrix
         :return:
         """
-        net = ndex2.create_nice_cx_from_file(self._get_5node_network())
-        g = net.to_networkx(mode='default')
-        # 1 - non-weighted graph, weighted=True, conserve=False
-        adj = netprop.get_normalized_adjacency_matrix(g, conserve_heat=False, weighted=True)
-        self.assertEqual([adj[0, 3], adj[3, 0], adj[4, 3], adj[3, 4]], [0.5, 0.5, 1/np.sqrt(6), 1/np.sqrt(6)])
-        # 2 - non-weighted graph, weighted=False, conserve = False
-        adj = netprop.get_normalized_adjacency_matrix(g, conserve_heat=False, weighted=False)
-        self.assertEqual([adj[0, 3], adj[3, 0], adj[4, 3], adj[3, 4]], [0.5, 0.5, 1/np.sqrt(6), 1/np.sqrt(6)])
-        # 3 - non-weighted graph, weighted=False, conserve = True
-        adj = netprop.get_normalized_adjacency_matrix(g, conserve_heat=True, weighted=False)
-        self.assertEqual([adj[0, 3], adj[3, 0], adj[4, 3], adj[3, 4]], [0.5, 0.5, 0.5, 1/3])
+        adj = nx.to_numpy_array(self.undirected)
+        heats = netprop.get_individual_heats_matrix(adj, alpha=0.5)
+        F = netprop.network_propagation(heats, list(self.undirected.nodes), [1])
+        expected = [0.75, 0.5, 0.25]
+        for i, node in enumerate(F.keys()):
+            self.assertAlmostEqual(expected[i], F[node])
 
-    def test_normalize_adj_weighted(self):
+    def test_netprop_directed_unidirectional(self):
         """
-        Weights the test graph and tests for correct normalization of an weighted input graph
-        under all parameter options
+        Test that model can handle directed networks having nodes with uneven in/out degree
         :return:
         """
-        net = ndex2.create_nice_cx_from_file(self._get_5node_network())
-        g = net.to_networkx(mode='default')
-        weights = {e: [1, 5, 0.1, 0.9, 2][i] for i, e in enumerate(g.edges)}
-        g_weighted = g.copy()
-        nx.set_edge_attributes(g_weighted, values=weights, name="weight")
-        self.assertTrue(nx.is_weighted(g_weighted))
-        # 1 - weighted input graph, weighted=False, conserve=True
-        adj = netprop.get_normalized_adjacency_matrix(g_weighted, conserve_heat=True, weighted=False)
-        self.assertEqual([adj[0, 3], adj[3, 0], adj[1, 4], adj[4, 1]], [0.5, 0.5, 1/3, 1/2])
-        # 2 - weighted input graph, weighted=True, conserve= True
-        adj = netprop.get_normalized_adjacency_matrix(g_weighted, conserve_heat=True, weighted=True)
-        self.assertEqual([adj[0, 1], adj[1, 0], adj[3, 4], adj[4, 3]], [5/2, 5/2, 0.9/3, 0.9/2])
-        # 3 - weighted input graph, weighted=True, conserve=False
-        adj = netprop.get_normalized_adjacency_matrix(g_weighted, conserve_heat=False, weighted=True)
-        self.assertEqual([adj[0, 3], adj[3, 0], adj[4, 2], adj[2, 4]], [0.1/2, 0.1/2, 2/np.sqrt(3), 2/np.sqrt(3)])
+        adj = nx.to_numpy_array(self.g)
+        heats = netprop.get_individual_heats_matrix(adj, alpha=0.5)
+        F1 = netprop.network_propagation(heats, list(self.g.nodes), [185])
+        # 1 - test no propagation out of seed with out-degree=0
+        expected1 = [0, 0, 0.5, 0, 0]
+        for i, node in enumerate(F1.keys()):
+            self.assertAlmostEqual(expected1[i], F1[node])
+        # 2 - test propagation out of seeds with out-degree > 0
+        F2 = netprop.network_propagation(heats, list(self.g.nodes), [180, 190])
+        expected2 = [0.25, 0.25, 0.125, 0.25, 0.25]
+        for i, node in enumerate(F2.keys()):
+            self.assertAlmostEqual(expected2[i], F2[node])
 
+    def test_netprop_directed_bidirectional(self):
+        """
+        Test that method returns correct result for directed network with all nodes have equal in/out degree,
+        but asymmetric adjacency matrix.
+        :return:
+        """
+        adj = nx.to_numpy_array(self.directed)
+        heats = netprop.get_individual_heats_matrix(adj, alpha=0.5)
+        F = netprop.network_propagation(heats, list(self.directed.nodes), [1])
+        expected = [7/12, 2/6, 1/12]
+        for i, node in enumerate(F.keys()):
+            self.assertAlmostEqual(expected[i], F[node], places=5)
 
-    def test_individual_heats_directed(self):
+    def test_netprop_unconnected(self):
+        """
+        Test that method appropriately deals with networks that contain unconnected components
+        :return:
+        """
+        g32 = self.g.copy()
+        g32.remove_edge(180, 195, 0)
+        g32.remove_edge(190, 175, 0)
+        # network now has two components (195, 190) and (185, 180, 175)
+        adj = nx.to_numpy_array(g32)
+        heats = netprop.get_individual_heats_matrix(adj, alpha=0.5)
+        F = netprop.network_propagation(heats, list(g32.nodes), [180])
+        # test that nodes with no path to seed get no heat
+        self.assertEqual(0, F[195])
+        self.assertEqual(0, F[190])
+        # test that nodes with path to seed do get heat
+        for node in [185, 180, 175]:
+            self.assertGreater(F[node], 0)
+
+    def test_netprop_alpha(self):
+        """
+        Test that the resulting heats change appropriately when alpha is modified from default.
+        :return:
+        """
+        adj = nx.to_numpy_array(self.undirected)
+        heats = netprop.get_individual_heats_matrix(adj, alpha=0.1)
+        F = netprop.network_propagation(heats, list(self.undirected.nodes), [1])
+        expected = [891/980, 9/98, 9/980]
+        for i, node in enumerate(F.keys()):
+            self.assertAlmostEqual(expected[i], F[node])
+
+    def test_normalization_multigraph(self):
         #TODO
         pass
 
-    def test_individual_heats_undirected(self):
+    def test_normalization_undirected(self):
         #TODO
         pass
 
-    def test_network_propagation_directed(self):
+    def test_normalization_directed(self):
         #TODO
         pass
 
-    def test_network_propagation_undirected(self):
+    def test_normalization_conservation(self):
         #TODO
         pass
-    #def test_command_line_interface(self):
-     #   runner = CliRunner()
-      #  result = runner.invoke(cli.main)
-       # assert result.exit_code == 0
-        #assert 'netcoloc.cli.main' in result.output
-        #help_result = runner.invoke(cli.main, ['--help'])
-        #assert help_result.exit_code == 0
-        #assert '--help  Show this message and exit.' in help_result.output
 
+    def test_normalization_weighting(self):
+        #TODO
+        pass
+
+    def test_normalization_warns_weighted_unweighted_input(self):
+        #TODO
+        pass
+
+    def test_normalization_warns_degree_zero(self):
+        #TODO
+        pass
+
+    def test_heats_symmetric(self):
+        #TODO
+        pass
+
+    def test_heats_asymmetric(self):
+        #TODO
+        pass
+
+    def test_heats_catch_bad_alpha(self):
+        #TODO
+        pass
 
 if __name__ == '__main__':
     sys.exit(unittest.main())
