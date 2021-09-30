@@ -36,6 +36,7 @@ def get_normalized_adjacency_matrix(graph, conserve_heat=True, weighted=False):
     :return: Square normalized adjacency matrix
     :rtype: :py:class:`numpy.ndarray`
     """
+    # TODO probably no reason to make a graph??
     # Create graph
     if conserve_heat:
         # If conserving heat, make G_weighted a di-graph (not symmetric)
@@ -73,6 +74,9 @@ def get_normalized_adjacency_matrix(graph, conserve_heat=True, weighted=False):
     graph_weighted.add_weighted_edges_from(edge_weights)
 
     # Transform graph to adjacency array
+    if len(graph.nodes) != len(graph_weighted):
+        raise ValueError("Input graph has nodes with zero degrees. Please remove these nodes.")
+
     w_prime = nx.to_numpy_array(graph_weighted, nodelist=graph.nodes())
 
     return w_prime
@@ -122,7 +126,7 @@ def network_propagation(individual_heats_matrix, nodes, seed_genes):
             individual_heats_matrix, in the same order in which they were
             supplied to :py:func:`~netcoloc.netprop.get_individual_heats_matrix`
     :type nodes: list
-    :param seed_genes:
+    :param seed_genes: # TODO
     :return: Final heat of each node after propagation, with the name
              of the nodes as the index
     :rtype: :py:class:`pandas.Series`
@@ -135,6 +139,7 @@ def network_propagation(individual_heats_matrix, nodes, seed_genes):
 
     # Add up resulting heats from each gene in seed genes set
     for gene in seed_genes:
+        # TODO check that this is the correct orientation
         F += individual_heats_matrix[:,nodes.index(gene)]
 
     # Normalize results by number of seed genes
