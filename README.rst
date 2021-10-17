@@ -40,7 +40,9 @@ Documentation
 -------------
 
 For a quick-start on NetColoc's functionality, please see the
-`example notebooks <https://github.com/ucsd-ccbb/NetColoc/tree/main/example_notebooks>`__.
+`example notebooks <https://github.com/ucsd-ccbb/NetColoc/tree/main/example_notebooks>`__.  
+
+**Usage Note:** Please follow steps in example notebooks for correct usage of NetColoc. At this time, individual functionalities have not been tested for independent use. 
 
 Dependencies
 --------------
