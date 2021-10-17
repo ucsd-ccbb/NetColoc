@@ -163,8 +163,10 @@ class TestNetcoloc(unittest.TestCase):
         pass
 
     def test_normalization_warns_degree_zero(self):
-        #TODO
-        pass
+        g41 = self.g.copy()
+        g41.remove_edge(180, 195, 0)
+        g41.remove_edge(190, 195, 0)
+        self.assertRaises(AssertionError, netprop.get_normalized_adjacency_matrix, g41)
 
     def test_heats_symmetric(self):
         #TODO
@@ -175,8 +177,9 @@ class TestNetcoloc(unittest.TestCase):
         pass
 
     def test_heats_catch_bad_alpha(self):
-        #TODO
-        pass
+        self.assertRaises(AssertionError, netprop.get_individual_heats_matrix, np.array([0]), alpha=10)
+        self.assertRaises(AssertionError, netprop.get_individual_heats_matrix, np.array([0]), alpha=-1)
+
 
 if __name__ == '__main__':
     sys.exit(unittest.main())

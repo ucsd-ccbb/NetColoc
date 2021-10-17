@@ -256,7 +256,7 @@ def calculate_heat_zscores(individual_heats_matrix, nodes, degrees, seed_genes, 
         # Perform network propagation with random seed genes
         random_final_heat = network_propagation(individual_heats_matrix, nodes, random_seed_genes)
         # Set seeds to NaN so they don't bias results
-        random_final_heat.loc[random_seed_genes]=np.nan
+        random_final_heat.loc[random_seed_genes] = np.nan
         # Add results to random_final_heats matrix
         random_final_heats[repetition] = random_final_heat
 

@@ -36,7 +36,8 @@ def get_normalized_adjacency_matrix(graph, conserve_heat=True, weighted=False):
     :return: Square normalized adjacency matrix
     :rtype: :py:class:`numpy.ndarray`
     """
-    # TODO probably no reason to make a graph??
+    assert 0 not in dict(graph.degree).values(), "Graph cannot have nodes with degree=zero"
+
     # Create graph
     if conserve_heat:
         # If conserving heat, make G_weighted a di-graph (not symmetric)
@@ -99,8 +100,9 @@ def get_individual_heats_matrix(normalized_adjacency_matrix, alpha=0.5):
     :return: square individual heats matrix
     :rtype: :py:class:`numpy.ndarray`
     """
+    assert 1 >= alpha >= 0, "Alpha must be between 0 and 1"
+    # adjacency matrix must be transposed to allow compatability of asymmetric matrix with network propagation formula
     normalized_adjacency_matrix_transpose = np.transpose(normalized_adjacency_matrix)
-
     return np.linalg.inv(
         np.identity(normalized_adjacency_matrix_transpose.shape[0])
         - alpha * normalized_adjacency_matrix_transpose
