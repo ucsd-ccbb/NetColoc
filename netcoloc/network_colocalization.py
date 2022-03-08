@@ -5,6 +5,7 @@
 
 
 import warnings
+import logging
 
 # External library imports
 import matplotlib.pyplot as plt
@@ -15,15 +16,11 @@ import seaborn as sns
 from scipy.spatial import distance
 
 
-# gprofiler prelim annotation
-from gprofiler import GProfiler
-
-
-gp = GProfiler("MyToolName/0.1")
-
-
 def __init__(self):
     pass
+
+
+logger = logging.getLogger(__name__)
 
 
 def calculate_network_overlap(z_scores_1, z_scores_2, z_score_threshold=3,
@@ -203,7 +200,7 @@ def calculate_expected_overlap(z_scores_1, z_scores_2,
     return network_overlap_size, random_network_overlap_sizes
 
 
-def transform_edges(G,method='cosine_sim', edge_weight_threshold=0.95):
+def transform_edges(G, method='cosine_sim', edge_weight_threshold=0.95):
     """
     Transforms binary edges using selected method (currently only cosine similarity is implemented).
     Cosine similarity measures the similarity between neighbors of node pairs in the input network
@@ -219,65 +216,77 @@ def transform_edges(G,method='cosine_sim', edge_weight_threshold=0.95):
     :rtype: :py:class:`networkx.Graph`
     """
 
-    if not method in ['cosine_sim']: # update this if we add more methods
+    if method not in ['cosine_sim']:  # update this if we add more methods
         warnings.warn('Error: ' + method + ' method not yet implemented')
         return
 
     # compute the adjacency matrix
-    print('computing the adjacency matrix...')
-    adj_temp = pd.DataFrame(nx.to_numpy_matrix(G))
-    adj_temp.index = G.nodes()
-    adj_temp.columns = G.nodes()
+    logging.info('computing the adjacency matrix...')
 
     nodelist = list(G.nodes())
+    # get graph as adjacency matrix
+    graph_as_adj = nx.to_numpy_array(G)
+
+    # add transpose to matrix to remove edge direction
+    adj_temp = graph_as_adj + np.transpose(graph_as_adj)
 
     # compute the cosine similarity
-    print('computing the cosine similarity...')
-    cos_pc = pd.DataFrame(np.zeros((len(nodelist),len(nodelist))),index=nodelist)
+    logging.info('computing the cosine similarity...')
+    cos_pc = pd.DataFrame(np.zeros((adj_temp.shape[0],
+                                   adj_temp.shape[1])),
+                          index=nodelist)
     cos_pc.columns = nodelist
 
-    counter = -1
-    for i in np.arange(len(nodelist)-1):
+    for i in np.arange(0, len(nodelist)-1):
         n1 = nodelist[i]
-        neigh1 = list(nx.neighbors(G,n1))
-        counter += 1
-        for j in np.arange(i+1,len(nodelist)):
+        # this node has no neighbors so set
+        # cosine distance to maximum distance aka 1.0
+        # in cos_pc and continue
+        if max(adj_temp[i]) < 1.0:
+            for j in np.arange(i + 1, len(nodelist)):
+                n2 = nodelist[j]
+                cos_pc.loc[n1][n2] = 1.0
+                cos_pc.loc[n2][n1] = 1.0
+            continue
+        for j in np.arange(i+1, len(nodelist)):
             n2 = nodelist[j]
-            neigh2 = list(nx.neighbors(G,n2))
-            # make sure they have some neighbors
-            if len(np.union1d(neigh1,neigh2))>0:
-                cos_sim_temp = distance.cosine(adj_temp[n1],adj_temp[n2])
-            else:
-                cos_sim_temp = 1
 
-            cos_pc.loc[n1][n2] = cos_sim_temp
-            cos_pc.loc[n2][n1] = cos_sim_temp
+            # make sure they have some neighbors
+            if max(adj_temp[j]) > 0.0:
+                cosine_distance = distance.cosine(adj_temp[i],
+                                                  adj_temp[j])
+            else:
+                # no neighbors in neigh2 so set
+                # cosine distance to maximum distance aka 1.0
+                cosine_distance = 1.0
+
+            cos_pc.loc[n1][n2] = cosine_distance
+            cos_pc.loc[n2][n1] = cosine_distance
 
     # Rank transform 1-cos distance
-    print('rank transforming...')
+    logger.info('rank transforming...')
     m1cos = 1-cos_pc
-    m1cos = m1cos.replace(np.nan,0)
+    m1cos = m1cos.replace(np.nan, 0)
     sim_names = m1cos.index.tolist()
     sim_rank = m1cos.rank(0) / (m1cos.shape[0] - 1)
-
-    sim_rank = pd.DataFrame((sim_rank.values + sim_rank.values.T) / 2.0, columns=sim_names, index=sim_names)
+    sim_rank = pd.DataFrame((sim_rank.values + sim_rank.values.T) / 2.0,
+                            columns=sim_names, index=sim_names)
 
     # remove self edges
     sim_rank.values[[np.arange(sim_rank.shape[0])]*2] = 0
 
     sim_rank['gene_temp'] = sim_rank.index.tolist()
     sim_rank_EL = sim_rank.melt(id_vars=['gene_temp'])
-    sim_rank_EL.columns = ['node1','node2','sim']
+    sim_rank_EL.columns = ['node1', 'node2', 'sim']
     sim_rank_EL = sim_rank_EL[sim_rank_EL['sim'] > edge_weight_threshold]
-
     G_transf = nx.Graph()
     G_transf.add_nodes_from(G)
     G_transf.add_weighted_edges_from(zip(sim_rank_EL['node1'],
                                          sim_rank_EL['node2'],
                                          sim_rank_EL['sim']))
 
-    print('number of transformed edges returned = ')
-    print(len(G_transf.edges()))
+    logger.info('number of transformed edges returned = ' +
+                str(len(G_transf.edges())))
 
     return G_transf
 

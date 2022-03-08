@@ -7,6 +7,7 @@
 import networkx as nx
 import numpy as np
 import pandas as pd
+import warnings
 
 
 def __init__(self):
@@ -35,41 +36,50 @@ def get_normalized_adjacency_matrix(graph, conserve_heat=True, weighted=False):
     :return: Square normalized adjacency matrix
     :rtype: :py:class:`numpy.ndarray`
     """
+    assert 0 not in dict(graph.degree).values(), "Graph cannot have nodes with degree=zero"
+
     # Create graph
     if conserve_heat:
         # If conserving heat, make G_weighted a di-graph (not symmetric)
-        graph_weighted= nx.DiGraph()
+        graph_weighted = nx.DiGraph()
     else:
         # If not conserving heat, make G_weighted a simple graph (symmetric)
         graph_weighted = nx.Graph()
 
-    #Create edge weights
+    # Create edge weights
     edge_weights = []
     node_to_degree_dict = dict(graph.degree)
+    if weighted and not nx.is_weighted(G=graph):
+        warnings.warn("Input graph is not weighted. All edge weights will be set to 1.")
+
     for e in graph.edges(data=True):
         v1 = e[0]
         v2 = e[1]
         deg1 = node_to_degree_dict[v1]
         deg2 = node_to_degree_dict[v2]
-        
-        if weighted:
+
+        if weighted and nx.is_weighted(G=graph):
             weight = e[2]['weight']
         else:
             weight = 1
-        
+
         if conserve_heat:
-            edge_weights.append((v1, v2, weight / float(deg2)))
-            edge_weights.append((v2, v1, weight / float(deg1)))
+            # created asymmetrically weighted edges - each directed edge u->v normalized by the degree of v
+            edge_weights.append((v1, v2, weight / float(deg1)))
+            edge_weights.append((v2, v1, weight / float(deg2)))
         else:
+            # normalize single undirected edge by the degree of both endpoints as per Vanunu, Oron, et al. 2010
             edge_weights.append((v1, v2, weight / np.sqrt(deg1 * deg2)))
-    
+
     # Apply edge weights to graph
     graph_weighted.add_weighted_edges_from(edge_weights)
-    
-    # Transform graph to adjacency matrix
-    w_prime = nx.to_numpy_matrix(graph_weighted, nodelist=graph.nodes())
-    w_prime = np.array(w_prime)
-    
+
+    # Transform graph to adjacency array
+    if len(graph.nodes) != len(graph_weighted):
+        raise ValueError("Input graph has nodes with zero degrees. Please remove these nodes.")
+
+    w_prime = nx.to_numpy_array(graph_weighted, nodelist=graph.nodes())
+
     return w_prime
 
 
@@ -90,9 +100,12 @@ def get_individual_heats_matrix(normalized_adjacency_matrix, alpha=0.5):
     :return: square individual heats matrix
     :rtype: :py:class:`numpy.ndarray`
     """
+    assert 1 >= alpha >= 0, "Alpha must be between 0 and 1"
+    # adjacency matrix must be transposed to allow compatability of asymmetric matrix with network propagation formula
+    normalized_adjacency_matrix_transpose = np.transpose(normalized_adjacency_matrix)
     return np.linalg.inv(
-        np.identity(normalized_adjacency_matrix.shape[0]) 
-        - alpha * normalized_adjacency_matrix
+        np.identity(normalized_adjacency_matrix_transpose.shape[0])
+        - alpha * normalized_adjacency_matrix_transpose
     ) * (1 - alpha)
 
 
@@ -117,7 +130,7 @@ def network_propagation(individual_heats_matrix, nodes, seed_genes):
             individual_heats_matrix, in the same order in which they were
             supplied to :py:func:`~netcoloc.netprop.get_individual_heats_matrix`
     :type nodes: list
-    :param seed_genes:
+    :param seed_genes: # TODO
     :return: Final heat of each node after propagation, with the name
              of the nodes as the index
     :rtype: :py:class:`pandas.Series`
@@ -130,10 +143,12 @@ def network_propagation(individual_heats_matrix, nodes, seed_genes):
 
     # Add up resulting heats from each gene in seed genes set
     for gene in seed_genes:
+        # TODO check that this is the correct orientation
         F += individual_heats_matrix[:,nodes.index(gene)]
 
     # Normalize results by number of seed genes
     F /= len(seed_genes)
 
     #Return as pandas series
+    # TODO does this need to be a pandas series?
     return pd.Series(F, index=nodes)
