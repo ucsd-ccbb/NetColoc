@@ -6,7 +6,7 @@ History
 --------------------
 
 * Fixed divide by zero error seen when calculating cosine distance by updating `netprop.get_normalized_adjancency_matrix()`
-  to properly normalize an adjacency matrix from graphs that are asymetric (UD-1863)
+  to properly normalize an adjacency matrix that is asymetric (UD-1863)
 
 0.1.4 (2021-08-31)
 --------------------
