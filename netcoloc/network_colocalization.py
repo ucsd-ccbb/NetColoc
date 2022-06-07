@@ -18,6 +18,11 @@ from scipy.spatial import distance
 # NEW:
 import ipycytoscape
 import ipywidgets as widgets
+from scipy.stats import hypergeom
+from scipy.stats import norm
+
+
+from netcoloc.netprop_zscore import *
 
 
 def __init__(self):
@@ -336,4 +341,246 @@ def view_G_hier(G_hier,layout='cose'):
     #ipyviewer.set_layout(name='breadthfirst',directed='true')
     ipyviewer.set_layout(name='cose')
     display(ipyviewer)
+    
+def sweep_input_pvals(D1_df,D2_df,
+                      individual_heats_matrix,nodes,degrees,
+                      cutoff_list = [.01,.02,.03,.04,.05,.1],
+                      gene_column='gene',
+                      score_column='pval',
+                      cutoff_max=True,
+                     num_reps=100,
+                     verbose=True,
+                     z_score_threshold=3,
+                     z12_threshold=1.5):
+    
+    """
+    Evaluate NetColoc enrichment for a range of thresholds on input gene lists.
+    
+    :param D1_df: DataFrame containing gene names and scores for the first gene set
+    :type D1_df: :py:class:`pandas.DataFrame`
+    :param D2_df: DataFrame containing gene names and scores for the second gene set
+    :type D2_df: :py:class:`pandas.DataFrame`
+    :param individual_heats_matrix: output of the
+            netprop.get_individual_heats_matrix. A square matrix containing the
+            final heat contributions of each gene
+    :type individual_heats_matrix: :py:class:`numpy.ndarray`
+    :param nodes: nodes, in the order in which they were supplied to
+            the :py:func:`~netcoloc.netprop.get_normalized_adjacency_matrix` method
+            which returns the precursor to the individual_heats_matrix
+    :type nodes: list
+    :param degrees: Mapping of node names to node degrees
+    :type degrees: dict
+    :param cutoff_list: list of values to threshold the input gene sets by
+    :type cutoff_list: list
+    :param gene_column: name of column containing genes in D1_df and D2_df
+    :type gene_column: string
+    :param score_column: name of column containing scores (usually p-value or log fold change) in D1_df and D2_df
+    :type score_column: string
+    :param cutoff_max: if True, genes will be selected which have scores less than the cutoff value. If false, genes will be selected which have scores greater than the cutoff value.
+    :type cutoff_max: Boolean
+    :param num_reps: Number of times the network propagation algorithm should
+        be run using random seed genes in order to build the null model
+    :type num_reps: int
+    :param verbose: if True, print out some diagnostics
+    :type verbose: Boolean
+    :param z_score_threshold: threshold to determine whether a gene is
+        a part of the network overlap or not. Genes with combined z-scores
+        below this threshold will be discarded
+    :type z_score_threshold: float
+    :param z12_threshold: individual z1/z2-score threshold to determine whether a gene is
+        a part of the network overlap or not. Genes with z1/z2-scores
+        below this threshold will be discarded
+    :type z12_threshold: float
+
+    :return: netcoloc_pval_df: DataFrame containing NetColoc enrichment results
+    :rtype: :py:class:`pandas.DataFrame`
+    """
+    
+    D1_num_genes, D2_num_genes = [],[]
+    num_shared_genes = []
+    plist = []
+    obs_overlap_list=[]
+    network_exp_mean_overlap_list=[]
+    network_exp_std_overlap_list=[]
+    
+    for c in cutoff_list:
+
+        if cutoff_max==True:
+            D1_genes = D1_df[D1_df[score_column]<c][gene_column].tolist()
+            D2_genes = D2_df[D2_df[score_column]<c][gene_column].tolist()
+        else:
+            D1_genes = D1_df[D1_df[score_column]>c][gene_column].tolist()
+            D2_genes = D2_df[D2_df[score_column]>c][gene_column].tolist()
+            
+        D1_num_genes.append(len(D1_genes))
+        D2_num_genes.append(len(D2_genes))
+        num_shared_genes.append(len(np.intersect1d(D1_genes,D2_genes)))
+            
+        # check that the gene sizes meet the input criteria of >5 and <500
+        if (5<=len(D1_genes)<=500) & (5<=len(D2_genes)<=500):
+            
+            # D1 variant network propagation
+            print('\nCalculating D1 variant z-scores: ')
+            z_D1, Fnew_D1, Fnew_rand_D1 = calculate_heat_zscores(individual_heats_matrix, nodes, 
+                                                                                degrees, 
+                                                                                D1_genes, num_reps=num_reps)
+
+            z_D1 = pd.DataFrame({'z':z_D1})
+            z_D1.sort_values('z',ascending=False).head()
+
+            # D2 variant network propagation
+            print('\nCalculating D2 variant z-scores: ')
+            z_D2, Fnew_D2, Fnew_rand_D2 = calculate_heat_zscores(individual_heats_matrix, nodes, 
+                                                                                degrees, 
+                                                                                D2_genes, num_reps=num_reps)
+
+            z_D2 = pd.DataFrame({'z':z_D2})
+
+            z_d1d2_size, high_z_rand = calculate_expected_overlap(
+                z_D1['z'],
+                z_D2['z'],
+                plot=False,
+                num_reps=num_reps,
+                z_score_threshold=z_score_threshold,
+                z1_threshold=z12_threshold,
+                z2_threshold=z12_threshold
+            )
+
+            ztemp = (z_d1d2_size - np.mean(high_z_rand)) / np.std(high_z_rand)
+            ptemp = norm.sf(ztemp)
+
+            # save the number of overlapping genes and overlap p-value
+            network_num_overlap = z_d1d2_size
+            network_pval_overlap = ptemp
+            
+            network_exp_mean_overlap = np.mean(high_z_rand)
+            network_exp_std_overlap = np.std(high_z_rand)
+
+            
+            obs_exp_temp = float(z_d1d2_size) / np.mean(high_z_rand)
+            
+        else:
+            ptemp = np.nan
+            network_num_overlap=np.nan
+            network_exp_mean_overlap=np.nan
+            network_exp_std_overlap=np.nan
+            z_d1d2_size=np.nan
+            obs_exp_temp=np.nan
+            
+        plist.append(ptemp)
+        obs_overlap_list.append(network_num_overlap)
+        network_exp_mean_overlap_list.append(network_exp_mean_overlap)
+        network_exp_std_overlap_list.append(network_exp_std_overlap)
+            
+        if verbose:
+            print('\ncutoff = '+str(c))
+            print('number of D1 genes = '+str(len(D1_genes)))
+            print('number of D2 genes = '+str(len(D2_genes)))
+            print('number of shared genes = '+str(len(np.intersect1d(D1_genes,D2_genes))))
+            
+            
+            print('size of network intersection = ' + str(z_d1d2_size))
+            print('observed size/ expected size = ' + str(obs_exp_temp))
+            print('p = ' + str(ptemp))
+            
+
+
+
+    netcoloc_pval_df = pd.DataFrame({'score_cutoff':cutoff_list,
+                                           'D1_num_genes':D1_num_genes,
+                                           'D2_num_genes':D2_num_genes,
+                                            'num_shared_genes':num_shared_genes,
+                                          'observed_overlap':obs_overlap_list,
+                                          'expected_overlap_mean':network_exp_mean_overlap_list,
+                                          'expected_overlap_std':network_exp_std_overlap_list,
+                                           'empirical_p':plist
+                                          })
+    netcoloc_pval_df['obs_exp']=netcoloc_pval_df['observed_overlap']/netcoloc_pval_df['expected_overlap_mean']
+
+            
+    
+    return netcoloc_pval_df
+
+
+
+def calculate_network_enrichment(z_D1,z_D2,zthresh_list = list(np.arange(1,15)),z12thresh_list=[1,1.5,2],
+                                 verbose=True):
+
+    """
+    Evaluate NetColoc enrichment for a range of thresholds on network proximity z-scores.
+    
+    :param z_D1: DataFrame containing gene names and network proximity z-scores for the first gene set
+    :type z_D1: :py:class:`pandas.DataFrame`
+    :param z_D2: DataFrame containing gene names and network proximity z-scores for the second gene set
+    :type z_D2: :py:class:`pandas.DataFrame`
+    :param zthresh_list: list of combined z-score thresholds to iterate over
+    :type zthresh_list: :list
+    :param z12thresh_list: list of individual z-score thresholds to iterate over
+    :type z12thresh_list: :list
+    :param verbose: if True, print out some diagnostics
+    :type verbose: Boolean
+    
+    :return: netcoloc_enrichment_df: DataFrame containing NetColoc enrichment results
+    :rtype: :py:class:`pandas.DataFrame`
+    """
+    
+    plist = []
+    obs_overlap_list=[]
+    network_exp_mean_overlap_list=[]
+    network_exp_std_overlap_list=[]
+    zlist=[]
+    z12list=[]
+
+    for zthresh in zthresh_list:
+        for z12 in z12thresh_list:
+
+            z_d1d2_size, high_z_rand = calculate_expected_overlap(
+                z_D1['z'],
+                z_D2['z'],
+                plot=False,
+                num_reps=100,
+                z_score_threshold=zthresh,
+                z1_threshold=z12,
+                z2_threshold=z12
+            )
+
+            ztemp = (z_d1d2_size - np.mean(high_z_rand)) / np.std(high_z_rand)
+            ptemp = norm.sf(ztemp)
+            plist.append(ptemp)
+
+            # save the number of overlapping genes and overlap p-value
+            network_num_overlap = z_d1d2_size
+            obs_overlap_list.append(network_num_overlap)
+            network_pval_overlap = ptemp
+            obs_exp_temp = float(z_d1d2_size) / np.mean(high_z_rand)
+            network_obs_exp = obs_exp_temp
+            network_exp_mean_overlap = np.mean(high_z_rand)
+            network_exp_mean_overlap_list.append(network_exp_mean_overlap)
+            network_exp_std_overlap = np.std(high_z_rand)
+            network_exp_std_overlap_list.append(network_exp_std_overlap)
+
+            zlist.append(zthresh)
+            z12list.append(z12)
+
+            if verbose:
+                print('z = '+str(zthresh))
+                print('z12 = '+str(z12))
+                print('size of network intersection = ' + str(z_d1d2_size))
+                print('observed size/ expected size = ' + str(obs_exp_temp))
+                print('p = ' + str(ptemp))
+
+
+
+    netcoloc_enrichment_df = pd.DataFrame({'z_comb':zlist,
+                                           'z_12':z12list,
+                                          'observed_overlap':obs_overlap_list,
+                                          'expected_overlap_mean':network_exp_mean_overlap_list,
+                                          'expected_overlap_std':network_exp_std_overlap_list,
+                                           'empirical_p':plist
+                                          })
+    netcoloc_enrichment_df['obs_exp']=netcoloc_enrichment_df['observed_overlap']/netcoloc_enrichment_df['expected_overlap_mean']
+    
+    return netcoloc_enrichment_df
+
+    
 
