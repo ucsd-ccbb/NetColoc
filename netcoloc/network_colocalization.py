@@ -15,6 +15,10 @@ import pandas as pd
 import seaborn as sns
 from scipy.spatial import distance
 
+# NEW:
+import ipycytoscape
+import ipywidgets as widgets
+
 
 def __init__(self):
     pass
@@ -289,4 +293,47 @@ def transform_edges(G, method='cosine_sim', edge_weight_threshold=0.95):
                 str(len(G_transf.edges())))
 
     return G_transf
+
+def view_G_hier(G_hier,layout='cose'):
+    
+    """
+    In-notebook visualization of NetColoc hierarchy, using ipycytoscape.
+
+    :param G_hier: network to visualize. Expects output of  cdapsutil.CommunityDetection(), transformed to networkx format. 'CD_MemberList_LogSize' is a required field of the network to map to the node size.
+    :type G: :py:class:`networkx.Graph`
+    :param layout: Layout method to use, any layout supported by cytoscape.js is supported. Suggest 'cose' or 'breadthfirst'.
+    :type layout: str
+    :param edge_weight_threshold: Transformed edges will be returned which have values greater than this
+    :type edge_weight_threshold: float
+    :return: Nothing
+    """
+    
+    # add a new field to map to node size
+    new_vals = nx.get_node_attributes(G_hier,'CD_MemberList_LogSize')
+    new_vals_keys = list(new_vals.keys())
+    new_vals_vals = [np.float64(v)*10 for v in list(new_vals.values())]
+    new_vals = dict(zip(new_vals_keys,[str(v) for v in new_vals_vals]))
+    new_vals
+    nx.set_node_attributes(G_hier,new_vals,name='CD_MemberList_LogSize_viz')
+    
+    ipyviewer = ipycytoscape.CytoscapeWidget()
+    ipyviewer.graph.add_graph_from_networkx(G_hier)
+    ipyviewer.set_style([{
+                            'selector': 'node',
+                            'css': {
+                                'content': 'data(name)',
+                                'text-valign': 'center',
+                                'color': 'white',
+                                'text-outline-width': 2,
+                                'text-outline-color': 'green',
+                                'background-color': 'green',
+                                'width': 'data(CD_MemberList_LogSize_viz)',
+                                'height': 'data(CD_MemberList_LogSize_viz)'
+                            }
+                            }
+                            ])
+
+    #ipyviewer.set_layout(name='breadthfirst',directed='true')
+    ipyviewer.set_layout(name='cose')
+    display(ipyviewer)
 
