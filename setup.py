@@ -28,7 +28,8 @@ requirements = [
     'matplotlib',
     'seaborn',
     'statsmodels',
-    'gprofiler-official>=1.0.0'
+    'gprofiler-official>=1.0.0',
+    'ipycytoscape'
 ]
 
 test_requirements = [
