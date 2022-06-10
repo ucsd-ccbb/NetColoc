@@ -21,6 +21,11 @@ def get_normalized_adjacency_matrix(graph, conserve_heat=True, weighted=False):
     Vanunu, Oron, et al. 'Associating genes and protein complexes with disease
     via network propagation.'
 
+    .. note::
+        Starting with version `0.1.6` the :py:class:`networkx.Graph`
+        can be directly passed into
+        :py:func:`~netcoloc.netprop.get_individual_heats_matrix`
+
     :param graph: Interactome from which to calculate normalized
             adjacency matrix.
     :type graph: :py:class:`networkx.Graph`
@@ -83,26 +88,53 @@ def get_normalized_adjacency_matrix(graph, conserve_heat=True, weighted=False):
     return w_prime
 
 
-def get_individual_heats_matrix(normalized_adjacency_matrix, alpha=0.5):
+def get_individual_heats_matrix(nam_or_graph, alpha=0.5,
+                                conserve_heat=True, weighted=False):
     """
     Returns the pre-calculated contributions of each individual gene in the
     interactome to the final heat of each other gene in the interactome after
     propagation.
 
-    :param normalized_adjacency_matrix: square normalized
-            adjacency matrix from :py:func:`~netcoloc.netprop.get_normalized_adjacency_matrix`
-    :type normalized_adjacency_matrix: :py:class:`numpy.ndarray`
+    .. versionchanged:: 0.1.6
+        In addition, to a normalized adjacency matrix, this function
+        now also supports :py:class:`networkx.Graph` network as input
+
+    .. note::
+        If a :py:class:`networkx.Graph` network is passed in as the **name_or_graph**
+        parameter, the function :py:func:`~netcoloc.netprop.get_normalized_adjacency_matrix`
+
+
+    :param nam_or_graph: square normalized
+            adjacency matrix or network
+    :type nam_or_graph: :py:class:`numpy.ndarray` or :py:class:`networkx.Graph`
     :param alpha: heat dissapation coefficient between 1 and 0. The
            contribution of the heat propagated from adjacent nodes in
            determining the final heat of a node, as opposed to the contribution
            from being a part of the gene set initially
     :type alpha: float
+    :param conserve_heat: If ``True``, heat will be conserved
+            (ie. the sum of the heat vector will be equal to 1),
+            and the graph will be asymmetric. Otherwise, heat will
+            not be conserved, and the graph will be symmetric.
+            **NOTE:** Only applies if **nam_or_graph** is :py:class:`networkx.Graph`
+    :type conserve_heat: bool
+    :param weighted: If ``True``, then the graph's edge weights
+            will be taken into account. Otherwise, all edge weights
+            will be set to 1.
+            **NOTE:** Only applies if **nam_or_graph** is :py:class:`networkx.Graph`
+    :type weighted: bool
     :return: square individual heats matrix
     :rtype: :py:class:`numpy.ndarray`
     """
     assert 1 >= alpha >= 0, "Alpha must be between 0 and 1"
-    # adjacency matrix must be transposed to allow compatability of asymmetric matrix with network propagation formula
-    normalized_adjacency_matrix_transpose = np.transpose(normalized_adjacency_matrix)
+
+    nam = nam_or_graph
+    if isinstance(nam_or_graph, nx.Graph):
+        nam = get_normalized_adjacency_matrix(nam_or_graph)
+
+    # adjacency matrix must be transposed to allow compatibility of
+    # asymmetric matrix with network propagation formula
+    normalized_adjacency_matrix_transpose = np.transpose(nam)
     return np.linalg.inv(
         np.identity(normalized_adjacency_matrix_transpose.shape[0])
         - alpha * normalized_adjacency_matrix_transpose
