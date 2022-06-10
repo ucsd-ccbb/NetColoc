@@ -278,11 +278,15 @@ def transform_edges(G, method='cosine_sim', edge_weight_threshold=0.95):
     m1cos = m1cos.replace(np.nan, 0)
     sim_names = m1cos.index.tolist()
     sim_rank = m1cos.rank(0) / (m1cos.shape[0] - 1)
+    sim_rank = np.matrix(sim_rank)
+    np.fill_diagonal(sim_rank,0) # remove self edges
+    sim_rank = pd.DataFrame(sim_rank)
     sim_rank = pd.DataFrame((sim_rank.values + sim_rank.values.T) / 2.0,
                             columns=sim_names, index=sim_names)
 
     # remove self edges
-    sim_rank.values[[np.arange(sim_rank.shape[0])]*2] = 0
+    #sim_rank.values[[np.arange(sim_rank.shape[0])]*2] = 0
+
 
     sim_rank['gene_temp'] = sim_rank.index.tolist()
     sim_rank_EL = sim_rank.melt(id_vars=['gene_temp'])
