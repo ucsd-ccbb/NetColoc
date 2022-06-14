@@ -9,9 +9,14 @@ History
 
 * `ipywidgets <https://ipywidgets.readthedocs.io/en/latest>`__ added as a dependency
 
+* Added `network_colocalization.sweep_input_pvals()` to sweep p-values and scores
+
 * `netprop.get_individual_heats_matrix()` can take a networkx `Graph` object and internally call
   `netprop.get_normalized_adjancency_matrix()`. Documentation updated in both methods to note
   that the resulting matrices can be saved via `numpy.save()` and retrieved via `numpy.load()`
+
+* `example_notebooks/ASD_CHD_NetColoc_analysis.ipynb` now visualizes hierarchy using
+  `ipycytoscape <https://ipycytoscape.readthedocs.io/en/latest>`__
 
 * `example_notebooks/ASD_CHD_NetColoc_analysis.ipynb` updated with a note about using `numpy.save()`
   and `numpy.load()` to save and retrieve result from `netprop.get_individual_heats_matrix()`
