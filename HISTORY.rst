@@ -7,7 +7,7 @@ History
 
 * `ipycytoscape <https://ipycytoscape.readthedocs.io/en/latest>`__ added as a dependency
 
-* `ipywidgets <https://ipywidgets.readthedocs.io/en/latest>>`__ added as a dependency
+* `ipywidgets <https://ipywidgets.readthedocs.io/en/latest>`__ added as a dependency
 
 * `netprop.get_individual_heats_matrix()` can take a networkx `Graph` object and internally call
   `netprop.get_normalized_adjancency_matrix()`. Documentation updated in both methods to note
