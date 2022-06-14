@@ -3,7 +3,6 @@
 '''Functions for performing network propagation
 '''
 
-# External library imports
 import networkx as nx
 import numpy as np
 import pandas as pd
@@ -24,7 +23,8 @@ def get_normalized_adjacency_matrix(graph, conserve_heat=True, weighted=False):
     .. note::
         Starting with version `0.1.6` the :py:class:`networkx.Graph`
         can be directly passed into
-        :py:func:`~netcoloc.netprop.get_individual_heats_matrix`
+        :py:func:`~netcoloc.netprop.get_individual_heats_matrix` and
+        this method will be invoked to create the normalized adjacency matrix
 
     :param graph: Interactome from which to calculate normalized
             adjacency matrix.
@@ -100,14 +100,15 @@ def get_individual_heats_matrix(nam_or_graph, alpha=0.5,
         now also supports :py:class:`networkx.Graph` network as input
 
     .. note::
-        If a :py:class:`networkx.Graph` network is passed in as the **name_or_graph**
+        If a :py:class:`networkx.Graph` network is passed in as the **nam_or_graph**
         parameter, the function :py:func:`~netcoloc.netprop.get_normalized_adjacency_matrix`
+        is called to generate the normalized adjacency matrix
 
 
     :param nam_or_graph: square normalized
             adjacency matrix or network
     :type nam_or_graph: :py:class:`numpy.ndarray` or :py:class:`networkx.Graph`
-    :param alpha: heat dissapation coefficient between 1 and 0. The
+    :param alpha: heat dissipation coefficient between 1 and 0. The
            contribution of the heat propagated from adjacent nodes in
            determining the final heat of a node, as opposed to the contribution
            from being a part of the gene set initially
@@ -130,15 +131,14 @@ def get_individual_heats_matrix(nam_or_graph, alpha=0.5,
 
     nam = nam_or_graph
     if isinstance(nam_or_graph, nx.Graph):
-        nam = get_normalized_adjacency_matrix(nam_or_graph)
+        nam = get_normalized_adjacency_matrix(nam_or_graph,
+                                              conserve_heat=conserve_heat,
+                                              weighted=weighted)
+    nam = np.transpose(nam)
 
-    # adjacency matrix must be transposed to allow compatibility of
-    # asymmetric matrix with network propagation formula
-    normalized_adjacency_matrix_transpose = np.transpose(nam)
-    return np.linalg.inv(
-        np.identity(normalized_adjacency_matrix_transpose.shape[0])
-        - alpha * normalized_adjacency_matrix_transpose
-    ) * (1 - alpha)
+    d_name = np.linalg.inv(np.identity(nam.shape[0]) - alpha * nam) * (1 - alpha)
+
+    return d_name
 
 
 def network_propagation(individual_heats_matrix, nodes, seed_genes):
