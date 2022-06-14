@@ -16,7 +16,8 @@ from click.testing import CliRunner
 
 from netcoloc import netcoloc_utils
 
-class TestNetcoloc(unittest.TestCase):
+
+class TestNetcolocUtil(unittest.TestCase):
 
     def setUp(self):
         pass

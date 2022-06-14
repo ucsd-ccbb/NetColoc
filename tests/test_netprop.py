@@ -19,7 +19,7 @@ import numpy as np
 from netcoloc import netprop
 
 
-class TestNetcoloc(unittest.TestCase):
+class TestNetcolocNetProp(unittest.TestCase):
 
     def setUp(self):
         """
@@ -36,7 +36,6 @@ class TestNetcoloc(unittest.TestCase):
         graph_directed.add_nodes_from([1, 2, 3])
         graph_directed.add_weighted_edges_from([(1, 2, 1), (2, 1, 0.5), (2, 3, 0.5), (3, 2, 1)])
         self.directed = graph_directed
-
 
     def tearDown(self):
         pass
@@ -60,9 +59,6 @@ class TestNetcoloc(unittest.TestCase):
         testdir = os.path.dirname(__file__)
         return os.path.join(testdir, 'data',
                             'testppi.cx')
-
-    def test_000_something(self):
-        assert 'one' == 'one'
 
     def test_netprop_undirected(self):
         """

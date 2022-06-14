@@ -22,7 +22,8 @@ from netcoloc import network_localization
 from netcoloc import network_colocalization
 from netcoloc import netcoloc_utils
 
-class TestNetcoloc(unittest.TestCase):
+
+class TestNetcolocLocalization(unittest.TestCase):
 
     def setUp(self):
         pass
