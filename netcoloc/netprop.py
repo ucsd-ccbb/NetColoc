@@ -20,11 +20,22 @@ def get_normalized_adjacency_matrix(graph, conserve_heat=True, weighted=False):
     Vanunu, Oron, et al. 'Associating genes and protein complexes with disease
     via network propagation.'
 
+
+    With version `0.1.6` and newer, the :py:class:`networkx.Graph`
+    can be directly passed into
+    :py:func:`~netcoloc.netprop.get_individual_heats_matrix` and
+    this method will be invoked to create the normalized adjacency matrix
+
     .. note::
-        Starting with version `0.1.6` the :py:class:`networkx.Graph`
-        can be directly passed into
-        :py:func:`~netcoloc.netprop.get_individual_heats_matrix` and
-        this method will be invoked to create the normalized adjacency matrix
+        Resulting matrix from this function can be saved to a file with :py:func:`numpy.save`
+        and loaded later with :py:func:`numpy.load`, but resulting file can be several gigabytes
+        and take a minute or more to save/load.
+
+        .. code-block:: python
+
+            numpy.save('nam.npy', adjacency_matrix)
+            adjacency_matrix = numpy.load('nam.npy')
+
 
     :param graph: Interactome from which to calculate normalized
             adjacency matrix.
@@ -99,10 +110,21 @@ def get_individual_heats_matrix(nam_or_graph, alpha=0.5,
         In addition, to a normalized adjacency matrix, this function
         now also supports :py:class:`networkx.Graph` network as input
 
+
+    If a :py:class:`networkx.Graph` network is passed in as the **nam_or_graph**
+    parameter, the function :py:func:`~netcoloc.netprop.get_normalized_adjacency_matrix`
+    is called to generate the normalized adjacency matrix using **conserve_heat** and
+    **weighted** parameters
+
     .. note::
-        If a :py:class:`networkx.Graph` network is passed in as the **nam_or_graph**
-        parameter, the function :py:func:`~netcoloc.netprop.get_normalized_adjacency_matrix`
-        is called to generate the normalized adjacency matrix
+        Resulting matrix from this function can be saved to a file with :py:func:`numpy.save`
+        and loaded later with :py:func:`numpy.load`, but resulting file can be several gigabytes
+        and take a minute or more to save/load.
+
+        .. code-block:: python
+
+            numpy.save('heats_matrix.npy', w_double_prime)
+            w_double_prime = numpy.load('heats_matrix.npy')
 
 
     :param nam_or_graph: square normalized
