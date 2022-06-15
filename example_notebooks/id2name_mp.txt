@@ -575,7 +575,7 @@ MP:0000595	abnormal liver morphology
 MP:0000599	enlarged liver
 MP:0000600	liver hypoplasia
 MP:0000601	small liver
-MP:0000602	dilated liver sinusoidal spaces
+MP:0000602	dilated liver sinusoidal space
 MP:0000603	pale liver
 MP:0000604	amyloidosis
 MP:0000695	amyloidosis
@@ -795,8 +795,8 @@ MP:0000820	abnormal choroid plexus morphology
 MP:0000821	choroid plexus hyperplasia
 MP:0000822	abnormal brain ventricle morphology
 MP:0000823	abnormal lateral ventricle morphology
-MP:0000825	dilated lateral ventricles
-MP:0000824	dilated lateral ventricles
+MP:0000825	dilated lateral ventricle
+MP:0000824	dilated lateral ventricle
 MP:0000826	abnormal third ventricle morphology
 MP:0000827	dilated third ventricle
 MP:0000828	abnormal fourth ventricle morphology
@@ -977,9 +977,9 @@ MP:0001000	absent golgi tendon organ
 MP:0001001	abnormal chemoreceptor morphology
 MP:0001002	abnormal taste bud morphology
 MP:0001003	abnormal olfactory receptor morphology
-MP:0001004	abnormal retinal photoreceptor morphology
-MP:0001005	abnormal retinal rod cell morphology
-MP:0001006	abnormal retinal cone cell morphology
+MP:0001004	abnormal retina photoreceptor morphology
+MP:0001005	abnormal retina rod cell morphology
+MP:0001006	abnormal retina cone cell morphology
 MP:0001007	abnormal sympathetic system morphology
 MP:0001008	abnormal sympathetic ganglion morphology
 MP:0001009	paravertebral ganglia hyperplasia
@@ -1148,7 +1148,7 @@ MP:0001179	thick pulmonary interalveolar septum
 MP:0001180	obsolete cellular infiltration of airway walls
 MP:0001181	absent lungs
 MP:0001182	lung hemorrhage
-MP:0001183	overexpanded pulmonary alveoli
+MP:0001183	overexpanded pulmonary alveolus
 MP:0001184	absent pulmonary alveoli
 MP:0001186	pigmentation phenotype
 MP:0001188	hyperpigmentation
@@ -1274,9 +1274,9 @@ MP:0006227	abnormal iris morphology
 MP:0001323	obsolete iris opacity
 MP:0001324	abnormal eye pigmentation
 MP:0001325	abnormal retina morphology
-MP:0001326	retinal degeneration
-MP:0001327	decreased retinal photoreceptor cell number
-MP:0001328	disorganized retinal layers
+MP:0001326	retina degeneration
+MP:0001327	decreased retina photoreceptor cell number
+MP:0001328	disorganized retina layers
 MP:0001329	retina hyperplasia
 MP:0001330	abnormal optic nerve morphology
 MP:0001058	abnormal optic nerve morphology
@@ -1302,9 +1302,9 @@ MP:0000684	absent lacrimal glands
 MP:0001348	abnormal lacrimal gland physiology
 MP:0001349	excessive tearing
 MP:0001353	increased aggression towards mice
-MP:0001354	increased aggression towards males
+MP:0001354	increased aggression towards male mice
 MP:0001355	submission towards male mice
-MP:0001356	increased aggression towards females
+MP:0001356	increased aggression towards female mice
 MP:0001357	increased aggression towards humans
 MP:0001358	aggression towards inanimate objects
 MP:0001359	obsolete piling
@@ -1346,8 +1346,8 @@ MP:0001397	hyperactivity
 MP:0001403	hyperactivity
 MP:0001400	hyperresponsive
 MP:0001401	jumpy
-MP:0001402	hypoactivity
-MP:0001419	hypoactivity
+MP:0001402	decreased locomotor activity
+MP:0001419	decreased locomotor activity
 MP:0001404	no spontaneous movement
 MP:0001405	impaired coordination
 MP:0001517	impaired coordination
@@ -1399,7 +1399,7 @@ MP:0001444	obsolete compulsive biting
 MP:0001445	obsolete compulsive licking
 MP:0001446	abnormal whisker trimming behavior
 MP:0001447	abnormal nest building behavior
-MP:0001448	abnormal huddling behavior
+MP:0001448	obsolete abnormal mouse huddling behavior
 MP:0001450	obsolete Altered Intelligence
 MP:0001451	obsolete Decreased Intelligence
 MP:0001452	obsolete Increased Intelligence
@@ -2523,8 +2523,8 @@ MP:0002554	aversion to addictive substance
 MP:0002555	addiction
 MP:0002556	abnormal cocaine consumption
 MP:0002569	abnormal cocaine consumption
-MP:0002557	abnormal social/conspecific interaction
-MP:0001351	abnormal social/conspecific interaction
+MP:0002557	abnormal social/conspecific interaction behavior
+MP:0001351	abnormal social/conspecific interaction behavior
 MP:0002558	obsolete abnormal circadian period
 MP:0002559	obsolete abnormal circadian persistence
 MP:0002560	obsolete arrhythmic circadian persistence
@@ -2675,7 +2675,7 @@ MP:0001291	opacity of vitreous body
 MP:0002702	decreased circulating free fatty acids level
 MP:0002703	abnormal renal tubule morphology
 MP:0002704	tubular nephritis
-MP:0002705	dilated renal tubules
+MP:0002705	dilated renal tubule
 MP:0002706	abnormal kidney size
 MP:0002707	abnormal kidney weight
 MP:0002708	nephrolithiasis
@@ -2686,7 +2686,7 @@ MP:0002712	increased circulating glucagon level
 MP:0002713	abnormal glycogen catabolism
 MP:0002714	increased glycogen catabolism rate
 MP:0002715	decreased glycogen catabolism rate
-MP:0002716	small male preputial glands
+MP:0002716	small male preputial gland
 MP:0002717	abnormal male preputial gland morphology
 MP:0002718	abnormal inner cell mass morphology
 MP:0002720	obsolete urogenital system: dysmorphology
@@ -2763,8 +2763,8 @@ MP:0002788	female pseudohermaphroditism
 MP:0002789	male pseudohermaphroditism
 MP:0002790	decreased circulating follicle stimulating hormone level
 MP:0002791	steatorrhea
-MP:0002792	abnormal retinal vasculature morphology
-MP:0006189	abnormal retinal vasculature morphology
+MP:0002792	abnormal retina vasculature morphology
+MP:0006189	abnormal retina vasculature morphology
 MP:0002794	lenticonus
 MP:0002795	dilated cardiomyopathy
 MP:0002796	impaired skin barrier function
@@ -2952,7 +2952,7 @@ MP:0002979	obsolete abnormal vestibular response
 MP:0002980	abnormal postural reflex
 MP:0002981	increased liver weight
 MP:0002982	abnormal primordial germ cell migration
-MP:0002983	increased retinal ganglion cell number
+MP:0002983	increased retina ganglion cell number
 MP:0002984	retina hypoplasia
 MP:0002985	abnormal urine calcium level
 MP:0002986	decreased urine calcium level
@@ -3068,7 +3068,7 @@ MP:0003095	abnormal corneal stroma development
 MP:0003096	increased corneal light-scattering
 MP:0003097	abnormal tendon stiffness
 MP:0003098	decreased tendon stiffness
-MP:0003099	retinal detachment
+MP:0003099	retina detachment
 MP:0003100	myopia
 MP:0003101	high myopia
 MP:0003102	sclera thinning
@@ -3421,7 +3421,7 @@ MP:0003451	absent olfactory bulb
 MP:0003452	abnormal parotid gland morphology
 MP:0003453	abnormal keratinocyte physiology
 MP:0003454	erythroderma
-MP:0003455	decreased susceptibility to induced retinal damage
+MP:0003455	decreased susceptibility to induced retina damage
 MP:0003456	absent tail
 MP:0005080	absent tail
 MP:0003457	abnormal circulating ketone body level
@@ -3561,7 +3561,7 @@ MP:0003592	urethra stricture
 MP:0003593	urethrovaginal fistula
 MP:0003594	small urethra
 MP:0003595	epididymal cyst
-MP:0003596	epididymal inflammation
+MP:0003596	epididymis inflammation
 MP:0003597	increased epididymal cystadenoma incidence
 MP:0003598	epispadia
 MP:0003599	large penis
@@ -3625,7 +3625,7 @@ MP:0003642	absent seminal vesicle
 MP:0003643	spleen atrophy
 MP:0003644	thymus atrophy
 MP:0003645	increased pancreatic beta cell number
-MP:0003646	muscle fatigue
+MP:0003646	increased muscle fatigability
 MP:0003647	absent oligodendrocytes
 MP:0003648	abnormal radial glial cell morphology
 MP:0003649	decreased heart right ventricle size
@@ -3707,14 +3707,14 @@ MP:0003723	abnormal long bone morphology
 MP:0003724	increased susceptibility to induced arthritis
 MP:0003725	increased autoantibody level
 MP:0003726	decreased autoantibody level
-MP:0003727	abnormal retinal layer morphology
-MP:0003728	abnormal retinal photoreceptor layer morphology
+MP:0003727	abnormal retina layer morphology
+MP:0003728	abnormal retina photoreceptor layer morphology
 MP:0003729	abnormal photoreceptor outer segment morphology
 MP:0003730	abnormal photoreceptor inner segment morphology
-MP:0003731	abnormal retinal outer nuclear layer morphology
-MP:0003732	abnormal retinal outer plexiform layer morphology
-MP:0003733	abnormal retinal inner nuclear layer morphology
-MP:0003734	abnormal retinal inner plexiform layer morphology
+MP:0003731	abnormal retina outer nuclear layer morphology
+MP:0003732	abnormal retina outer plexiform layer morphology
+MP:0003733	abnormal retina inner nuclear layer morphology
+MP:0003734	abnormal retina inner plexiform layer morphology
 MP:0003735	cup-shaped ears
 MP:0003736	folded helix
 MP:0003737	ossification of pinnae
@@ -3838,7 +3838,7 @@ MP:0003858	enhanced coordination
 MP:0003859	abnormal Harderian gland physiology
 MP:0003860	abnormal carbon dioxide level
 MP:0003861	abnormal nervous system development
-MP:0003862	decreased aggression towards males
+MP:0003862	decreased aggression towards male mice
 MP:0003863	decreased aggression towards mice
 MP:0003864	abnormal midbrain development
 MP:0003865	lymph node inflammation
@@ -5089,7 +5089,7 @@ MP:0005099	abnormal ciliary body morphology
 MP:0005100	abnormal choroid pigmentation
 MP:0005101	abnormal ciliary body pigmentation
 MP:0005102	abnormal iris pigmentation
-MP:0005103	abnormal retinal pigmentation
+MP:0005103	abnormal retina pigmentation
 MP:0005104	abnormal tarsal bone morphology
 MP:0005105	abnormal middle ear ossicle morphology
 MP:0003738	abnormal middle ear ossicle morphology
@@ -5186,7 +5186,7 @@ MP:0005197	abnormal uvea morphology
 MP:0005198	abnormal aqueous drainage system morphology
 MP:0005199	abnormal iris pigment epithelium
 MP:0005200	obsolete abnormal eye pigment epithelium morphology
-MP:0005201	abnormal retinal pigment epithelium morphology
+MP:0005201	abnormal retina pigment epithelium morphology
 MP:0005202	lethargy
 MP:0005203	abnormal trabecular meshwork morphology
 MP:0005204	abnormal canal of Schlemm morphology
@@ -5227,7 +5227,7 @@ MP:0005238	increased brain size
 MP:0000773	increased brain size
 MP:0005239	abnormal Bruch membrane morphology
 MP:0005240	abnormal amacrine cell morphology
-MP:0005241	abnormal retinal ganglion layer morphology
+MP:0005241	abnormal retina ganglion layer morphology
 MP:0005242	cryptophthalmos
 MP:0005243	hemothorax
 MP:0005244	hemopericardium
@@ -5513,8 +5513,8 @@ MP:0005544	corneal deposits
 MP:0005545	abnormal lens development
 MP:0005546	choroidal neovascularization
 MP:0005547	abnormal Muller cell morphology
-MP:0005548	retinal pigment epithelium atrophy
-MP:0005549	retinal pigment epithelium hyperplasia
+MP:0005548	retina pigment epithelium atrophy
+MP:0005549	retina pigment epithelium hyperplasia
 MP:0005550	obsolete orbital hemorrhage
 MP:0005551	abnormal eye electrophysiology
 MP:0005552	obsolete abnormal orbital bone morphology
@@ -5662,7 +5662,7 @@ MP:0006022	absent Reissner membrane
 MP:0006023	detached Reissner membrane
 MP:0006024	collapsed Reissner membrane
 MP:0006025	distended Reissner membrane
-MP:0006026	dilated terminal bronchiole tubes
+MP:0006026	dilated terminal bronchiole tube
 MP:0006027	impaired lung alveolus development
 MP:0006028	obsolete impaired bronchiole branching
 MP:0006029	abnormal sclerotome morphology
@@ -5704,14 +5704,14 @@ MP:0006064	abnormal superior vena cava morphology
 MP:0006065	abnormal heart position or orientation
 MP:0006066	decreased clearance of atrial thrombosis
 MP:0006067	increased clearance of atrial thrombosis
-MP:0006068	abnormal retinal horizontal cell morphology
-MP:0006069	abnormal retinal neuronal layer morphology
-MP:0006070	increased retinal photoreceptor cell number
-MP:0006071	abnormal retinal progenitor cell morphology
-MP:0006072	abnormal retinal apoptosis
-MP:0006073	abnormal retinal bipolar cell morphology
-MP:0006074	abnormal retinal rod bipolar cell morphology
-MP:0006075	abnormal retinal cone bipolar cell morphology
+MP:0006068	abnormal retina horizontal cell morphology
+MP:0006069	abnormal retina neuronal layer morphology
+MP:0006070	increased retina photoreceptor cell number
+MP:0006071	abnormal retina progenitor cell morphology
+MP:0006072	abnormal retina apoptosis
+MP:0006073	abnormal retina bipolar cell morphology
+MP:0006074	abnormal retina rod bipolar cell morphology
+MP:0006075	abnormal retina cone bipolar cell morphology
 MP:0006076	abnormal circulating homocysteine level
 MP:0006077	inguinal hernia
 MP:0006078	abnormal nipple morphology
@@ -5729,7 +5729,7 @@ MP:0006092	abnormal olfactory sensory neuron morphology
 MP:0006093	arteriovenous malformation
 MP:0006094	increased fat cell size
 MP:0006095	absent amacrine cells
-MP:0006096	absent retinal bipolar cells
+MP:0006096	absent retina bipolar cells
 MP:0006097	abnormal cerebellar lobule formation
 MP:0006098	absent cerebellar lobules
 MP:0006099	thin cerebellar granule layer
@@ -5807,14 +5807,14 @@ MP:0006175	choroid atrophy
 MP:0006176	choroid degeneration
 MP:0006177	choroid sclerosis
 MP:0006180	increased choroid hemangioma incidence
-MP:0006182	increased retinal hemangioma incidence
+MP:0006182	increased retina hemangioma incidence
 MP:0006183	increased retina hamartoma incidence
-MP:0006184	increased retinal astrocytoma incidence
-MP:0006185	retinal hemorrhage
-MP:0006186	retinal fibrosis
-MP:0006187	retinal deposits
+MP:0006184	increased retina astrocytoma incidence
+MP:0006185	retina hemorrhage
+MP:0006186	retina fibrosis
+MP:0006187	retina deposits
 MP:0006188	calcified retina
-MP:0006190	retinal ischemia
+MP:0006190	retina ischemia
 MP:0006191	conjunctival deposits
 MP:0006192	abnormal conjunctival vasculature morphology
 MP:0006193	conjunctival telangiectasia
@@ -5919,12 +5919,12 @@ MP:0006299	abnormal latent inhibition of conditioning behavior
 MP:0006300	abnormal entorhinal cortex morphology
 MP:0006301	abnormal mesenchyme morphology
 MP:0006302	abnormal ectomesenchyme morphology
-MP:0006303	abnormal retinal nerve fiber layer morphology
+MP:0006303	abnormal retina nerve fiber layer morphology
 MP:0006305	abnormal optic eminence morphology
 MP:0006306	abnormal nasal pit morphology
 MP:0006307	abnormal seminiferous tubule size
 MP:0006308	enlarged seminiferous tubules
-MP:0006309	decreased retinal ganglion cell number
+MP:0006309	decreased retina ganglion cell number
 MP:0006310	increased retinoblastoma incidence
 MP:0006315	abnormal urine protein level
 MP:0006316	increased urine sodium level
@@ -6096,7 +6096,7 @@ MP:0008052	abnormal serous gland morphology
 MP:0008053	abnormal NK cell differentiation
 MP:0008054	abnormal uterine NK cell morphology
 MP:0008055	increased urine osmolality
-MP:0008056	abnormal retinal ganglion cell morphology
+MP:0008056	abnormal retina ganglion cell morphology
 MP:0008057	abnormal DNA replication
 MP:0008058	abnormal DNA repair
 MP:0008059	abnormal podocyte foot process morphology
@@ -6107,8 +6107,8 @@ MP:0008063	increased otic epithelial cell apoptosis
 MP:0008064	decreased otic epithelial cell proliferation
 MP:0008065	short endolymphatic duct
 MP:0008066	small endolymphatic duct
-MP:0008067	retinal ganglion cell degeneration
-MP:0008068	absent retinal ganglion cell
+MP:0008067	retina ganglion cell degeneration
+MP:0008068	absent retina ganglion cell
 MP:0008069	abnormal joint mobility
 MP:0008070	absent T cells
 MP:0008071	absent B cells
@@ -6147,7 +6147,7 @@ MP:0008103	amacrine cell degeneration
 MP:0008104	abnormal amacrine cell number
 MP:0008105	increased amacrine cell number
 MP:0008106	decreased amacrine cell number
-MP:0008107	absent retinal horizontal cells
+MP:0008107	absent retina horizontal cells
 MP:0008108	abnormal small intestinal villus morphology
 MP:0008109	abnormal small intestinal microvillus morphology
 MP:0008111	abnormal granulocyte differentiation
@@ -6491,19 +6491,19 @@ MP:0008440	abnormal subplate morphology
 MP:0008441	thin cortical plate
 MP:0008442	disorganized cortical plate
 MP:0008443	absent subplate
-MP:0008444	retinal cone cell degeneration
-MP:0008445	increased retinal cone cell number
-MP:0008446	decreased retinal cone cell number
-MP:0008447	absent retinal cone cells
-MP:0008448	abnormal retinal cone cell inner segment morphology
-MP:0008449	abnormal retinal cone cell outer segment morphology
-MP:0008450	retinal photoreceptor degeneration
-MP:0008451	retinal rod cell degeneration
-MP:0008452	increased retinal rod cell number
-MP:0008453	decreased retinal rod cell number
-MP:0008454	absent retinal rod cells
-MP:0008455	abnormal retinal rod cell inner segment morphology
-MP:0008456	abnormal retinal rod cell outer segment morphology
+MP:0008444	retina cone cell degeneration
+MP:0008445	increased retina cone cell number
+MP:0008446	decreased retina cone cell number
+MP:0008447	absent retina cone cells
+MP:0008448	abnormal retina cone cell inner segment morphology
+MP:0008449	abnormal retina cone cell outer segment morphology
+MP:0008450	retina photoreceptor degeneration
+MP:0008451	retina rod cell degeneration
+MP:0008452	increased retina rod cell number
+MP:0008453	decreased retina rod cell number
+MP:0008454	absent retina rod cells
+MP:0008455	abnormal retina rod cell inner segment morphology
+MP:0008456	abnormal retina rod cell outer segment morphology
 MP:0008457	abnormal cortical intermediate zone morphology
 MP:0008458	abnormal cortical ventricular zone morphology
 MP:0008459	abnormal circulating pancreatic peptide level
@@ -6554,20 +6554,20 @@ MP:0008503	abnormal spinal cord grey matter morphology
 MP:0008504	abnormal adrenal chromaffin cell morphology
 MP:0008505	absent adrenal chromaffin cells
 MP:0008506	abnormal noradrenergic chromaffin cell morphology
-MP:0008507	thin retinal ganglion layer
-MP:0008508	thick retinal ganglion layer
-MP:0008509	disorganized retinal ganglion layer
-MP:0008510	absent retinal ganglion layer
-MP:0008511	thin retinal inner nuclear layer
-MP:0008512	disorganized retinal inner nuclear layer
-MP:0008513	thin retinal inner plexiform layer
-MP:0008514	absent retinal inner plexiform layer
-MP:0008515	thin retinal outer nuclear layer
-MP:0008516	disorganized retinal outer nuclear layer
-MP:0008517	thick retinal outer nuclear layer
-MP:0008518	retinal outer nuclear layer degeneration
-MP:0008519	thin retinal outer plexiform layer
-MP:0008520	disorganized retinal outer plexiform layer
+MP:0008507	thin retina ganglion layer
+MP:0008508	thick retina ganglion layer
+MP:0008509	disorganized retina ganglion layer
+MP:0008510	absent retina ganglion layer
+MP:0008511	decreased retina inner nuclear layer thickness
+MP:0008512	disorganized retina inner nuclear layer
+MP:0008513	thin retina inner plexiform layer
+MP:0008514	absent retina inner plexiform layer
+MP:0008515	thin retina outer nuclear layer
+MP:0008516	disorganized retina outer nuclear layer
+MP:0008517	thick retina outer nuclear layer
+MP:0008518	retina outer nuclear layer degeneration
+MP:0008519	thin retina outer plexiform layer
+MP:0008520	disorganized retina outer plexiform layer
 MP:0008521	abnormal Bowman membrane morphology
 MP:0008522	abnormal lymph node germinal center morphology
 MP:0008523	absent lymph node germinal center
@@ -6899,7 +6899,7 @@ MP:0008848	abnormal anterior hypothalamic nucleus morphology
 MP:0008849	abnormal hemoglobin concentration distribution width
 MP:0008850	increased hemoglobin concentration distribution width
 MP:0008851	decreased hemoglobin concentration distribution width
-MP:0008852	retinal neovascularization
+MP:0008852	retina neovascularization
 MP:0008853	decreased abdominal adipose tissue amount
 MP:0008854	bleb
 MP:0008855	eye bleb
@@ -7097,8 +7097,8 @@ MP:0009046	muscle twitch
 MP:0009047	short metestrus
 MP:0009048	enlarged tectum
 MP:0009049	abnormal hallux morphology
-MP:0009050	dilated proximal convoluted tubules
-MP:0009051	dilated distal convoluted tubules
+MP:0009050	dilated proximal convoluted tubule
+MP:0009051	dilated distal convoluted tubule
 MP:0009052	anal stenosis
 MP:0009053	abnormal anal canal morphology
 MP:0009054	absent anal canal
@@ -7188,7 +7188,7 @@ MP:0009136	decreased brown fat cell size
 MP:0009137	decreased brown fat lipid droplet number
 MP:0009138	increased brown fat lipid droplet number
 MP:0009139	failure of Mullerian duct regression
-MP:0009140	dilated efferent ductules of testis
+MP:0009140	dilated efferent ductule of testis
 MP:0009141	increased prepulse inhibition
 MP:0009142	decreased prepulse inhibition
 MP:0009143	abnormal pancreatic duct morphology
@@ -7306,7 +7306,7 @@ MP:0009253	abnormal sympathetic neuron physiology
 MP:0009254	disorganized pancreatic islets
 MP:0009255	degranulated pancreatic beta cells
 MP:0009256	enlarged corpus epididymis
-MP:0009257	dilated seminiferous tubules
+MP:0009257	dilated seminiferous tubule
 MP:0009258	abnormal thymocyte apoptosis
 MP:0009259	abnormal vestibular saccule duct morphology
 MP:0009260	abnormal utricle duct morphology
@@ -7412,9 +7412,9 @@ MP:0009359	endometrium atrophy
 MP:0009360	endometrium inflammation
 MP:0009361	abnormal primordial ovarian follicle morphology
 MP:0009362	abnormal primary ovarian follicle morphology
-MP:0009363	abnormal secondary ovarian follicle morphology
+MP:0009363	abnormal tertiary ovarian follicle morphology
 MP:0009364	abnormal mature ovarian follicle morphology
-MP:0009365	abnormal theca folliculi
+MP:0009365	abnormal theca cell layer morphology
 MP:0009366	abnormal theca interna
 MP:0009367	abnormal theca externa
 MP:0009368	absent theca folliculi
@@ -7441,7 +7441,7 @@ MP:0009388	abnormal epidermal melanocyte morphology
 MP:0009389	abnormal extracutaneous pigmentation
 MP:0009390	abnormal otic pigmentation
 MP:0009391	abnormal leptomeninges pigmentation
-MP:0009392	retinal gliosis
+MP:0009392	retina gliosis
 MP:0009393	abnormal resting posture
 MP:0009394	increased uterine NK cell number
 MP:0009395	increased nucleated erythrocyte cell number
@@ -7715,7 +7715,7 @@ MP:0009656	delayed chorioallantoic fusion
 MP:0009657	failure of chorioallantoic fusion
 MP:0009658	increased placenta apoptosis
 MP:0009659	striated fur
-MP:0009660	abnormal induced retinal neovascularization
+MP:0009660	abnormal induced retina neovascularization
 MP:0009661	abnormal pregnancy
 MP:0009662	abnormal uterine receptivity
 MP:0009663	abnormal uterine-embryonic axis
@@ -7826,7 +7826,7 @@ MP:0009768	impaired somite development
 MP:0009769	abnormal meiotic spindle assembly checkpoint
 MP:0009770	abnormal optic chiasm morphology
 MP:0009771	absent optic chiasm
-MP:0009772	abnormal retinal development
+MP:0009772	abnormal retina development
 MP:0009773	absent retina
 MP:0009774	abnormal behavioral withdrawal response
 MP:0009775	increased behavioral withdrawal response
@@ -8157,8 +8157,8 @@ MP:0010093	decreased circulating magnesium level
 MP:0010094	abnormal chromosome stability
 MP:0010095	increased chromosomal stability
 MP:0010096	abnormal incisor color
-MP:0010097	abnormal retinal blood vessel morphology
-MP:0010098	abnormal retinal blood vessel pattern
+MP:0010097	abnormal retina blood vessel morphology
+MP:0010098	abnormal retina blood vessel pattern
 MP:0010099	abnormal thoracic cage shape
 MP:0010100	increased cervical vertebrae number
 MP:0010101	increased sacral vertebrae number
@@ -8249,9 +8249,9 @@ MP:0010186	increased T follicular helper cell number
 MP:0010187	decreased T follicular helper cell number
 MP:0010188	abnormal T follicular helper cell differentiation
 MP:0010189	abnormal T follicular helper cell physiology
-MP:0010190	abnormal retinal melanocyte morphology
+MP:0010190	abnormal retina melanocyte morphology
 MP:0010191	abnormal choroid melanocyte morphology
-MP:0010192	abnormal retinal melanin granule morphology
+MP:0010192	abnormal retina melanin granule morphology
 MP:0010193	abnormal choroid melanin granule morphology
 MP:0010194	absent lymphatic vessels
 MP:0010195	abnormal lymphatic vessel endothelium morphology
@@ -8563,7 +8563,7 @@ MP:0010466	vascular ring
 MP:0010467	pulmonary artery sling
 MP:0010468	abnormal thoracic aorta morphology
 MP:0010469	ascending aorta hypoplasia
-MP:0010470	ascending aorta dilation
+MP:0010470	dilated ascending aorta
 MP:0010471	supravalvar aortic stenosis
 MP:0010472	abnormal ascending aorta and coronary artery attachment
 MP:0010473	descending aorta dilation
@@ -8666,7 +8666,7 @@ MP:0010570	prolonged ST segment
 MP:0010571	shortened ST segment
 MP:0010572	persistent right dorsal aorta
 MP:0010573	left dorsal aorta regression
-MP:0010574	aorta dilation
+MP:0010574	dilated aorta
 MP:0010575	aortic arch dilation
 MP:0010576	premature closure of the ductus arteriosus
 MP:0010577	abnormal heart right ventricle size
@@ -8792,7 +8792,7 @@ MP:0010695	abnormal blood pressure regulation
 MP:0010696	increased siderocyte number
 MP:0010697	abnormal systemic arterial blood pressure regulation
 MP:0010698	abnormal impulsive behavior control
-MP:0010699	dilated hair follicles
+MP:0010699	dilated hair follicle
 MP:0010700	hair follicle comedo
 MP:0010701	fusion of atlas and odontoid process
 MP:0010702	split cervical atlas
@@ -8959,7 +8959,7 @@ MP:0010852	absent epidermal lamellar bodies
 MP:0010853	abnormal lung position or orientation
 MP:0010854	lung situs inversus
 MP:0010855	pulmonary hyperemia
-MP:0010856	dilated respiratory conducting tubes
+MP:0010856	dilated respiratory conducting tube
 MP:0010857	pulmonary necrosis
 MP:0010858	pulmonary epithelial necrosis
 MP:0010859	abnormal anterior commissure pars anterior morphology
@@ -9010,7 +9010,7 @@ MP:0010904	abnormal alveolar pore morphology
 MP:0010905	absent alveolar pores
 MP:0010906	abnormal lung bud morphology
 MP:0010907	absent lung buds
-MP:0010908	dilated pulmonary alveolar ducts
+MP:0010908	dilated pulmonary alveolar duct
 MP:0010909	pulmonary alveolar hemorrhage
 MP:0010910	bronchiolar epithelial hyperplasia
 MP:0010911	abnormal pulmonary acinus morphology
@@ -9229,10 +9229,10 @@ MP:0011123	abnormal primary ovarian follicle number
 MP:0011124	increased primary ovarian follicle number
 MP:0011125	decreased primary ovarian follicle number
 MP:0011126	absent primary ovarian follicles
-MP:0011127	abnormal secondary ovarian follicle number
-MP:0011128	increased secondary ovarian follicle number
-MP:0011129	decreased secondary ovarian follicle number
-MP:0011130	absent secondary ovarian follicles
+MP:0011127	abnormal tertiary ovarian follicle number
+MP:0011128	increased tertiary ovarian follicle number
+MP:0011129	decreased tertiary ovarian follicle number
+MP:0011130	absent tertiary ovarian follicles
 MP:0011131	abnormal lung endothelial cell physiology
 MP:0011132	abnormal lung endothelial cell migration
 MP:0011133	increased lung endothelial cell migration
@@ -9735,7 +9735,7 @@ MP:0011628	increased mitochondrial number
 MP:0011629	decreased mitochondrial number
 MP:0011630	increased mitochondrial size
 MP:0011631	decreased mitochondrial size
-MP:0011632	dilated mitochondria
+MP:0011632	dilated mitochondrion
 MP:0011633	abnormal mitochondrial shape
 MP:0011634	abnormal mitochondrial inner membrane morphology
 MP:0011635	abnormal mitochondrial crista morphology
@@ -10100,8 +10100,8 @@ MP:0011992	increased erythrocyte catalase activity
 MP:0011993	increased foot pad temperature
 MP:0011994	increased nerve conduction velocity
 MP:0011995	decreased leukemia incidence
-MP:0011996	abnormal retinal inner nuclear layer thickness
-MP:0011997	abnormal retinal outer nuclear layer thickness
+MP:0011996	abnormal retina inner nuclear layer thickness
+MP:0011997	abnormal retina outer nuclear layer thickness
 MP:0011998	decreased embryonic cilium length
 MP:0011999	abnormal tail length
 MP:0012000	abnormal limb position
@@ -10152,9 +10152,9 @@ MP:0012044	abnormal phospholipase A2 level
 MP:0012045	increased susceptibility to hypertension
 MP:0012046	decreased susceptibility to hypertension
 MP:0012047	abnormal cholinesterase level
-MP:0012048	abnormal response to retinal ischemic injury
-MP:0012049	increased susceptilbility to retinal ischemic injury
-MP:0012050	decreased susceptilbility to retinal ischemic injury
+MP:0012048	abnormal response to retina ischemic injury
+MP:0012049	increased susceptilbility to retina ischemic injury
+MP:0012050	decreased susceptilbility to retina ischemic injury
 MP:0012051	spasticity
 MP:0012052	hypertonicity
 MP:0012053	limb hypertonicity
@@ -10601,7 +10601,7 @@ MP:0006333	abnormal cochlear VIII nucleus morphology
 MP:0012491	larynx stenosis
 MP:0012492	pharyngeal arch artery hypoplasia
 MP:0012493	absent pharyngeal arch arteries
-MP:0012494	dilated pharyngeal arch arteries
+MP:0012494	dilated pharyngeal arch artery
 MP:0012495	pharyngeal arch artery stenosis
 MP:0012496	abnormal pleuropericardial membrane morphology
 MP:0012497	absent pleuropericardial membrane
@@ -10626,7 +10626,7 @@ MP:0012515	abnormal heart apex morphology
 MP:0012516	absent metencephalon
 MP:0012517	absent diencephalon
 MP:0012518	abnormal Brunner's gland morphology
-MP:0012519	dilated Brunner's glands
+MP:0012519	dilated Brunner's gland
 MP:0012520	absent Brunner's glands
 MP:0012521	abnormal buccopharyngeal membrane morphology
 MP:0012522	abnormal stomodeum morphology
@@ -10778,12 +10778,12 @@ MP:0012667	split sternal manubrium
 MP:0012668	absent sternal manubrium
 MP:0012669	abnormal somite segmentation clock
 MP:0012670	prolonged somite segmentation clock period
-MP:0012671	retinal spots
+MP:0012671	retina spots
 MP:0012672	enlarged trachea
 MP:0012673	aberrant crypt foci
 MP:0012674	tomacula
 MP:0012675	enlarged floor plate
-MP:0012676	dilated brain ventricles
+MP:0012676	dilated brain ventricle
 MP:0012677	absent brain ventricles
 MP:0012678	absent fourth ventricle
 MP:0012679	absent third ventricle
@@ -11246,7 +11246,7 @@ MP:0013316	abnormal pheomelanosome pheomelanin content
 MP:0013317	abnormal seminal vesicle development
 MP:0013318	abnormal branching involved in seminal vesicle morphogenesis
 MP:0013319	seminal vesicle atrophy
-MP:0013320	dilated seminal vesicles
+MP:0013320	dilated seminal vesicle
 MP:0013321	squamous metaplasia of seminal vesicles
 MP:0013322	squamous metaplasia of prostate gland
 MP:0013323	abnormal ampullary gland morphology
@@ -11492,7 +11492,7 @@ MP:0013562	abnormal circumventricular organ morphology
 MP:0013563	abnormal secretory circumventricular organ morphology
 MP:0013564	abnormal sensory circumventricular organ morphology
 MP:0013565	abnormal adrenal gland capsule morphology
-MP:0013566	dilated gastric glands
+MP:0013566	dilated gastric gland
 MP:0013567	gastric gland atrophy
 MP:0013568	gastric gland degeneration
 MP:0013569	gastric gland hyperplasia
@@ -12105,7 +12105,7 @@ MP:0014175	abnormal ciliary epithelium morphology
 MP:0014176	abnormal cilary zonule morphology
 MP:0014177	abnormal Weber's gland morphology
 MP:0014178	increased brain apoptosis
-MP:0014179	abnormal blood-retinal barrier function
+MP:0014179	abnormal blood-retina barrier function
 MP:0014180	abnormal thymus apoptosis
 MP:0014181	abnormal respiratory epithelial sodium ion transmembrane transport
 MP:0014182	decreased respiratory epithelial sodium ion transmembrane transport
@@ -12154,9 +12154,9 @@ MP:0014226	abnormal alveolar macrophage physiology
 MP:0014227	abnormal alveolar macrophage number
 MP:0014228	increased alveolar macrophage number
 MP:0014229	decreased alveolar macrophage number
-MP:0014230	dilated crypts of Lieberkuhn
+MP:0014230	dilated crypt of Lieberkuhn
 MP:0014231	intestinal mucus accumulation
-MP:0014232	pancreatic acinus dilation
+MP:0014232	dilated pancreatic acinus
 MP:0014233	bile duct epithelium hyperplasia
 MP:0020000	abnormal response to antigen
 MP:0020001	decreased response to antigen
@@ -12196,7 +12196,7 @@ MP:0020034	decreased cholinesterase activity
 MP:0020035	abnormal coumarin hydroxylase activity
 MP:0020036	decreased coumarin hydroxylase activity
 MP:0020037	increased coumarin hydroxylase activity
-MP:0020038	retinal macular degeneration
+MP:0020038	retina macular degeneration
 MP:0020039	increased bone ossification
 MP:0020040	decreased bone ossification
 MP:0020041	decreased susceptibility to pulmonary hyaline membrane formation
@@ -12497,14 +12497,14 @@ MP:0020335	abnormal dentate gyrus neuron dendrite morphology
 MP:0020336	abnormal motor neuron dendrite morphology
 MP:0020337	abnormal pyramidal neuron dendrite morphology
 MP:0020338	abnormal hippocampal pyramidal neuron dendrite morphology
-MP:0020339	abnormal retinal ganglion cell dendrite morphology
+MP:0020339	abnormal retina ganglion cell dendrite morphology
 MP:0020340	abnormal inhibitory learning
 MP:0020341	abnormal circulating hyaluronic acid level
 MP:0020342	small optic nerve
 MP:0020343	abnormal ureteric bud number
 MP:0020344	abnormal susceptibility to injury induced morbidity/mortality
 MP:0020345	abnormal myocardial fiber currents
-MP:0020346	abnormal mycardial fiber calcium currents
+MP:0020346	abnormal myocardial fiber calcium currents
 MP:0020347	abnormal mycoardial fiber sodium currents
 MP:0020348	decreased olfactory sensory neuron number
 MP:0020349	abnormal dendritic cell migration
@@ -12599,9 +12599,9 @@ MP:0020437	abnormal social play behavior
 MP:0020438	decreased papilloma incidence
 MP:0020439	absent b-wave
 MP:0020440	abnormal front foot hair pigmentation
-MP:0020441	rhegmatogenous retinal detachment
-MP:0020442	serous retinal detachment
-MP:0020443	tractional retinal detachment
+MP:0020441	rhegmatogenous retina detachment
+MP:0020442	serous retina detachment
+MP:0020443	tractional retina detachment
 MP:0020444	abnormal intestine apoptosis
 MP:0020445	abnormal NAD(P)H oxidase activity
 MP:0020446	increased NAD(P)H oxidase activity
@@ -12882,7 +12882,7 @@ MP:0020720	increased pontine nuclei cell density
 MP:0020721	abnormal pontine nuclei average cell area
 MP:0020722	decreased pontine nuclei average cell area
 MP:0020723	increased pontine nuclei average cell area
-MP:0020724	increased retinal inner nuclear layer thickness
+MP:0020724	increased retina inner nuclear layer thickness
 MP:0020725	abnormal substantia nigra cell number
 MP:0020726	decreased substantia nigra cell number
 MP:0020727	increased substantia nigra cell number
@@ -13264,13 +13264,45 @@ MP:0021102	abnormal ventral interneuron 0 morphology
 MP:0021103	abnormal ventral interneuron 1 morphology
 MP:0021104	abnormal ventral interneuron 2 morphology
 MP:0021105	abnormal ventral interneuron 3 morphology
+MP:0021106	abnormal secondary ovarian follicle morphology
+MP:0021107	retina fold
+MP:0021108	intestinal epithelium hyperplasia
+MP:0021109	intestinal epithelium hypoplasia
+MP:0021110	increased social investigation
+MP:0021111	decreased social investigation
+MP:0021112	impaired social recognition
+MP:0021113	enhanced social recognition
+MP:0021114	social amnesia
+MP:0021115	abnormal aggression towards conspecific
+MP:0021116	abnormal heterospecific interaction behavior
+MP:0021117	abnormal huddling behavior
+MP:0021118	abnormal paternal behavior
+MP:0021119	abnormal auditory behavior
+MP:0021120	abnormal visual behavior
+MP:0021121	abnormal rhythmic behavior
+MP:0021122	abnormal trimethylamine N-oxide level
+MP:0021123	increased trimethylamine N-oxide level
+MP:0021124	decreased trimethylamine N-oxide level
+MP:0021125	abnormal phosphocholine level
+MP:0021126	increased phosphocholine level
+MP:0021127	decreased phosphocholine level
+MP:0021128	increased choline level
+MP:0021129	abnormal glycerophosphocholine level
+MP:0021130	decreased glycerophosphocholine level
+MP:0021131	increased glycerophosphocholine level
+MP:0021132	abnormal amino acid betaine level
+MP:0021133	increased amino acid betaine level
+MP:0021134	decreased amino acid betaine level
+MP:0021135	abnormal annulus fibrosus morphology
+MP:0021136	abnormal vertebrae shape
+MP:0021137	abnormal wedge-shaped vertebrae
 MP:0030000	abnormal subglottis morphology
 MP:0030001	subglottis stenosis
 MP:0030002	increased lung apoptosis
 MP:0030003	hippocampus atrophy
 MP:0030004	hippocampus hypoplasia
-MP:0030005	increased retinal apoptosis
-MP:0030006	decreased retinal apoptosis
+MP:0030005	increased retina apoptosis
+MP:0030006	decreased retina apoptosis
 MP:0030007	abnormal bone marrow adipose tissue morphology
 MP:0030008	abnormal bone marrow adipose tissue amount
 MP:0030009	increased bone marrow adipose tissue amount
@@ -14399,14 +14431,14 @@ MP:0031135	increased coronary artery tortuosity
 MP:0031136	muscle hemorrhage
 MP:0031137	vaginal hemorrhage
 MP:0031138	testicular hemorrhage
-MP:0031139	abnormal retinal artery morphology
-MP:0031140	increased retinal artery tortuosity
-MP:0031141	increased retinal vascular tortuosity
-MP:0031142	retinal artery stenosis
-MP:0031143	retinal artery occlusion
-MP:0031144	abnormal retinal arteriole morphology
-MP:0031145	retinal arteriole stenosis
-MP:0031146	retinal arteriole occlusion
+MP:0031139	abnormal retina artery morphology
+MP:0031140	increased retina artery tortuosity
+MP:0031141	increased retina vascular tortuosity
+MP:0031142	retina artery stenosis
+MP:0031143	retina artery occlusion
+MP:0031144	abnormal retina arteriole morphology
+MP:0031145	retina arteriole stenosis
+MP:0031146	retina arteriole occlusion
 MP:0031147	abnormal ventricular thrombosis
 MP:0031148	abnormal liver sinusoidal endothelial cell morphology
 MP:0031149	abnormal susceptibility to thrombosis induced morbidity/mortality
@@ -14446,19 +14478,19 @@ MP:0031182	abnormal cerebral blood flow rate
 MP:0031183	decreased cerebral blood flow rate
 MP:0031184	increased cerebral blood flow rate
 MP:0031185	sudden unexpected death in epilepsy
-MP:0031186	abnormal retinal horizontal cell density
-MP:0031187	decreased retinal horizontal cell density
-MP:0031188	increased retinal horizontal cell density
-MP:0031189	abnormal retinal rod bipolar cell density
-MP:0031190	decreased retinal rod bipolar cell density
-MP:0031191	increased retinal rod bipolar cell density
+MP:0031186	abnormal retina horizontal cell density
+MP:0031187	decreased retina horizontal cell density
+MP:0031188	increased retina horizontal cell density
+MP:0031189	abnormal retina rod bipolar cell density
+MP:0031190	decreased retina rod bipolar cell density
+MP:0031191	increased retina rod bipolar cell density
 MP:0031192	coronary artery spasm
 MP:0031193	pulmonary arterial medial hypertrophy
 MP:0031194	abnormal testicular artery morphology
 MP:0031195	decreased testicular artery wall-to-lumen ratio
 MP:0031196	increased testicular artery wall-to-lumen ratio
 MP:0031197	calcified testicular artery
-MP:0031198	retinal inner nuclear layer degeneration
+MP:0031198	retina inner nuclear layer degeneration
 MP:0031199	decreased aortic weight
 MP:0031200	increased aortic weight
 MP:0031201	hemiparesis
@@ -14628,16 +14660,65 @@ MP:0031366	decreased prostate gland dorsolateral lobe weight
 MP:0031367	prostate gland dorsolateral lobe hypoplasia
 MP:0031368	increased prostate gland dorsolateral lobe weight
 MP:0031369	prostate gland dorsolateral lobe hyperplasia
+MP:0031372	abnormal sperm individualization
+MP:0031373	abnormal manchette perinuclear ring morphology
+MP:0031374	abnormal manchette assembly
+MP:0031375	abnormal manchette disassembly
+MP:0031376	abnormal acrosomal vesicle exocytosis
+MP:0031377	ambiguous external genitalia
+MP:0031378	ambiguous male external genitalia
+MP:0031379	ambiguous female external genitalia
+MP:0031380	abnormal secondary ovarian follicle number
+MP:0031381	decreased secondary ovarian follicle number
+MP:0031382	absent secondary ovarian follicles
+MP:0031383	increased secondary ovarian follicle number
+MP:0031384	impaired blood-brain barrier function
+MP:0031385	enhanced blood-brain barrier function
+MP:0031386	elongated manchette
+MP:0031387	abnormal intramanchette transport
+MP:0031388	absent manchette
+MP:0031389	abnormal ectoplasmic specialization morphology
+MP:0031390	myometrium hyperplasia
+MP:0031391	increased locomotor activity
+MP:0031392	hypoactivity
+MP:0031393	abnormal bicarbonate homeostasis
+MP:0031394	abnormal bicarbonate level
+MP:0031395	cutaneous mastocytosis
+MP:0031396	abnormal aspartoacylase level
+MP:0031397	increased aspartoacylase level
+MP:0031398	decreased aspartoacylase level
+MP:0031399	early balanopreputial separation
+MP:0031400	decreased esophagus squamous cell carcinoma incidence
+MP:0031401	increased esophagus squamous cell carcinoma incidence
+MP:0031402	decreased muscle fatigability
+MP:0031404	increased tubuloglomerular feedback response
+MP:0031405	abnormal Sertoli cell proliferation
+MP:0031406	decreased Sertoli cell proliferation
+MP:0031407	increased Sertoli cell proliferation
+MP:0031408	multi-headed sperm
+MP:0031409	double-headed sperm
+MP:0031410	biflagellated sperm
+MP:0031411	increased ovulation rate
+MP:0031412	abnormal muscle triglyceride level
+MP:0031413	abnormal skeletal muscle triglyceride level
+MP:0031414	decreased skeletal muscle triglyceride level
+MP:0031415	increased skeletal muscle triglyceride level
+MP:0031416	abnormal cardiac muscle triglyceride level
+MP:0031417	decreased cardiac muscle triglyceride level
+MP:0031418	increased cardiac muscle triglyceride level
+MP:0031419	delayed estrus
+MP:0031420	decreased superovulation rate
+MP:0031421	increased superovulation rate
+MP:0031422	failure of superovulation
 MP:3000001	abnormal gastrula morphology
 MP:3000002	obsolete abnormal skull morphology
 MP:3000003	abnormal Ebner's gland morphology
 MP:3000004	abnormal nictitating membrane morphology
 MP:3000005	abnormal lacrimal sac morphology
+RO:0002573	has modifier
 after	after
 during	during
 exists_during	exists_during
 has_central_participant	has_central_participant
 has_quality	has quality
-occurs_in	occurs in
-preceded_by	preceded_by
 results_from	results from
