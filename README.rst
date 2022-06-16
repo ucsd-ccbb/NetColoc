@@ -62,6 +62,8 @@ NetColoc requires the following python packages:
 * `scipy >= 1.5.3 <https://pypi.org/project/scipy/>`__
 * `statsmodels <https://pypi.org/project/statsmodels/>`__
 * `gprofiler-official >= 1.0.0 <https://pypi.org/project/gprofiler-official/>`__
+* `ipywidgets <https://pypi.org/project/ipywidgets>`__
+* `ipycytoscape <https://ipycytoscape.readthedocs.io/en/latest>`__
 
 * `python3 branch of DDOT <https://github.com/idekerlab/ddot/tree/python3>`__
 
@@ -91,7 +93,6 @@ NetColoc requires the following python packages:
 
 Additional requirements for full functionality of example notebook:
 
-* `ipywidgets <https://pypi.org/project/ipywidgets>`__
 * `cdapsutil >= 0.2.0a1 <https://pypi.org/project/cdapsutil/>`__
 
 
