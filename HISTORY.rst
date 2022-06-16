@@ -2,7 +2,7 @@
 History
 =======
 
-0.1.6 (TBD)
+0.1.6 (2022-06-16)
 --------------------
 
 * `ipycytoscape <https://ipycytoscape.readthedocs.io/en/latest>`__ added as a dependency
