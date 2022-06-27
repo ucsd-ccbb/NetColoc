@@ -8,7 +8,7 @@ from setuptools import setup, find_packages
 with open(os.path.join('netcoloc', '__init__.py')) as ver_file:
     for line in ver_file:
         if line.startswith('__version__'):
-            version=re.sub("'", "", line[line.index("'"):])
+            version=re.sub("'", "", line[line.index("'"):]).rstrip()
 
 with open('README.rst') as readme_file:
     readme = readme_file.read()
@@ -68,6 +68,7 @@ setup(
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
+
     ],
     test_suite='tests',
     tests_require=test_requirements,
