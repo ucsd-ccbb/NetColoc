@@ -12,8 +12,8 @@ NetColoc
         :target: https://netcoloc.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
         
-.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.6654561.svg
-   :target: https://doi.org/10.5281/zenodo.6654561
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.6773330.svg
+   :target: https://doi.org/10.5281/zenodo.6773330
 
 
 Description
