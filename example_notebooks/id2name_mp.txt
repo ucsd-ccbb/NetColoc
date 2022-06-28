@@ -13296,6 +13296,34 @@ MP:0021134	decreased amino acid betaine level
 MP:0021135	abnormal annulus fibrosus morphology
 MP:0021136	abnormal vertebrae shape
 MP:0021137	abnormal wedge-shaped vertebrae
+MP:0021138	abnormal multifidus muscle morphology
+MP:0021139	abnormal cardiac muscle calcium level
+MP:0021140	increased cardiac muscle calcium level
+MP:0021141	decreased cardiac muscle calcium level
+MP:0021142	abnormal brain N-acetyl-L-aspartic acid level
+MP:0021143	increased brain N-acetyl-L-aspartic acid level
+MP:0021144	decreased brain N-acetyl-L-aspartic acid level
+MP:0021145	abnormal amino acid derivative level
+MP:0021146	AA amyloidosis
+MP:0021147	renal amyloidosis
+MP:0021148	cardiac amyloidosis
+MP:0021149	abnormal amyloid beta protein level
+MP:0021150	increased amyloid beta protein level
+MP:0021151	decreased amyloid beta protein level
+MP:0021152	abnormal amyloid deposition
+MP:0021153	decreased amyloid deposition
+MP:0021154	hepatic amyloidosis
+MP:0021155	abnormal heart left ventricle wall thickness
+MP:0021156	abnormal heart right ventricle wall thickness
+MP:0021157	increased heart left ventricle wall thickness
+MP:0021158	decreased heart left ventricle wall thickness
+MP:0021159	increased heart right ventricle wall thickness
+MP:0021160	decreased heart right ventricle wall thickness
+MP:0021161	increased heart left ventricle posterior wall thickness
+MP:0021162	increased heart left ventricle anterior wall thickness
+MP:0021163	increased heart left ventricle septal wall thickness
+MP:0021164	oral cleft
+MP:0021165	behavioral developmental delay
 MP:0030000	abnormal subglottis morphology
 MP:0030001	subglottis stenosis
 MP:0030002	increased lung apoptosis
@@ -14710,6 +14738,9 @@ MP:0031419	delayed estrus
 MP:0031420	decreased superovulation rate
 MP:0031421	increased superovulation rate
 MP:0031422	failure of superovulation
+MP:0031423	abnormal luteolysis
+MP:0031424	enhanced female fertility
+MP:0031425	enhanced male fertility
 MP:3000001	abnormal gastrula morphology
 MP:3000002	obsolete abnormal skull morphology
 MP:3000003	abnormal Ebner's gland morphology
