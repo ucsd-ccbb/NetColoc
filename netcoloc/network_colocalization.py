@@ -165,11 +165,12 @@ def calculate_expected_overlap(z_scores_1, z_scores_2,
         a part of the network overlap or not. Genes with z2-scores
         below this threshold will be discarded
     :type z2_threshold: float
-    :param num_reps:
+    :param num_reps: Number of repitions of randomly shuffling input z_score vectors to generate null distribution
+    :type num_reps: int
     :param plot: If ``True``, distribution will be plotted
     :type plot: bool
-    :return:
-    :rtype: float
+    :return: Observed overlap size, and vector of randomized overlap sizes from permuted z_scores
+    :rtype: float, np.array of floats
     """
     # Build a distribution of expected network overlap sizes by shuffling node names
     random_network_overlap_sizes = []
@@ -278,7 +279,7 @@ def transform_edges(G, method='cosine_sim', edge_weight_threshold=0.95):
     m1cos = m1cos.replace(np.nan, 0)
     sim_names = m1cos.index.tolist()
     sim_rank = m1cos.rank(0) / (m1cos.shape[0] - 1)
-    sim_rank = np.matrix(sim_rank)
+    sim_rank = np.array(sim_rank)
     np.fill_diagonal(sim_rank,0) # remove self edges
     sim_rank = pd.DataFrame(sim_rank)
     sim_rank = pd.DataFrame((sim_rank.values + sim_rank.values.T) / 2.0,

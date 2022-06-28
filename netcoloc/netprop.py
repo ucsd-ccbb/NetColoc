@@ -184,7 +184,9 @@ def network_propagation(individual_heats_matrix, nodes, seed_genes):
             individual_heats_matrix, in the same order in which they were
             supplied to :py:func:`~netcoloc.netprop.get_individual_heats_matrix`
     :type nodes: list
-    :param seed_genes: # TODO
+    :param seed_genes: Input list of genes/nodes for intializing the heat in network propagation. 
+            Any items in `seed genes` that are not present in `nodes` will be ignored.
+    :type seed_genes: list
     :return: Final heat of each node after propagation, with the name
              of the nodes as the index
     :rtype: :py:class:`pandas.Series`
