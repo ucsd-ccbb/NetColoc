@@ -2,6 +2,11 @@
 History
 =======
 
+0.1.7 (2022-06-28)
+--------------------
+
+* Removed unused `network_localization.py` module
+
 0.1.6 (2022-06-16)
 --------------------
 

@@ -18,7 +18,6 @@ from click.testing import CliRunner
 from netcoloc import cli
 from netcoloc import netprop
 from netcoloc import netprop_zscore
-from netcoloc import network_localization
 from netcoloc import network_colocalization
 from netcoloc import netcoloc_utils
 
