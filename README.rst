@@ -93,6 +93,9 @@ NetColoc requires the following python packages:
         python setup.py bdist_wheel
         pip install dist/ddot*py3*whl
 
+  .. note::
+    Due to dependency issue DDOT, will not work with Python 3.10 or later
+
 
 Additional requirements for full functionality of example notebook:
 
