@@ -541,7 +541,7 @@ MP:0000564	syndactyly
 MP:0000565	oligodactyly
 MP:0000563	oligodactyly
 MP:0000566	synostosis
-MP:0000567	truncation of digits
+MP:0000567	truncated digits
 MP:0000568	ectopic digits
 MP:0000569	abnormal digit pigmentation
 MP:0000570	abnormal digit pigmentation
@@ -2670,8 +2670,8 @@ MP:0002696	decreased circulating glucagon level
 MP:0002697	abnormal eye size
 MP:0002698	abnormal sclera morphology
 MP:0002699	abnormal vitreous body morphology
-MP:0002700	opacity of vitreous body
-MP:0001291	opacity of vitreous body
+MP:0002700	increased opacity of vitreous body
+MP:0001291	increased opacity of vitreous body
 MP:0002702	decreased circulating free fatty acids level
 MP:0002703	abnormal renal tubule morphology
 MP:0002704	tubular nephritis
@@ -5249,7 +5249,7 @@ MP:0005259	ocular hypertension
 MP:0005260	ocular hypotension
 MP:0005261	aniridia
 MP:0005262	coloboma
-MP:0005263	ectopia lentis
+MP:0005263	obsolete ectopia lentis
 MP:0005264	glomerulosclerosis
 MP:0005265	abnormal blood urea nitrogen level
 MP:0005266	abnormal metabolism
@@ -5864,7 +5864,7 @@ MP:0006241	abnormal placement of pupils
 MP:0006242	white pupil
 MP:0006243	impaired pupillary reflex
 MP:0006244	eyelid muscle spasm
-MP:0006245	dislocated lens
+MP:0006245	obsolete dislocated lens
 MP:0006248	lagophthalmos
 MP:0006249	phthisis bulbi
 MP:0006250	abnormal line of Schwalbe morphology
@@ -11098,7 +11098,7 @@ MP:0013168	absent hindlimb buds
 MP:0013169	small hindlimb buds
 MP:0013170	eye swellings
 MP:0013171	ear hemorrhage
-MP:0013172	miscarriage
+MP:0013172	obsolete miscarriage
 MP:0013173	trigeminal ganglion degeneration
 MP:0013174	pharynx stenosis
 MP:0013175	bifurcated tail
@@ -12505,7 +12505,7 @@ MP:0020343	abnormal ureteric bud number
 MP:0020344	abnormal susceptibility to injury induced morbidity/mortality
 MP:0020345	abnormal myocardial fiber currents
 MP:0020346	abnormal myocardial fiber calcium currents
-MP:0020347	abnormal mycoardial fiber sodium currents
+MP:0020347	abnormal myocardial fiber sodium currents
 MP:0020348	decreased olfactory sensory neuron number
 MP:0020349	abnormal dendritic cell migration
 MP:0020350	fused pharyngeal arches
@@ -13324,6 +13324,39 @@ MP:0021162	increased heart left ventricle anterior wall thickness
 MP:0021163	increased heart left ventricle septal wall thickness
 MP:0021164	oral cleft
 MP:0021165	behavioral developmental delay
+MP:0021166	delayed palatal shelf elevation
+MP:0021167	abnormal behavioral response to oxycodone
+MP:0021168	enhanced behavioral response to oxycodone
+MP:0021169	impaired behavioral response to oxycodone
+MP:0021170	spinal stenosis
+MP:0021171	abnormal granulocyte nuclear morphology
+MP:0021172	abnormal neutrophil nuclear morphology
+MP:0021173	abnormal neutrophil nuclear segmentation
+MP:0021174	decreased neutrophil nuclear segmentation
+MP:0021175	symmetrical hyposegmentation of neutrophil nuclei
+MP:0021176	asymmetrical hyposegmentation of neutrophil nuclei
+MP:0021177	increased neutrophil nuclear segmentation
+MP:0021178	abnormal eosinophil nuclear morphology
+MP:0021179	abnormal eosinophil nuclear segmentation
+MP:0021180	decreased eosinophil nuclear segmentation
+MP:0021181	increased eosinophil nuclear segmentation
+MP:0021182	decreased femoral compact bone area
+MP:0021183	increased femoral compact bone area
+MP:0021184	decreased bone mineral density of humerus
+MP:0021185	increased bone mineral density of humerus
+MP:0021186	decreased bone mineral density of vertebrae
+MP:0021187	increased bone mineral density of vertebrae
+MP:0021188	decreased bone mineral density of presacral vertebrae
+MP:0021189	increased bone mineral density of presacral vertebrae
+MP:0021190	decreased bone mineral density of lumbar vertebrae
+MP:0021191	increased bone mineral density of lumbar vertebrae
+MP:0021192	decreased bone mineral density of sacral vertebrae
+MP:0021193	increased bone mineral density of sacral vertebrae
+MP:0021194	decreased bone mineral density of caudal vertebrae
+MP:0021195	increased bone mineral density of caudal vertebrae
+MP:0021196	decreased bone mineral density of cervical vertebrae
+MP:0021197	increased bone mineral density of cervical vertebrae
+MP:0021198	abnormal sleep duration
 MP:0030000	abnormal subglottis morphology
 MP:0030001	subglottis stenosis
 MP:0030002	increased lung apoptosis
@@ -14302,8 +14335,8 @@ MP:0030978	impaired binding of sperm to zona pellucida
 MP:0030979	decreased spinal cord weight
 MP:0030980	abnormal acroplaxome morphology
 MP:0030981	abnormal dentate gyrus subgranular zone morphology
-MP:0030982	abnormal copulatory plug formation
-MP:0030983	failure of copulatory plug formation
+MP:0030982	abnormal copulatory plug deposition
+MP:0030983	failure of copulatory plug deposition
 MP:0030984	increased circulating osteocalcin level
 MP:0030985	decreased circulating osteocalcin level
 MP:0030986	striatum atrophy
@@ -14741,6 +14774,29 @@ MP:0031422	failure of superovulation
 MP:0031423	abnormal luteolysis
 MP:0031424	enhanced female fertility
 MP:0031425	enhanced male fertility
+MP:0031426	increased sperm motility
+MP:0031427	increased sperm progressive motility
+MP:0031428	lens dislocation
+MP:0031429	lens luxation
+MP:0031430	lens subluxation
+MP:0031431	increased spongiotrophoblast cell number
+MP:0031432	cornea perforation
+MP:0031433	decreased miscarriage rate
+MP:0031434	increased miscarriage rate
+MP:0031435	abnormal copulatory plug biosynthesis
+MP:0031436	decreased copulatory plug deposition
+MP:0031437	increased copulatory plug deposition
+MP:0031438	abnormal sperm radial spoke morphology
+MP:0031439	small lymphatic vessel
+MP:0031440	lymphatic vessel hypoplasia
+MP:0031441	increased periocular mesenchyme apoptosis
+MP:0031442	enlarged cerebral aqueduct
+MP:0031443	abnormal tongue position
+MP:0031444	glossoptosis
+MP:0031445	midline cleft upper lip
+MP:0031446	non-midline cleft upper lip
+MP:0031447	unilateral cleft upper lip
+MP:0031448	bilateral cleft upper lip
 MP:3000001	abnormal gastrula morphology
 MP:3000002	obsolete abnormal skull morphology
 MP:3000003	abnormal Ebner's gland morphology
