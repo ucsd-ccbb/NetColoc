@@ -119,7 +119,9 @@ License
 Citing NetColoc
 ---------------
 
-Coming soon...
+Rosenthal, Sara Brin, Sarah N. Wright, Sophie Liu, Christopher Churas, Daisy Chilin-Fuentes, Chi-Hua Chen, Kathleen M. Fisch, Dexter Pratt, Jason F. Kreisberg, and Trey Ideker. "Mapping the common gene networks that underlie related diseases." Nature protocols (2023): 1-15.
+
+https://www.nature.com/articles/s41596-022-00797-1
 
 Credits
 -------
