@@ -5,11 +5,6 @@ import os
 import re
 from setuptools import setup, find_packages
 
-with open(os.path.join('netcoloc', '__init__.py')) as ver_file:
-    for line in ver_file:
-        if line.startswith('__version__'):
-            version=re.sub("'", "", line[line.index("'"):]).rstrip()
-
 with open('README.rst') as readme_file:
     readme = readme_file.read()
 
@@ -41,7 +36,7 @@ test_requirements = [
 
 setup(
     name='netcoloc',
-    version=version,
+    version='0.1.7',
     description="",
     long_description=readme + '\n\n' + history,
     author="Brin Rosenthal, Sophie Liu, Sarah Wright",
