@@ -52,7 +52,7 @@ Dependencies
 
 NetColoc requires the following python packages:
 
-.. note:: All of the following packages minus `DDOT <https://github.com/idekerlab/ddot>`__ and `cdapsutil <https://pypi.org/project/cdapsutil>`__ will be automatically installed via ``pip install netcoloc``
+.. note:: All of the following packages will be automatically installed via ``pip install netcoloc``
 
 * `click <https://pypi.org/project/click>`__
 * `matplotlib <https://pypi.org/project/matplotlib>`__
@@ -67,39 +67,8 @@ NetColoc requires the following python packages:
 * `gprofiler-official >= 1.0.0 <https://pypi.org/project/gprofiler-official/>`__
 * `ipywidgets <https://pypi.org/project/ipywidgets>`__
 * `ipycytoscape <https://ipycytoscape.readthedocs.io/en/latest>`__
-
-* `python3 branch of DDOT <https://github.com/idekerlab/ddot/tree/python3>`__
-
-  `DDOT <https://github.com/idekerlab/ddot>`__ can be installed one of
-  two ways:
-
-  1. To install `DDOT <https://github.com/idekerlab/ddot>`__ by downloading
-     the zip file of the source tree:
-
-     .. code-block::
-
-        wget https://github.com/idekerlab/ddot/archive/refs/heads/python3.zip
-        unzip python3.zip
-        cd ddot-python3
-        python setup.py bdist_wheel
-        pip install dist/ddot*py3*whl
-
-  2. To install `DDOT <https://github.com/idekerlab/ddot>`__ by cloning the repo:
-
-     .. code-block::
-
-        git clone --branch python3 https://github.com/idekerlab/ddot.git
-        cd ddot
-        python setup.py bdist_wheel
-        pip install dist/ddot*py3*whl
-
-  .. note::
-    Due to dependency issue DDOT, will not work with Python 3.10 or later
-
-
-Additional requirements for full functionality of example notebook:
-
-* `cdapsutil >= 0.2.0a1 <https://pypi.org/project/cdapsutil/>`__
+* `obonet <https://pypi.org/project/obonet/>`__
+* `cdapsutil <https://pypi.org/project/cdapsutil/>`__
 
 
 Installation
@@ -121,7 +90,7 @@ Citing NetColoc
 
 Rosenthal, Sara Brin, Sarah N. Wright, Sophie Liu, Christopher Churas, Daisy Chilin-Fuentes, Chi-Hua Chen, Kathleen M. Fisch, Dexter Pratt, Jason F. Kreisberg, and Trey Ideker. "Mapping the common gene networks that underlie related diseases." Nature protocols (2023): 1-15.
 
-https://www.nature.com/articles/s41596-022-00797-1
+`https://www.nature.com/articles/s41596-022-00797-1 <https://pypi.org/project/cdapsutil/>`
 
 Credits
 -------

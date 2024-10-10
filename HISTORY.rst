@@ -2,6 +2,17 @@
 History
 =======
 
+0.1.8 (2024-10-10)
+------------------
+* `obonet <https://pypi.org/project/obonet/>`__ added as a dependency, replacing `DDOT <https://github.com/idekerlab/ddot>`__ dependency
+* `cdapsutil <https://pypi.org/project/cdapsutil/>`__ added as a dependency
+* `network_colocalization` updated for compatability with `pandas>=2.0 <https://pypi.org/project/pandas/>`__
+* `validation` updated for compatability with `obonet <https://pypi.org/project/obonet/>`__. 
+Added ``validation.focus_ontology()`` to replace ``ddot.Ontology.focus()`` functionality, and 
+``validation.find_related_terms()`` and ``validation.get_MP_description()`` for analyzing Mammalian Phenotype Ontology terms. 
+* `example_notebooks` updated for compatibility with `pandas>=2.0 <https://pypi.org/project/pandas/>`__ and `obonet <https://pypi.org/project/obonet/>`__
+* `requirements_dev.txt` updated for `python=3.13`
+
 0.1.7 (2022-06-28)
 --------------------
 

@@ -19,7 +19,7 @@ with open('HISTORY.rst') as history_file:
 requirements = [
     'click>=6.0',
     'ndex2',
-    'networkx>=2.0',
+    'networkx>=2.0,<3.0',
     'mygene>=3.2.2',
     'scipy>=1.5.3',
     'numpy',
@@ -30,7 +30,9 @@ requirements = [
     'statsmodels',
     'gprofiler-official>=1.0.0',
     'ipycytoscape',
-    'ipywidgets'
+    'ipywidgets',
+    'cdapsutil',
+    'obonet'
 ]
 
 test_requirements = [
@@ -42,8 +44,8 @@ setup(
     version=version,
     description="",
     long_description=readme + '\n\n' + history,
-    author="Brin Rosenthal, Sophie Liu",
-    author_email='sbrosenthal@health.ucsd.edu, sol015@ucsd.edu',
+    author="Brin Rosenthal, Sophie Liu, Sarah Wright",
+    author_email='sbrosenthal@health.ucsd.edu, sol015@ucsd.edu, snwright@ucsd.edu',
     url='https://github.com/ucsd-ccbb/netcoloc',
     packages=find_packages(include=['netcoloc']),
     package_dir={'netcoloc':
