@@ -36,7 +36,7 @@ test_requirements = [
 
 setup(
     name='netcoloc',
-    version='0.1.7',
+    version='0.1.8',
     description="",
     long_description=readme + '\n\n' + history,
     author="Brin Rosenthal, Sophie Liu, Sarah Wright",
