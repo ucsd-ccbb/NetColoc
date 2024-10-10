@@ -255,8 +255,8 @@ def transform_edges(G, method='cosine_sim', edge_weight_threshold=0.95):
         if max(adj_temp[i]) < 1.0:
             for j in np.arange(i + 1, len(nodelist)):
                 n2 = nodelist[j]
-                cos_pc.loc[n1][n2] = 1.0
-                cos_pc.loc[n2][n1] = 1.0
+                cos_pc.loc[n1, n2] = 1.0
+                cos_pc.loc[n2, n1] = 1.0
             continue
         for j in np.arange(i+1, len(nodelist)):
             n2 = nodelist[j]
@@ -270,8 +270,8 @@ def transform_edges(G, method='cosine_sim', edge_weight_threshold=0.95):
                 # cosine distance to maximum distance aka 1.0
                 cosine_distance = 1.0
 
-            cos_pc.loc[n1][n2] = cosine_distance
-            cos_pc.loc[n2][n1] = cosine_distance
+            cos_pc.loc[n1, n2] = cosine_distance
+            cos_pc.loc[n2, n1] = cosine_distance
 
     # Rank transform 1-cos distance
     logger.info('rank transforming...')

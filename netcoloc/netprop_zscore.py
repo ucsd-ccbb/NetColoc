@@ -159,7 +159,7 @@ def netprop_zscore(seed_gene_file, seed_gene_file_delimiter=None, num_reps=10, a
     # Save z-score results
     z_scores.name = 'z-scores'
     if save_z_scores:
-      z_scores.to_csv(out_name + '_z_scores_' + str(num_reps) + '_reps.tsv', sep='\t')
+        z_scores.to_csv(out_name + '_z_scores_' + str(num_reps) + '_reps.tsv', sep='\t')
 
     # If save_final_heat is true, save out the final heat vector
     if save_final_heat:
@@ -262,7 +262,7 @@ def calculate_heat_zscores(individual_heats_matrix, nodes, degrees, seed_genes, 
 
     # Calculate z-scores
     with warnings.catch_warnings():
-      warnings.simplefilter("ignore")
-      z_scores = (np.log(final_heat) - np.nanmean(np.log(random_final_heats), axis=0)) / np.nanstd(np.log(random_final_heats), axis=0)
+        warnings.simplefilter("ignore")
+        z_scores = (np.log(final_heat) - np.nanmean(np.log(random_final_heats), axis=0)) / np.nanstd(np.log(random_final_heats), axis=0)
 
     return z_scores, final_heat, random_final_heats

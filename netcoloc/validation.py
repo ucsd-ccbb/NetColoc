@@ -6,23 +6,37 @@
 import warnings
 import numpy as np
 import pandas as pd
+import pickle
+import obonet as obo
 
 import requests
 from scipy.stats import hypergeom
 from statsmodels.stats import contingency_tables
+import networkx as nx
 
 try:
     # need ddot to parse the ontology
     import ddot
     from ddot import Ontology
     DDOT_LOADED = True
+    warnings.warn('Use of ddot is deprecated in netcoloc>=0.1.8. By default, ddot will no longer be use, to force use of ddot set use_ddot=True for all validation functions.')
 except ImportError as ie:
-    warnings.warn('Import of ddot failed. NetColoc will not work properly: + ' + str(ie))
     DDOT_LOADED = False
 
 # find human orthologs of mouse genes
 import mygene
 mg = mygene.MyGeneInfo()
+
+
+def focus_ontology(ont, start_node, use_ddot=False):
+    successors = nx.dfs_successors(ont, start_node)
+    predecessors = nx.dfs_successors(nx.reverse(ont, copy=True), start_node)
+    focus_list = set([start_node])
+    for k,v in successors.items():
+        focus_list = focus_list.union(set(v))
+    for k,v in predecessors.items():
+        focus_list = focus_list.union(set(v))
+    return list(focus_list)
 
 
 def load_MGI_mouseKO_data(url='http://www.informatics.jax.org/downloads/reports/MGI_PhenoGenoMP.rpt'):
@@ -68,60 +82,64 @@ def load_MGI_mouseKO_data(url='http://www.informatics.jax.org/downloads/reports/
     return mgi_df
 
 
-def load_MPO(url='http://www.informatics.jax.org/downloads/reports/MPheno_OBO.ontology'):
+def load_MPO(url='http://www.informatics.jax.org/downloads/reports/MPheno_OBO.ontology', use_ddot=False):
     """
     Function to parse and load mouse phenotype ontology, using DDOT's ontology module
 
     :param url: URL containing MPO ontology file
     :type url: str
+    :param use_ddot: Use the deprecated DDOT package to load the MGI ontology. Default False to use obonet
+    :type use_ddot: boolean
     :return: MPO parsed using DDOT
     :rtype: :py:class:`ddot.Ontology`
     :raises ImportError: If DDOT package is not found
     """
-
-    # download the mammalian phenotype ontology, parse with ddot
-    r = requests.get(url,allow_redirects=True)
-    open('MPheno_OBO.ontology','wb').write(r.content)
-    if DDOT_LOADED is False:
-        raise ImportError('ddot package is required to use this method')
-    ddot.parse_obo('MPheno_OBO.ontology',
-                   'parsed_mp.txt',
-                  'id2name_mp.txt',
-                  'id2namespace_mp.txt',
-                  'altID_mp.txt')
-
-
-    MP2desc = pd.read_csv('id2name_mp.txt',sep='\t',
-                          names=['MP','description'],index_col='MP')
-
-    MP2desc=MP2desc.loc[MP2desc.index.dropna()] # drop NAN from index
-    print(len(MP2desc))
+    if use_ddot:
+        # download the mammalian phenotype ontology, parse with ddot
+        r = requests.get(url,allow_redirects=True)
+        open('MPheno_OBO.ontology','wb').write(r.content)
+        if DDOT_LOADED is False:
+            raise ImportError('ddot package is required to use this method')
+        ddot.parse_obo('MPheno_OBO.ontology',
+                       'parsed_mp.txt',
+                      'id2name_mp.txt',
+                      'id2namespace_mp.txt',
+                      'altID_mp.txt')
 
 
-    display(MP2desc.head())
+        MP2desc = pd.read_csv('id2name_mp.txt',sep='\t',
+                              names=['MP','description'],index_col='MP')
 
-    hierarchy = pd.read_table('parsed_mp.txt',
-                              sep='\t',
-                              header=None,
-                              names=['Parent', 'Child', 'Relation', 'Namespace'])
+        MP2desc=MP2desc.loc[MP2desc.index.dropna()] # drop NAN from index
+        print(len(MP2desc))
 
-    display(hierarchy.head())
 
-    MPO = Ontology.from_table(
-        table=hierarchy,
-        parent='Parent',
-        child='Child',
-        add_root_name='MP:00SUPER',
-        ignore_orphan_terms=True)
+        #display(MP2desc.head())
 
-    # add description to node attribute
-    terms_keep = list(np.unique(hierarchy['Parent'].tolist()+hierarchy['Child'].tolist()))
-    MPO.node_attr=MP2desc.loc[terms_keep]
+        hierarchy = pd.read_table('parsed_mp.txt',
+                                  sep='\t',
+                                  header=None,
+                                  names=['Parent', 'Child', 'Relation', 'Namespace'])
 
+        #display(hierarchy.head())
+
+        MPO = Ontology.from_table(
+            table=hierarchy,
+            parent='Parent',
+            child='Child',
+            add_root_name='MP:00SUPER',
+            ignore_orphan_terms=True)
+
+        # add description to node attribute
+        terms_keep = list(np.unique(hierarchy['Parent'].tolist()+hierarchy['Child'].tolist()))
+        MPO.node_attr=MP2desc.loc[terms_keep]
+        
+    else:
+        MPO = obo.read_obo(url)
     return MPO
 
 
-def MPO_enrichment_root(hier_df,MPO,mgi_df,MP_focal_list,G_int,verbose=True):
+def MPO_enrichment_root(hier_df,MPO,mgi_df,MP_focal_list,G_int,verbose=True, use_ddot=False):
     """
     Function to test for enrichment of genes resulting in selected phenotypes
     when knocked out in root node of NetColoc hierarchy.
@@ -147,6 +165,8 @@ def MPO_enrichment_root(hier_df,MPO,mgi_df,MP_focal_list,G_int,verbose=True):
     :type G_int: :py:class:`networkx.Graph`
     :param verbose: If true, print out some progress
     :type verbose: bool
+    :param use_ddot: Use the deprecated DDOT package to load the MGI ontology. Default False to use obonet
+    :type use_ddot: boolean
     :return: Dataframe containing enrichment results
     :rtype: :py:class:`pandas.DataFrame`
     """
@@ -164,15 +184,23 @@ def MPO_enrichment_root(hier_df,MPO,mgi_df,MP_focal_list,G_int,verbose=True):
     G_int_nodes = list(G_int.nodes())
 
     for MP_focal in MP_focal_list:
-        MP_desc_focal = dict(MPO.node_attr['description'])[MP_focal]
+        if use_ddot:
+            assert DDOT_LOADED, 'DDOT not successfully loaded. Please check installation or set use_ddot=False'
 
-        # focus the hierarchy on one branch, and look up all terms within that branch
-        if len(MPO.parent_2_child[MP_focal])>0:
-            MPO_focal = MPO.focus(MP_focal,verbose=False)
-            focal_terms = MPO_focal.terms
-        else:  # if the term has no children, just look at that term
-            focal_terms=[MP_focal]
-
+            MP_desc_focal = dict(MPO.node_attr['description'])[MP_focal]
+            # focus the hierarchy on one branch, and look up all terms within that branch
+            if len(MPO.parent_2_child[MP_focal])>0:
+                MPO_focal = MPO.focus(MP_focal,verbose=False)
+                focal_terms = MPO_focal.terms
+            else:  # if the term has no children, just look at that term
+                focal_terms=[MP_focal]
+        else:
+            MP_desc_focal = MPO.nodes[MP_focal]['name']
+            if MPO.in_degree(MP_focal) > 0:
+                focal_terms = focus_ontology(MPO, MP_focal)
+            else:
+                 focal_terms=[MP_focal]
+        
         # check enrichment in root node
         focal_genes = hier_df['CD_MemberList'].loc[root_node].split(' ')
         mgi_temp = mgi_df[mgi_df['MP'].isin(focal_terms)]
@@ -216,13 +244,17 @@ def MPO_enrichment_root(hier_df,MPO,mgi_df,MP_focal_list,G_int,verbose=True):
                                'log_OR_CI_lower':OR_CI_lower,'log_OR_CI_upper':OR_CI_upper,
                               'num_genes_in_term':num_genes_in_term_list},
                               index=MP_keep_list)
-
-    root_KO_df['MP_description'] = root_KO_df.index.map(dict(MPO.node_attr['description']))
+    
+    if use_ddot:
+        root_KO_df['MP_description'] = root_KO_df.index.map(dict(MPO.node_attr['description']))
+    else:
+        term_description_dict = {t: MPO.nodes[t]['name'] for t in MPO.nodes}
+        root_KO_df['MP_description'] = root_KO_df.index.map(term_description_dict)
 
     return root_KO_df
 
 
-def MPO_enrichment_full(hier_df,MPO,mgi_df,MP_focal_list,G_int):
+def MPO_enrichment_full(hier_df,MPO,mgi_df,MP_focal_list,G_int, use_ddot=False):
     """
     Function to test for enrichment of genes resulting in selected phenotypes
     when knocked out in every NetColoc system (not just root)
@@ -244,21 +276,30 @@ def MPO_enrichment_full(hier_df,MPO,mgi_df,MP_focal_list,G_int):
     :type MP_focal_list: list
     :param G_int: Background interactome
     :type G_int: :py:class:`networkx.Graph`
+    :param use_ddot: Use the deprecated DDOT package to load the MGI ontology. Default False to use obonet
+    :type use_ddot: boolean
     :return: Dataframe containing enrichment results
     :rtype: :py:class:`pandas.DataFrame`
     """
     MP_full_results_df=pd.DataFrame(index=hier_df.index.tolist())
 
     for MP_focal in MP_focal_list:
-        MP_desc_focal = dict(MPO.node_attr['description'])[MP_focal]
-        print(MP_desc_focal)
+        if use_ddot:
+            assert DDOT_LOADED, 'DDOT not successfully loaded. Please check installation or set use_ddot=False'
 
-        # focus the hierarchy on one branch, and look up all terms within that branch
-        if len(MPO.parent_2_child[MP_focal])>0:
-            MPO_focal = MPO.focus(MP_focal)
-            focal_terms = MPO_focal.terms
-        else:  # if the term has no children, just look at that term
-            focal_terms=[MP_focal]
+            MP_desc_focal = dict(MPO.node_attr['description'])[MP_focal]
+            # focus the hierarchy on one branch, and look up all terms within that branch
+            if len(MPO.parent_2_child[MP_focal])>0:
+                MPO_focal = MPO.focus(MP_focal,verbose=False)
+                focal_terms = MPO_focal.terms
+            else:  # if the term has no children, just look at that term
+                focal_terms=[MP_focal]
+        else:
+            MP_desc_focal = MPO.nodes[MP_focal]['name']
+            if MPO.in_degree(MP_focal) > 0:
+                focal_terms = focus_ontology(MPO, MP_focal)
+            else:
+                 focal_terms=[MP_focal]
 
         hyper_p_list = []
         num_genes_list = []
@@ -326,3 +367,37 @@ def MPO_enrichment_full(hier_df,MPO,mgi_df,MP_focal_list,G_int):
             MP_full_results_df=MP_full_results_df.join(MP_focal_df)
 
     return MP_full_results_df
+
+
+def find_related_terms(MPO, keywords, use_ddot=False):
+    focal_list = []
+    if use_ddot:
+        assert validation.DDOT_LOADED, 'DDOT not successfully loaded. Please check installation or set use_ddot=False'
+        for t in MPO.node_attr.index.tolist():
+            descr_temp = MPO.node_attr.loc[t]['description']
+            if check_keywords(keywords, descr_temp):
+                focal_list.append(t)
+    else:
+        for t in MPO.nodes:
+            descr_temp = MPO.nodes[t]['name']
+            if check_keywords(keywords, descr_temp):
+                focal_list.append(t)
+    return focal_list
+            
+def check_keywords(keywords, description):
+    for keyword in keywords:
+        if description.find(keyword) >-1:
+            return True
+    return False
+
+
+def get_MP_description(term_id, ontology, use_ddot=False, include_definition=False):
+    if use_ddot:
+        assert validation.DDOT_LOADED, 'DDOT not successfully loaded. Please check installation or set use_ddot=False'
+        return ontology.node_attr.loc[term_id, "description"]
+    else:
+        term_info = ontology.nodes[term_id]
+        if include_definition:    
+            return f'{term_info["name"]}: {term_info["def"]}'
+        else:
+            return term_info["name"]
