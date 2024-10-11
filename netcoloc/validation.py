@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import pickle
 import obonet as obo
+import os
 
 import requests
 from scipy.stats import hypergeom
@@ -19,7 +20,7 @@ try:
     import ddot
     from ddot import Ontology
     DDOT_LOADED = True
-    warnings.warn('Use of ddot is deprecated in netcoloc>=0.1.8. By default, ddot will no longer be use, to force use of ddot set use_ddot=True for all validation functions.')
+    warnings.warn('Use of ddot will be deprecated in netcoloc>=0.1.9. By default, ddot will no longer be use, to force use of ddot set use_ddot=True for all validation functions.', DeprecationWarning)
 except ImportError as ie:
     DDOT_LOADED = False
 
@@ -82,7 +83,11 @@ def load_MGI_mouseKO_data(url='http://www.informatics.jax.org/downloads/reports/
     return mgi_df
 
 
-def load_MPO(url='http://www.informatics.jax.org/downloads/reports/MPheno_OBO.ontology', use_ddot=False):
+## Changes to implement:
+ #1. Add reuse of data, and variable to update
+ #2. 
+def load_MPO(url='http://www.informatics.jax.org/downloads/reports/MPheno_OBO.ontology', 
+            use_ddot=False, update=True, data_loc=None):
     """
     Function to parse and load mouse phenotype ontology, using DDOT's ontology module
 
@@ -94,12 +99,21 @@ def load_MPO(url='http://www.informatics.jax.org/downloads/reports/MPheno_OBO.on
     :rtype: :py:class:`ddot.Ontology`
     :raises ImportError: If DDOT package is not found
     """
+    if data_loc is not None:
+        obo_file_target = os.path.join(data_loc, url.split('/')[-1])
+    else:
+        obo_file_target = url.split('/')[-1]
+    
     if use_ddot:
+        # add deprecation warning
+        warnings.warn('Use of ddot will be deprecated from version 0.1.9', DeprecationWarning)
         # download the mammalian phenotype ontology, parse with ddot
-        r = requests.get(url,allow_redirects=True)
-        open('MPheno_OBO.ontology','wb').write(r.content)
-        if DDOT_LOADED is False:
-            raise ImportError('ddot package is required to use this method')
+        if update or (not os.path.exists(obo_file_target)):
+            r = requests.get(url,allow_redirects=True)
+            open('MPheno_OBO.ontology','wb').write(r.content)
+            if DDOT_LOADED is False:
+                raise ImportError('ddot package is required to use this method')
+        
         ddot.parse_obo('MPheno_OBO.ontology',
                        'parsed_mp.txt',
                       'id2name_mp.txt',
@@ -113,16 +127,11 @@ def load_MPO(url='http://www.informatics.jax.org/downloads/reports/MPheno_OBO.on
         MP2desc=MP2desc.loc[MP2desc.index.dropna()] # drop NAN from index
         print(len(MP2desc))
 
-
-        #display(MP2desc.head())
-
         hierarchy = pd.read_table('parsed_mp.txt',
                                   sep='\t',
                                   header=None,
                                   names=['Parent', 'Child', 'Relation', 'Namespace'])
-
-        #display(hierarchy.head())
-
+        
         MPO = Ontology.from_table(
             table=hierarchy,
             parent='Parent',
@@ -135,7 +144,10 @@ def load_MPO(url='http://www.informatics.jax.org/downloads/reports/MPheno_OBO.on
         MPO.node_attr=MP2desc.loc[terms_keep]
         
     else:
-        MPO = obo.read_obo(url)
+        if update or (not os.path.exists(obo_file_target)):
+            MPO = obo.read_obo(url)
+        else:
+            MPO = obo.read_obo(obo_file_target)
     return MPO
 
 
@@ -185,6 +197,7 @@ def MPO_enrichment_root(hier_df,MPO,mgi_df,MP_focal_list,G_int,verbose=True, use
 
     for MP_focal in MP_focal_list:
         if use_ddot:
+            warnings.warn('Use of ddot will be deprecated from version 0.1.9', DeprecationWarning)
             assert DDOT_LOADED, 'DDOT not successfully loaded. Please check installation or set use_ddot=False'
 
             MP_desc_focal = dict(MPO.node_attr['description'])[MP_focal]
@@ -246,6 +259,7 @@ def MPO_enrichment_root(hier_df,MPO,mgi_df,MP_focal_list,G_int,verbose=True, use
                               index=MP_keep_list)
     
     if use_ddot:
+        warnings.warn('Use of ddot will be deprecated from version 0.1.9', DeprecationWarning)
         root_KO_df['MP_description'] = root_KO_df.index.map(dict(MPO.node_attr['description']))
     else:
         term_description_dict = {t: MPO.nodes[t]['name'] for t in MPO.nodes}
@@ -285,6 +299,7 @@ def MPO_enrichment_full(hier_df,MPO,mgi_df,MP_focal_list,G_int, use_ddot=False):
 
     for MP_focal in MP_focal_list:
         if use_ddot:
+            warnings.warn('Use of ddot will be deprecated from version 0.1.9', DeprecationWarning)
             assert DDOT_LOADED, 'DDOT not successfully loaded. Please check installation or set use_ddot=False'
 
             MP_desc_focal = dict(MPO.node_attr['description'])[MP_focal]
@@ -372,7 +387,8 @@ def MPO_enrichment_full(hier_df,MPO,mgi_df,MP_focal_list,G_int, use_ddot=False):
 def find_related_terms(MPO, keywords, use_ddot=False):
     focal_list = []
     if use_ddot:
-        assert validation.DDOT_LOADED, 'DDOT not successfully loaded. Please check installation or set use_ddot=False'
+        warnings.warn('Use of ddot will be deprecated from version 0.1.9', DeprecationWarning)
+        assert DDOT_LOADED, 'DDOT not successfully loaded. Please check installation or set use_ddot=False'
         for t in MPO.node_attr.index.tolist():
             descr_temp = MPO.node_attr.loc[t]['description']
             if check_keywords(keywords, descr_temp):
@@ -393,7 +409,8 @@ def check_keywords(keywords, description):
 
 def get_MP_description(term_id, ontology, use_ddot=False, include_definition=False):
     if use_ddot:
-        assert validation.DDOT_LOADED, 'DDOT not successfully loaded. Please check installation or set use_ddot=False'
+        warnings.warn('Use of ddot will be deprecated from version 0.1.9', DeprecationWarning)
+        assert DDOT_LOADED, 'DDOT not successfully loaded. Please check installation or set use_ddot=False'
         return ontology.node_attr.loc[term_id, "description"]
     else:
         term_info = ontology.nodes[term_id]
