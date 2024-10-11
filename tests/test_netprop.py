@@ -59,6 +59,117 @@ class TestNetcolocNetProp(unittest.TestCase):
         testdir = os.path.dirname(__file__)
         return os.path.join(testdir, 'data',
                             'testppi.cx')
+        
+    ### Test get_normalized_adjacency_matrix ###
+
+    # Handle graphs with no zero-degree nodes correctly
+    def test_handle_graphs_with_no_zero_degree_nodes(self):
+        # Create a graph with no zero-degree nodes
+        graph = nx.Graph()
+        graph.add_nodes_from([1, 2, 3])
+        graph.add_edges_from([(1, 2), (2, 3)])
+
+        # Call the function under test
+        result = netprop.get_normalized_adjacency_matrix(graph)
+
+        # Check if the result is not empty
+        self.assertTrue(result.any())
+    
+    def test_pass_adjacency_matrix(self):
+        # Create a test graph
+        G = nx.Graph()
+        G.add_nodes_from([1, 2, 3])
+        G.add_edges_from([(1, 2), (2, 3)])
+        
+        # Calculate the normalized adjacency matrix
+        result = netprop.get_normalized_adjacency_matrix(nx.to_numpy_array(G), conserve_heat=True)
+        
+        # Define the expected result
+        expected_result = np.array([[0.0, 1, 0.0],
+                                    [0.5, 0.0, 0.5],
+                                    [0.0, 1, 0.0]])
+        np.testing.assert_array_almost_equal(result, expected_result)
+        
+        
+        # Calculate normalized adjacency matrix for a weighted graph with conserved heat
+    def test_normalized_adjacency_matrix_weighted_with_conserve_heat(self):
+        # Create a test graph
+        G = nx.Graph()
+        G.add_nodes_from([1, 2, 3])
+        G.add_weighted_edges_from([(1, 2, 0.5), (2, 3, 0.8)])
+
+        # Calculate the normalized adjacency matrix
+        result = netprop.get_normalized_adjacency_matrix(G, conserve_heat=True, weighted=True)
+
+        # Define the expected result
+        expected_result = np.array([[0.0, 0.5, 0.0],
+                                    [0.25, 0.0, 0.4],
+                                    [0.0, 0.8, 0.0]])
+
+        # Check if the result matches the expected result
+        np.testing.assert_array_almost_equal(result, expected_result)
+        
+    def test_normalized_adjacency_matrix_weighted_without_conserve_heat(self):
+        # Create a test graph
+        G = nx.Graph()
+        G.add_nodes_from([1, 2, 3])
+        G.add_weighted_edges_from([(1, 2, 0.5), (2, 3, 0.8)])
+
+        # Calculate the normalized adjacency matrix
+        result = netprop.get_normalized_adjacency_matrix(G, conserve_heat=False, weighted=True)
+
+        # Define the expected result
+        expected_result = np.array([[0.0, 0.5/np.sqrt(2), 0.0],
+                                    [0.5/np.sqrt(2), 0.0, 0.8/np.sqrt(2)],
+                                    [0.0, 0.8/np.sqrt(2), 0.0]])
+
+        # Check if the result matches the expected result
+        np.testing.assert_array_almost_equal(result, expected_result)
+        
+    def test_normalization_conservation(self):
+        graph = nx.Graph()
+        graph.add_nodes_from([1, 2, 3])
+        graph.add_edges_from([(1, 2), (2, 3)])
+
+        # Call the function under test
+        result = netprop.get_normalized_adjacency_matrix(graph, conserve_heat=True)
+        # assert row sums are 1
+        self.assertTrue(np.allclose(result.sum(axis=1), np.ones(3)))
+        
+        result2 = netprop.get_normalized_adjacency_matrix(graph, conserve_heat=False)
+        # assert row sums are equal to degrees
+        self.assertTrue(np.allclose(result2.sum(axis=1), np.array([1, 2, 1])/np.sqrt(2)))
+
+    def test_normalization_warns_weighted_unweighted_input(self):
+        graph = nx.Graph()
+        graph.add_nodes_from([1, 2, 3])
+        graph.add_edges_from([(1, 2), (2, 3)])
+
+        # Call the function under test
+        with self.assertWarns(UserWarning):
+            netprop.get_normalized_adjacency_matrix(graph, weighted=True)
+
+    def test_normalization_warns_degree_zero(self):
+        graph = nx.Graph()
+        graph.add_nodes_from([1, 2, 3])
+        graph.add_edges_from([(1, 2), (2, 3)])
+        graph.add_node(4)
+        self.assertRaises(AssertionError, netprop.get_normalized_adjacency_matrix, graph)
+        
+    def test_normalization_multigraph(self):
+        G = nx.MultiGraph()
+        self.assertRaises(ValueError, netprop.get_normalized_adjacency_matrix, G)
+
+    def test_normalization_directed(self):
+        G = nx.DiGraph()
+        self.assertRaises(ValueError, netprop.get_normalized_adjacency_matrix, G)
+        
+    ### Test network propagation ###
+    
+    def test_heats_catch_bad_alpha(self):
+        self.assertRaises(AssertionError, netprop.get_individual_heats_matrix, np.array([0]), alpha=10)
+        self.assertRaises(AssertionError, netprop.get_individual_heats_matrix, np.array([0]), alpha=-1)
+
 
     def test_netprop_undirected(self):
         """
@@ -133,48 +244,6 @@ class TestNetcolocNetProp(unittest.TestCase):
         expected = [891/980, 9/98, 9/980]
         for i, node in enumerate(F.keys()):
             self.assertAlmostEqual(expected[i], F[node])
-
-    def test_normalization_multigraph(self):
-        #TODO
-        pass
-
-    def test_normalization_undirected(self):
-        #TODO
-        pass
-
-    def test_normalization_directed(self):
-        #TODO
-        pass
-
-    def test_normalization_conservation(self):
-        #TODO
-        pass
-
-    def test_normalization_weighting(self):
-        #TODO
-        pass
-
-    def test_normalization_warns_weighted_unweighted_input(self):
-        #TODO
-        pass
-
-    def test_normalization_warns_degree_zero(self):
-        g41 = self.g.copy()
-        g41.remove_edge(180, 195, 0)
-        g41.remove_edge(190, 195, 0)
-        self.assertRaises(AssertionError, netprop.get_normalized_adjacency_matrix, g41)
-
-    def test_heats_symmetric(self):
-        #TODO
-        pass
-
-    def test_heats_asymmetric(self):
-        #TODO
-        pass
-
-    def test_heats_catch_bad_alpha(self):
-        self.assertRaises(AssertionError, netprop.get_individual_heats_matrix, np.array([0]), alpha=10)
-        self.assertRaises(AssertionError, netprop.get_individual_heats_matrix, np.array([0]), alpha=-1)
 
 
 if __name__ == '__main__':

@@ -7,7 +7,7 @@
 
 import os
 import warnings
-from tqdm.auto import tqdm
+from tqdm import tqdm
 import ndex2
 # Internal module convenience imports
 from netcoloc.netcoloc_utils import *
@@ -124,6 +124,10 @@ def netprop_zscore(seed_gene_file, seed_gene_file_delimiter=None, num_reps=10, a
     if 'None' in interactome.nodes():
         interactome.remove_node('None')
     nodes = list(interactome.nodes)
+    
+    if len(nodes) == 0:
+        warnings.warn("Interactome is empty. Returning empty z-scores and random final heats.")
+        return pd.Series(), np.array([])
 
     # Log interactome num nodes and edges for diagnostic purposes
     if verbose:
