@@ -60,6 +60,8 @@ To install this version, please use the following command:
 
      pip install netcoloc==0.1.6
 
+And follow the additional installation instructions at `<https://pypi.org/project/netcoloc/0.1.6/>`__.
+
 The original source code and example notebooks can be acquired from Zenodo: `DOI:6654561 <https://doi.org/10.5281/zenodo.6654561>`__, or from GitHub:
 
 ::
