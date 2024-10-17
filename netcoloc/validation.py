@@ -14,6 +14,7 @@ import requests
 from scipy.stats import hypergeom
 from statsmodels.stats import contingency_tables
 import networkx as nx
+from collections import defaultdict
 
 try:
     # need ddot to parse the ontology
@@ -40,7 +41,8 @@ def focus_ontology(ont, start_node, use_ddot=False):
     return list(focus_list)
 
 
-def load_MGI_mouseKO_data(url='http://www.informatics.jax.org/downloads/reports/MGI_PhenoGenoMP.rpt'):
+def load_MGI_mouseKO_data(url='http://www.informatics.jax.org/downloads/reports/MGI_PhenoGenoMP.rpt',
+                          update=False, data_loc=None, map_using='mygeneinfo', verbose=False):
     """
     Function to parse and load mouse knockout data from MGI.
 
@@ -50,44 +52,94 @@ def load_MGI_mouseKO_data(url='http://www.informatics.jax.org/downloads/reports/
     :rtype: :py:class:`pandas.DataFrame`
     """
     # download MGI phenotype data
-    r = requests.get(url,allow_redirects=True)
-    open('MGI_PhenoGenoMP.rpt', 'wb').write(r.content)
+    if data_loc is not None:
+        rpt_file_target = os.path.join(data_loc, url.split('/')[-1])
+    else:
+        rpt_file_target = url.split('/')[-1]
+    
+    if update or (not os.path.exists(rpt_file_target)):
+        r = requests.get(url,allow_redirects=True)
+        open(rpt_file_target, 'wb').write(r.content)
 
     # parse the downloaded MGI phenotype data
-    mgi_df = pd.read_csv('MGI_PhenoGenoMP.rpt', sep='\t',
+    mgi_df = pd.read_csv(rpt_file_target, sep='\t',
                         names=['MGI_Allele_Accession_ID',
                                'Allele symbol', 'involves',
                                'MP', 'PMID', 'MGI_marker_accession_ID'])
-    # extract gene names
-    gene_name = [a.split('<')[0] for a in mgi_df['Allele symbol'].tolist()]
-    mgi_df['gene_name']=gene_name
-    mgi_df.index=mgi_df['gene_name']
+    
+    mapping = map_mgi_to_human_orthologs(mgi_df, map_using=map_using, verbose=verbose, data_loc=data_loc, update=update)
 
-    # map mouse genes to human orthologs
-    mouse_genes = list(np.unique(mgi_df['gene_name']))
-    mg_mapped = mg.querymany(mouse_genes,
-                             as_dataframe=True, species=['mouse','human'],
-                             scopes='symbol', fields='symbol')
-
-    # drop genes with no human ortholog
-    print(len(mg_mapped))
-    mg_mapped = mg_mapped.dropna(subset=['symbol'])
-    print(len(mg_mapped))
-    # drop duplicates
-    mg_mapped = mg_mapped[~mg_mapped.index.duplicated(keep='first')]
-    print(len(mg_mapped))
-    mg_mapped.head()
-
-    mgi_df['human_ortholog']=mgi_df['gene_name'].map(dict(mg_mapped['symbol']))
+    mgi_df['human_ortholog']=mgi_df['gene_name'].map(mapping)
 
     return mgi_df
 
+def map_mgi_to_human_orthologs(mgi_df, map_using='mygeneinfo', verbose=False, data_loc=None, update=False):
+    # TODO needs testing for formatting.
+    assert map_using in ['mygeneinfo', 'mgi'], 'map_using must be one of mygeneinfo or mgi'
+    if map_using == 'mygeneinfo':
+        # extract gene names
+        gene_name = [a.split('<')[0] for a in mgi_df['Allele symbol'].tolist()]
+        mgi_df['gene_name']=gene_name
+        mgi_df.index=mgi_df['gene_name']
 
-## Changes to implement:
- #1. Add reuse of data, and variable to update
- #2. 
+        # map mouse genes to human orthologs
+        mouse_genes = list(np.unique(mgi_df['gene_name']))
+        mg_mapped = mg.querymany(mouse_genes,
+                                as_dataframe=True, species=['mouse','human'],
+                                scopes='symbol', fields='symbol')
+
+        # drop genes with no human ortholog
+        if verbose:
+            print('Raw', len(mg_mapped))
+        mg_mapped = mg_mapped.dropna(subset=['symbol'])
+        if verbose:
+            print('With symbol', len(mg_mapped))
+        # drop duplicates
+        mg_mapped = mg_mapped[~mg_mapped.index.duplicated(keep='first')]
+        if verbose:
+            print('Deduplicated', len(mg_mapped))
+            mg_mapped.head()
+        return dict(mapping['symbol'])
+    elif map_using == 'mgi':
+        if data_loc is not None:
+            mrk_target = os.path.join(data_loc, 'MRK_List2.rpt')
+            hmd_target = os.path.join(data_loc, 'HMD_HumanPhenotype.rpt')
+        else:
+            mrk_target = 'MRK_List2.rpt'
+            hmd_target = 'HMD_HumanPhenotype.rpt'
+        
+        if not os.path.exists(mrk_target) or update:
+            keep_url = "http://www.informatics.jax.org/downloads/reports/MRK_List2.rpt"
+            r_map = requests.get(keep_url, allow_redirects=True)
+            open(mrk_target, 'wb').write(r_map.content)
+        keep = pd.read_csv(mrk_target, sep="\t", usecols=["MGI Accession ID", "Marker Symbol",
+                            "Feature Type", "Marker Name"])
+        keep = keep.loc[keep["Feature Type"].isin(["protein coding gene"])].reset_index(drop=True)
+        mgi_df["MGI"] = mgi_df.MGI_marker_accession_ID.apply(lambda x: x.split("|"))
+        mgi_df = mgi_df.explode("MGI", ignore_index=True)
+        mgi_df["MGI"] = [mg if type(mg) is str else mg[0] for mg in mgi_df.MGI]
+        mgi_df = mgi_df.loc[mgi_df["MGI"].isin(keep["MGI Accession ID"])]
+        mgi_df = mgi_df.merge(keep.loc[:, ("MGI Accession ID", "Marker Symbol")], left_on="MGI",
+                            right_on="MGI Accession ID", how="left")
+
+        if not os.path.exists(hmd_target) or update:
+            map_url = "http://www.informatics.jax.org/downloads/reports/HMD_HumanPhenotype.rpt"
+            r_map = requests.get(map_url, allow_redirects=True)
+            open(hmd_target, 'wb').write(r_map.content)
+        mapping = pd.read_csv(hmd_target, sep="\t", header=None, usecols=[0, 2, 3],
+                            index_col=False, names=["symbol", "gene_name", "MGI"])
+        mapping = mapping.loc[mapping["MGI"].isin(keep["MGI Accession ID"])]
+
+        mg_mapped = mgi_df.merge(mapping, on="MGI", how="left")
+        mg_mapped.loc[mg_mapped.symbol.isna(), "gene_name"] = mg_mapped.loc[mg_mapped.symbol.isna(), "Marker Symbol"]
+        mg_mapped = mg_mapped.drop_duplicates()
+        mg_mapped.rename(columns={"symbol": 'human_ortholog'}, inplace=True)
+        
+        return mg_mapped.set_index('gene_name')['human_ortholog'].to_dict()
+
+
 def load_MPO(url='http://www.informatics.jax.org/downloads/reports/MPheno_OBO.ontology', 
-            use_ddot=False, update=True, data_loc=None):
+            use_ddot=False, update=False, data_loc=None):
     """
     Function to parse and load mouse phenotype ontology, using DDOT's ontology module
 
@@ -150,6 +202,28 @@ def load_MPO(url='http://www.informatics.jax.org/downloads/reports/MPheno_OBO.on
             MPO = obo.read_obo(obo_file_target)
     return MPO
 
+def format_mapping(mapping, gene_col='human_ortholog', term_col='MP'):
+        formatted_mapping = mapping.loc[:, (gene_col, term_col)].dropna().reset_index()
+        formatted_mapping = formatted_mapping.loc[:, (gene_col, term_col)]
+        formatted_mapping.columns = ["Gene", "Term"]
+        return formatted_mapping
+
+def map_genes_to_MPO(MPO, mapping, restrict_to=None, map_col='human_ortholog', MP_col='MP'):
+    if ('Gene' not in mapping.columns) or ('Term' not in mapping.columns):
+        mapping = format_mapping(mapping, gene_col=map_col, term_col=MP_col)
+    MPO_mapped = MPO.copy()
+    if restrict_to is not None:
+        mapping = mapping.loc[mapping.Gene.isin(restrict_to)]
+    mapping_dict = defaultdict(set)
+    for row in mapping.iterrows():
+        mapping_dict[row[1]['Term']].add(row[1]['Gene'])
+    # add any terms not present in mapping with empty sets to ensure attribute exists for all terms in the ontology
+    missing_terms = [t for t in MPO.nodes() if t not in mapping_dict]
+    mapping_dict = {**mapping_dict, **{t:set() for t in missing_terms}}
+    
+    # set node attributes will ignore additional terms, attribute will not exist for term not in mapping.    
+    nx.set_node_attributes(MPO_mapped, mapping_dict, 'term2genes')
+    return MPO_mapped
 
 def MPO_enrichment_root(hier_df,MPO,mgi_df,MP_focal_list,G_int,verbose=True, use_ddot=False):
     """
