@@ -59,8 +59,7 @@ test-all: ## run tests on every Python version with tox
 
 coverage: ## check code coverage quickly with the default Python
 
-		coverage run --source netcoloc setup.py test
-
+		coverage run --source netcoloc -m unittest discover
 		coverage report -m
 		coverage html
 		$(BROWSER) htmlcov/index.html
