@@ -2,14 +2,14 @@
 History
 =======
 
-0.1.8 (2024-10-10)
+1.0.0 (2024-10-10)
 ------------------
 * `obonet <https://pypi.org/project/obonet/>`__ added as a dependency, replacing `DDOT <https://github.com/idekerlab/ddot>`__ dependency
 * `cdapsutil <https://pypi.org/project/cdapsutil/>`__ added as a dependency
 * `network_colocalization` updated for compatability with `pandas>=2.0 <https://pypi.org/project/pandas/>`__
-* `validation` updated for compatability with `obonet <https://pypi.org/project/obonet/>`__. 
-Added ``validation.focus_ontology()`` to replace ``ddot.Ontology.focus()`` functionality, and 
-``validation.find_related_terms()`` and ``validation.get_MP_description()`` for analyzing Mammalian Phenotype Ontology terms. 
+* `validation` updated for compatability with `obonet <https://pypi.org/project/obonet/>`__.
+Added ``validation.focus_ontology()`` to replace ``ddot.Ontology.focus()`` functionality, and
+``validation.find_related_terms()`` and ``validation.get_MP_description()`` for analyzing Mammalian Phenotype Ontology terms.
 * `example_notebooks` updated for compatibility with `pandas>=2.0 <https://pypi.org/project/pandas/>`__ and `obonet <https://pypi.org/project/obonet/>`__
 * `requirements_dev.txt` updated for `python=3.13`
 
@@ -38,7 +38,7 @@ Added ``validation.focus_ontology()`` to replace ``ddot.Ontology.focus()`` funct
 
 * `example_notebooks/ASD_CHD_NetColoc_analysis.ipynb` updated with a note about using `numpy.save()`
   and `numpy.load()` to save and retrieve result from `netprop.get_individual_heats_matrix()`
-  
+
 
 
 
