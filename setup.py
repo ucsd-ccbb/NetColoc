@@ -11,6 +11,16 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
+with open(os.path.join('netcoloc', '__init__.py')) as ver_file:
+    for line in ver_file:
+        line = line.rstrip()
+        if line.startswith('__version__'):
+            version = re.sub("'", "", line[line.index("'"):])
+        elif line.startswith('__author__'):
+            author = re.sub("'", "", line[line.index("'"):])
+        elif line.startswith('__email__'):
+            email = re.sub("'", "", line[line.index("'"):])
+
 requirements = [
     'click>=6.0',
     'ndex2',
@@ -36,11 +46,11 @@ test_requirements = [
 
 setup(
     name='netcoloc',
-    version='0.1.8',
+    version=version,
     description="",
     long_description=readme + '\n\n' + history,
-    author="Brin Rosenthal, Sophie Liu, Sarah Wright",
-    author_email='sbrosenthal@health.ucsd.edu, sol015@ucsd.edu, snwright@ucsd.edu',
+    author=author,
+    author_email=email,
     url='https://github.com/ucsd-ccbb/netcoloc',
     packages=find_packages(include=['netcoloc']),
     package_dir={'netcoloc':
@@ -60,12 +70,12 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
+        'Programming Language :: Python :: 3.13'
     ],
     test_suite='tests',
     tests_require=test_requirements,
