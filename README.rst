@@ -5,13 +5,13 @@ NetColoc
 .. image:: https://img.shields.io/pypi/v/netcoloc.svg
         :target: https://pypi.python.org/pypi/netcoloc
 
-.. image:: https://img.shields.io/travis/ceofy/netcoloc.svg
-        :target: https://travis-ci.org/ceofy/netcoloc
+.. image:: https://app.travis-ci.com/ucsd-ccbb/NetColoc.svg?token=nGm2MDyYBLqUCSB4exJZ&branch=main
+    :target: https://app.travis-ci.com/ucsd-ccbb/NetColoc
 
 .. image:: https://readthedocs.org/projects/netcoloc/badge/?version=latest
         :target: https://netcoloc.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
-        
+
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.6773330.svg
         :target: https://doi.org/10.5281/zenodo.6773330
 
@@ -52,7 +52,7 @@ NetColoc is available on `PyPI <https://pypi.org/>`__
 Version Notes
 ~~~~~~~~~~~~~
 
-Prior version `netcoloc v0.1.6 <https://doi.org/10.5281/zenodo.6654561>`__ was utilized in the *NetColoc* publication: Rosenthal, S. B. et al., 
+Prior version `netcoloc v0.1.6 <https://doi.org/10.5281/zenodo.6654561>`__ was utilized in the *NetColoc* publication: Rosenthal, S. B. et al.,
 "`Mapping the common gene networks that underlie related diseases <https://doi.org/10.1038/s41596-022-00797-1>`__." Nature Protocols (2023).
 To install this version, please use the following command:
 
@@ -74,9 +74,9 @@ Documentation
 -------------
 
 For a quick-start on NetColoc's functionality, please see the
-`example notebooks <https://github.com/ucsd-ccbb/NetColoc/tree/main/example_notebooks>`__.  
+`example notebooks <https://github.com/ucsd-ccbb/NetColoc/tree/main/example_notebooks>`__.
 
-**Usage Note:** Please follow steps in example notebooks for correct usage of NetColoc. At this time, individual functionalities have not been tested for independent use. 
+**Usage Note:** Please follow steps in example notebooks for correct usage of NetColoc. At this time, individual functionalities have not been tested for independent use.
 
 Dependencies
 --------------
@@ -111,13 +111,13 @@ License
 Citing NetColoc
 ---------------
 
-Rosenthal, Sara Brin, Sarah N. Wright, Sophie Liu, Christopher Churas, Daisy Chilin-Fuentes, Chi-Hua Chen, Kathleen M. Fisch, Dexter Pratt, Jason F. Kreisberg, and Trey Ideker. 
+Rosenthal, Sara Brin, Sarah N. Wright, Sophie Liu, Christopher Churas, Daisy Chilin-Fuentes, Chi-Hua Chen, Kathleen M. Fisch, Dexter Pratt, Jason F. Kreisberg, and Trey Ideker.
 "Mapping the common gene networks that underlie related diseases." Nature protocols (2023): 1-15. `<https://doi.org/10.1038/s41596-022-00797-1>`__
 
 Other publications utilizing NetColoc:
 
-* Rosenthal, S. B. et al. A convergent molecular network underlying autism and congenital heart disease. Cell Syst. 12, 1094-1107.e6 (2021). `10.1016/j.cels.2021.07.009 <http://dx.doi.org/10.1016/j.cels.2021.07.009>`__ 
-* Wright, S. N. et al. Genome-wide association studies of human and rat BMI converge on synapse, epigenome, and hormone signaling networks. Cell Rep. 42, 112873 (2023). `10.1016/j.celrep.2023.112873 <http://dx.doi.org/10.1016/j.celrep.2023.112873>`__  
+* Rosenthal, S. B. et al. A convergent molecular network underlying autism and congenital heart disease. Cell Syst. 12, 1094-1107.e6 (2021). `10.1016/j.cels.2021.07.009 <http://dx.doi.org/10.1016/j.cels.2021.07.009>`__
+* Wright, S. N. et al. Genome-wide association studies of human and rat BMI converge on synapse, epigenome, and hormone signaling networks. Cell Rep. 42, 112873 (2023). `10.1016/j.celrep.2023.112873 <http://dx.doi.org/10.1016/j.celrep.2023.112873>`__
 
 
 
