@@ -47,7 +47,7 @@ test_requirements = [
 setup(
     name='netcoloc',
     version=version,
-    description="",
+    description="Analyze network colocalization of gene sets",
     long_description=readme + '\n\n' + history,
     author=author,
     author_email=email,
