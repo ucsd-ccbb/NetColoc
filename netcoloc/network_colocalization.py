@@ -252,7 +252,7 @@ def calculate_expected_overlap(z_scores_1, z_scores_2, seed1=None, seed2=None,
 
 
 def calculate_mean_z_score_distribution(z1, z2, num_reps=1000, zero_double_negatives=True, 
-                                        overlap_control="remove", seed1=[], seed2=[]):
+                                        overlap_control="remove", seed1=[], seed2=[], quant=False):
     """Determines size of expected mean combined `z=z1*z2` by randomly shuffling gene names
 
     Args:
@@ -274,6 +274,12 @@ def calculate_mean_z_score_distribution(z1, z2, num_reps=1000, zero_double_negat
         z2 = pd.DataFrame(z2, columns=["z"])
     z1z2 = z1.join(z2, lsuffix="1", rsuffix="2")
     z1z2 = z1z2.assign(zz=z1z2.z1 * z1z2.z2)
+    # get the number of rows with na values
+    if z1z2.isnull().any(axis=1).sum() < 5:
+        z1z2.dropna(inplace=True)
+    else:
+        print("!!!!!NaN in Z1Z2 (more than 4 rows):")
+        print(z1z2[z1z2.isnull().any(axis=1)])
     #print(z1z2.head())
     if overlap_control == "remove":
         seed_overlap = list(set(seed1).intersection(set(seed2)))
@@ -311,7 +317,13 @@ def calculate_mean_z_score_distribution(z1, z2, num_reps=1000, zero_double_negat
                     overlap_perm_z1z2[node] = overlap_z1[node] * z2[node]
             perm_z1z2 = np.concatenate([perm_z1z2, overlap_perm_z1z2])
                     
-        permutation_means[i] = np.mean(perm_z1z2)
+        permutation_means[i] = np.nanmean(perm_z1z2)
+        if np.isnan(permutation_means[i]):
+            print("!!!!!NaN in permutation_means, Z1Z2:")
+            print(z1z2[z1z2.isnull().any(axis=1)])
+            print("!!!PERM Z1Z2:")
+            print([i for i, x in enumerate(perm_z1z2) if np.isnan(x)])
+            break
     return np.mean(z1z2.zz), permutation_means
 
 
@@ -325,7 +337,8 @@ def get_p_from_permutation_results(observed, permuted):
     Returns:
         float: p-value from z-test of observed value versus the permuted distribution
     """
-    p = norm.sf((observed-np.mean(permuted))/np.std(permuted))
+    z = (observed-np.mean(permuted))/np.std(permuted)
+    p = 2 * norm.sf(abs(z))
     try:
         p = round(p, 4 - int(math.floor(math.log10(abs(p)))) - 1)
     except ValueError:
@@ -709,5 +722,31 @@ def calculate_network_enrichment(z_D1,z_D2,zthresh_list = list(np.arange(1,15)),
     
     return netcoloc_enrichment_df
 
-    
+# from netcoloc_utils import Seeds
 
+# if __name__ == '__main__':
+#     datadir = '/cellar/users/snwright/Data/RareCommon/outputs/netcoloc/magma/'
+#     seeds1 = Seeds('/cellar/users/snwright/Data/RareCommon/inputs/magma/magma_all_GCST90428625_EFO_0004769_CV.txt')
+#     seeds2 = Seeds('/cellar/users/snwright/Data/RareCommon/inputs/magma/magma_all_GCST90428625_EFO_0004769_RV.txt')
+    
+#     z1_file = 'magma_all_GCST90428625_EFO_0004769_z_CV_q_neglog10_sum.tsv'
+#     z2_file = 'magma_all_GCST90428625_EFO_0004769_z_RV_q_neglog10_sum.tsv'
+#     zcontrol_file = 'magma_all_GCST010572_EFO_0010156_z_CV_q_neglog10_sum.tsv'
+    
+#     z1 = pd.read_csv(datadir+z1_file,sep='\t', index_col=0, header=None, names=['z'])
+#     z2 = pd.read_csv(datadir+z2_file,sep='\t', index_col=0, header=None, names=['z'])
+#     zcontrol = pd.read_csv(datadir+zcontrol_file,sep='\t', index_col=0, header=None)
+    
+#     genes1 = [x for x in seeds1.genes if x in z1.index]
+#     genes2 = [x for x in seeds2.genes if x in z2.index]
+    
+#     a = calculate_mean_z_score_distribution(z1, z2, num_reps=1000, zero_double_negatives=False, 
+#                                         overlap_control=None, seed1=genes1, seed2=genes2, quant=True)
+    
+#     b = calculate_expected_overlap(z1, z2, seed1=genes1, seed2=genes2,
+#                             z_score_threshold=3, z1_threshold=1.5,
+#                             z2_threshold=1.5, overlap_control=None,
+#                             num_reps=1000, plot=False)
+#     print(z1.head())
+    
+    

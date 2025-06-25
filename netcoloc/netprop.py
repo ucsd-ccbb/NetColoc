@@ -7,6 +7,7 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 import warnings
+from collections import defaultdict
 
 
 def __init__(self):
@@ -171,6 +172,38 @@ def get_individual_heats_matrix(nam_or_graph, alpha=0.5,
     return d_name
 
 
+def scored_network_propagation_old(individual_heats_matrix, nodes, seed_score_dict, normalize_heat=None, Timer=None):
+    # TODO make this a matrix operation where all genes are scored (zero for non seed genes.)
+    if normalize_heat is not None:
+        assert normalize_heat in ['count','total_score'], f'Invalid option normalize=`{normalize_heat}`. Normalize parameter must be `count`, `total_score`, or None'
+        
+    assert isinstance(seed_score_dict, dict), "Seed scores must be a dictionary"
+    assert len(nodes) == individual_heats_matrix.shape[0], f'Number of nodes must match the size of the individual heats matrix. #Nodes: {len(nodes)}, Matrix size: {individual_heats_matrix.shape}'
+    assert len(seed_score_dict) > 0, "Seed scores dictionary must contain at least one gene"
+    
+    seed_genes = list(np.intersect1d(nodes, list(seed_score_dict.keys())))
+
+    assert len(seed_genes) > 0, "No seed genes found in network"
+
+    # Initialize results vector
+    F = np.zeros(len(nodes))
+
+    # Add up resulting heats from each gene in seed genes set
+    for gene in seed_genes:
+        # multiply the score of the gene by the heat of the gene    
+        F += seed_score_dict[gene] * individual_heats_matrix[:,nodes.index(gene)]
+
+    # Normalize results by number of seed genes
+    if normalize_heat is not None:
+        if normalize_heat == 'count':
+            F /= len(seed_genes)
+        elif normalize_heat == 'total_score':
+            F /= sum(seed_score_dict.values())
+            
+    #Return as pandas series
+    return pd.Series(F, index=nodes)
+
+
 def network_propagation(individual_heats_matrix, nodes, seed_genes):
     """
     Implements network propagation, as detailed in:
@@ -216,3 +249,70 @@ def network_propagation(individual_heats_matrix, nodes, seed_genes):
     #Return as pandas series
     # TODO does this need to be a pandas series?
     return pd.Series(F, index=nodes)
+
+
+
+def scored_network_propagation(individual_heats_matrix, nodes, seed_score_dict, normalize_heat=None, Timer=None):
+    if normalize_heat is not None:
+        assert normalize_heat in ['count','total_score'], f'Invalid option normalize=`{normalize_heat}`. Normalize parameter must be `count`, `total_score`, or None'
+    print('USING NEW METHOD')
+    assert isinstance(seed_score_dict, dict), "Seed scores must be a dictionary"
+    assert len(nodes) == individual_heats_matrix.shape[0], f'Number of nodes must match the size of the individual heats matrix. #Nodes: {len(nodes)}, Matrix size: {individual_heats_matrix.shape}'
+    assert len(seed_score_dict) > 0, "Seed scores dictionary must contain at least one gene"
+    
+    seed_genes = list(np.intersect1d(nodes, list(seed_score_dict.keys())))
+    assert len(seed_genes) > 0, "No seed genes found in network"
+    if Timer is not None:
+        Timer.start('Index seeds')
+    # Get the indices of seed genes in the node list
+    node_indices = {node: idx for idx, node in enumerate(nodes)}
+    if Timer is not None:
+        Timer.end('Index seeds')
+        Timer.start('Get vectors')
+    all_scores = defaultdict(float, seed_score_dict)
+    # Create a matrix where each seed gene's heat vector is scaled by its score
+    seed_scores = np.array([all_scores[gene] for gene in nodes])
+    #seed_indices = [node_indices[gene] for gene in seed_genes]
+    #heat_vectors = individual_heats_matrix[:, seed_indices]  # shape: (num_nodes, num_seed_genes)
+    if Timer is not None:
+        Timer.end('Get vectors')
+        Timer.start('Compute F')
+    # Compute the propagated heat values by multiplying and summing across genes
+    F = np.dot(individual_heats_matrix , seed_scores)  # shape: (num_nodes,)
+    if Timer is not None:
+        Timer.end('Compute F')
+    # Normalize results by the total score or count of seed genes if specified
+    if normalize_heat is not None:
+        if normalize_heat == 'count':
+            F /= len(seed_genes)
+        elif normalize_heat == 'total_score':
+            F /= sum(seed_score_dict.values())
+            
+    return pd.Series(F, index=nodes)
+
+
+
+# if __name__ == '__main__':
+#     # Test case 1: Simple test case
+#     individual_heats_matrix = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+#     nodes = ['A', 'B', 'C']
+#     seed_score_dict = {'A': 0.5, 'B': 1.0}
+#     normalize_heat = 'count'
+
+#     result = scored_network_propagation(individual_heats_matrix, nodes, seed_score_dict, normalize_heat)
+#     result2 = scored_network_propagation2(individual_heats_matrix, nodes, seed_score_dict, normalize_heat)
+#     print(result, result2)
+
+#     # Test case 2: Test with 'total_score' normalization
+#     seed_score_dict = {'A': 0.5, 'C': 2.0}
+#     normalize_heat = 'total_score'
+#     result = scored_network_propagation(individual_heats_matrix, nodes, seed_score_dict, normalize_heat)
+#     result2 = scored_network_propagation2(individual_heats_matrix, nodes, seed_score_dict, normalize_heat)
+#     print(result, result2)
+
+#     # Test case 3: Test with no normalization
+#     seed_score_dict = {'B': 1.0, 'C': 1.5, 'A': 0.5}
+#     normalize_heat = None
+#     result = scored_network_propagation(individual_heats_matrix, nodes, seed_score_dict, normalize_heat)
+#     result2 = scored_network_propagation2(individual_heats_matrix, nodes, seed_score_dict, normalize_heat)
+#     print(result, result2)

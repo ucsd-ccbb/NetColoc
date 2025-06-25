@@ -14,6 +14,8 @@ import unittest
 from contextlib import contextmanager
 from netcoloc import netcoloc_utils
 
+import pandas as pd
+import numpy as np
 
 class TestNetcolocUtil(unittest.TestCase):
 
@@ -120,6 +122,66 @@ class TestNetcolocUtil(unittest.TestCase):
 
         self.assertEqual(bins, expected_bins)
         self.assertEqual(degree_to_bin_index, expected_degree_to_bin_index)
+        
+    def test_Seeds_data_aggregation(self):
+        data = pd.DataFrame({'gene':['A', 'B', 'C', 'B'], 'score':[1, 2, 3, 7]})
+        nodes = ['A', 'B', 'C']
+        
+        seeds = netcoloc_utils.Seeds(data)
+        # assert dictionary equal
+        self.assertEqual(seeds.scores, {'A':1, 'B':4.5, 'C':3})
+        
+        
+    def test_Seeds_filter(self):
+        data = pd.DataFrame({'gene':['A', 'B', 'C', 'B'], 'score':[1, 2, 3, 7]})
+
+        # test min and max
+        seeds = netcoloc_utils.Seeds(data)
+        seeds.filter_seeds_by_score(min_score=4, max_score=5)
+        self.assertEqual(seeds.scores, {'B':4.5})
+        
+        # test min only
+        seeds.reset_seeds()
+        seeds.filter_seeds_by_score(min_score=2)
+        self.assertEqual(seeds.scores, {'B':4.5, 'C':3})
+        
+        # test max only
+        seeds.reset_seeds()
+        seeds.filter_seeds_by_score(max_score=2)
+        self.assertEqual(seeds.scores, {'A':1})
+        
+        # test network filter
+        seeds.reset_seeds()
+        seeds.filter_seeds_by_network(['A', 'B', 'D'])
+        self.assertEqual(seeds.genes, {'A', 'B'})
+    
+    def test_Seeds_normalization(self):
+        self.scores = {'A':1, 'B':4.5, 'C':3}
+        seeds = netcoloc_utils.Seeds(self.scores)
+        seeds.normalize_scores(method='max')
+        self.assertEqual(seeds.scores, {'A':1/4.5,  'B':1.0, 'C':3/4.5})
+        
+        seeds.reset_seeds()
+        seeds.normalize_scores(method='minmax')
+        self.assertEqual(seeds.scores, {'A':0,  'B':1.0, 'C':2/3.5})
+        
+        seeds = netcoloc_utils.Seeds({'A':1, 'B':2, 'C':3, 'D': 4, 'E':5})
+        seeds.normalize_scores(method='zscore')
+        self.assertEqual(seeds.scores, {'A':-2/np.sqrt(2),  'B':-1/np.sqrt(2), 'C':0, 'D':1/np.sqrt(2), 'E': 2/np.sqrt(2)})
+        
+    def test_Seeds_normalization_cap(self):
+        self.scores = {'A':1, 'B':4.5, 'C':3}
+        seeds = netcoloc_utils.Seeds(self.scores)
+        seeds.normalize_scores(method='max', score_cap=3)
+        self.assertEqual(seeds.scores, {'A':1/3,  'B':3/3, 'C':3/3})
+
+    def test_Seeds_reset(self):
+        self.scores = {'A':1, 'B':4.5, 'C':3}
+        seeds = netcoloc_utils.Seeds(self.scores)
+        seeds.normalize_scores(method='max')
+        self.assertEqual(seeds.original_scores, self.scores)
+        seeds.reset_seeds()
+        self.assertEqual(seeds.scores, self.scores)
 
 
 
