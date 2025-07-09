@@ -16,11 +16,11 @@ from statsmodels.stats import contingency_tables
 import networkx as nx
 
 try:
-    # need ddot to parse the ontology
+    # if forcing use of ddot
     import ddot
     from ddot import Ontology
     DDOT_LOADED = True
-    warnings.warn('Use of ddot will be deprecated in netcoloc>=0.1.9. By default, ddot will no longer be use, to force use of ddot set use_ddot=True for all validation functions.', DeprecationWarning)
+    warnings.warn('Use of ddot will be deprecated in netcoloc>=1.0.1. By default, ddot will no longer be used, to force use of ddot set use_ddot=True for all validation functions.', DeprecationWarning)
 except ImportError as ie:
     DDOT_LOADED = False
 
@@ -40,21 +40,35 @@ def focus_ontology(ont, start_node, use_ddot=False):
     return list(focus_list)
 
 
-def load_MGI_mouseKO_data(url='http://www.informatics.jax.org/downloads/reports/MGI_PhenoGenoMP.rpt'):
+def load_MGI_mouseKO_data(url='http://www.informatics.jax.org/downloads/reports/MGI_PhenoGenoMP.rpt', 
+                          data_loc=None, update=True):
     """
     Function to parse and load mouse knockout data from MGI.
 
     :param url: location of MGI knockout data
     :type url: str
+    :param data_loc: location to save the downloaded file, if None, saves in current directory
+    :type data_loc: str
+    :param update: whether to update the data if it already exists
+    :type update: bool
     :return: parsed MGI knockout dataframe, including column for human orthologs
     :rtype: :py:class:`pandas.DataFrame`
+    
     """
+    if data_loc is not None:
+        mgi_file_target = os.path.join(data_loc, url.split('/')[-1])
+    else:
+        mgi_file_target = url.split('/')[-1]
     # download MGI phenotype data
-    r = requests.get(url,allow_redirects=True)
-    open('MGI_PhenoGenoMP.rpt', 'wb').write(r.content)
+    if update or (not os.path.exists(mgi_file_target)):
+        r = requests.get(url,allow_redirects=True)
+        with open(mgi_file_target, 'wb') as f:
+            f.write(r.content)
+    else:
+        pass
 
     # parse the downloaded MGI phenotype data
-    mgi_df = pd.read_csv('MGI_PhenoGenoMP.rpt', sep='\t',
+    mgi_df = pd.read_csv(mgi_file_target, sep='\t',
                         names=['MGI_Allele_Accession_ID',
                                'Allele symbol', 'involves',
                                'MP', 'PMID', 'MGI_marker_accession_ID'])
@@ -62,7 +76,6 @@ def load_MGI_mouseKO_data(url='http://www.informatics.jax.org/downloads/reports/
     gene_name = [a.split('<')[0] for a in mgi_df['Allele symbol'].tolist()]
     mgi_df['gene_name']=gene_name
     mgi_df.index=mgi_df['gene_name']
-
     # map mouse genes to human orthologs
     mouse_genes = list(np.unique(mgi_df['gene_name']))
     mg_mapped = mg.querymany(mouse_genes,
@@ -70,12 +83,9 @@ def load_MGI_mouseKO_data(url='http://www.informatics.jax.org/downloads/reports/
                              scopes='symbol', fields='symbol')
 
     # drop genes with no human ortholog
-    print(len(mg_mapped))
     mg_mapped = mg_mapped.dropna(subset=['symbol'])
-    print(len(mg_mapped))
     # drop duplicates
     mg_mapped = mg_mapped[~mg_mapped.index.duplicated(keep='first')]
-    print(len(mg_mapped))
     mg_mapped.head()
 
     mgi_df['human_ortholog']=mgi_df['gene_name'].map(dict(mg_mapped['symbol']))
@@ -83,9 +93,6 @@ def load_MGI_mouseKO_data(url='http://www.informatics.jax.org/downloads/reports/
     return mgi_df
 
 
-## Changes to implement:
- #1. Add reuse of data, and variable to update
- #2. 
 def load_MPO(url='http://www.informatics.jax.org/downloads/reports/MPheno_OBO.ontology', 
             use_ddot=False, update=True, data_loc=None):
     """
