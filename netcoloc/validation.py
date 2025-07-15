@@ -30,14 +30,29 @@ import mygene
 mg = mygene.MyGeneInfo()
 
 
-def focus_ontology(ont, start_node, use_ddot=False):
+def focus_ontology(ont, start_node, include_children=True, include_parents=False):
+    """
+    Focus the ontology on a specific node and its neighbors.
+    :param ont: The ontology to focus on
+    :type ont: :py:class:`networkx.MultiDiGraph`
+    :param start_node: The node to focus on
+    :type start_node: str
+    :param include_children: Whether to include children of the start node
+    :type include_children: bool
+    :param include_parents: Whether to include parents of the start node. Note that this will include the root node.
+    :type include_parents: bool
+    :return: List of nodes in the focused ontology
+    :rtype: list
+    """
     successors = nx.dfs_successors(ont, start_node)
     predecessors = nx.dfs_successors(nx.reverse(ont, copy=True), start_node)
     focus_list = set([start_node])
-    for k,v in successors.items():
-        focus_list = focus_list.union(set(v))
-    for k,v in predecessors.items():
-        focus_list = focus_list.union(set(v))
+    if include_parents:
+        for k,v in successors.items():
+            focus_list = focus_list.union(set(v))
+    if include_children:
+        for k,v in predecessors.items():
+            focus_list = focus_list.union(set(v))
     return list(focus_list)
 
 def load_MGI_mouseKO_data(url='http://www.informatics.jax.org/downloads/reports/MGI_PhenoGenoMP.rpt',
@@ -101,7 +116,7 @@ def map_mgi_to_human_orthologs(mgi_df, map_using='mygeneinfo', verbose=False, da
         if verbose:
             print('Deduplicated', len(mg_mapped))
             mg_mapped.head()
-        return dict(mapping['symbol'])
+        return dict(mg_mapped['symbol'])
     elif map_using == 'mgi':
         if data_loc is not None:
             mrk_target = os.path.join(data_loc, 'MRK_List2.rpt')
@@ -204,11 +219,13 @@ def load_MPO(url='http://www.informatics.jax.org/downloads/reports/MPheno_OBO.on
             MPO = obo.read_obo(obo_file_target)
     return MPO
 
+
 def format_mapping(mapping, gene_col='human_ortholog', term_col='MP'):
         formatted_mapping = mapping.loc[:, (gene_col, term_col)].dropna().reset_index()
         formatted_mapping = formatted_mapping.loc[:, (gene_col, term_col)]
         formatted_mapping.columns = ["Gene", "Term"]
         return formatted_mapping
+
 
 def map_genes_to_MPO(MPO, mapping, restrict_to=None, map_col='human_ortholog', MP_col='MP'):
     if ('Gene' not in mapping.columns) or ('Term' not in mapping.columns):
@@ -227,7 +244,8 @@ def map_genes_to_MPO(MPO, mapping, restrict_to=None, map_col='human_ortholog', M
     nx.set_node_attributes(MPO_mapped, mapping_dict, 'term2genes')
     return MPO_mapped
 
-def MPO_enrichment_root(hier_df,MPO,mgi_df,MP_focal_list,G_int,verbose=True, use_ddot=False):
+def MPO_enrichment_root(hier_df,MPO,mgi_df,MP_focal_list,G_int,verbose=True, use_ddot=False,
+                        min_genes=10, max_genes=2000):
     """
     Function to test for enrichment of genes resulting in selected phenotypes
     when knocked out in root node of NetColoc hierarchy.
@@ -272,60 +290,22 @@ def MPO_enrichment_root(hier_df,MPO,mgi_df,MP_focal_list,G_int,verbose=True, use
     G_int_nodes = list(G_int.nodes())
 
     for MP_focal in MP_focal_list:
-        if use_ddot:
-            warnings.warn('Use of ddot will be deprecated from version 0.1.9', DeprecationWarning)
-            assert DDOT_LOADED, 'DDOT not successfully loaded. Please check installation or set use_ddot=False'
 
-            MP_desc_focal = dict(MPO.node_attr['description'])[MP_focal]
-            # focus the hierarchy on one branch, and look up all terms within that branch
-            if len(MPO.parent_2_child[MP_focal])>0:
-                MPO_focal = MPO.focus(MP_focal,verbose=False)
-                focal_terms = MPO_focal.terms
-            else:  # if the term has no children, just look at that term
-                focal_terms=[MP_focal]
-        else:
-            MP_desc_focal = MPO.nodes[MP_focal]['name']
-            if MPO.in_degree(MP_focal) > 0:
-                focal_terms = focus_ontology(MPO, MP_focal)
-            else:
-                 focal_terms=[MP_focal]
-        
-        # check enrichment in root node
-        focal_genes = hier_df['CD_MemberList'].loc[root_node].split(' ')
-        mgi_temp = mgi_df[mgi_df['MP'].isin(focal_terms)]
-        mgi_temp = mgi_temp.dropna(subset=['human_ortholog'])
-        mgi_genes = list(np.unique(mgi_temp['human_ortholog']))
-        mgi_genes = list(np.intersect1d(mgi_genes,G_int_nodes))
-
-        # only test if there are at least 10 genes, and fewer than 2000 genes
-        if (len(mgi_genes)>10) and (len(mgi_genes) < 2000):
-            q00 = len(np.intersect1d(mgi_genes, focal_genes))
-
-            q01 = len(mgi_genes)-q00
-            q10 = len(focal_genes)-q00
-            q11 = len(G_int_nodes)-q00-q01-q10
-            table_temp = [[q00,q01],[q10,q11]]
-
-            CT= contingency_tables.Table2x2(table_temp)
-            OR_p_temp = CT.log_oddsratio_pvalue()
-            OR_CI_temp = CT.log_oddsratio_confint()
-            log_OR_temp = CT.log_oddsratio
-
+        focal_terms, MP_desc_focal = get_focal_terms(MPO, MP_focal, use_ddot=use_ddot, include_parents=False, include_children=True)
+        OR_p_temp, OR_CI_temp, log_OR_temp, mgi_genes = test_single_MPO_term(focal_terms, hier_df, root_node, mgi_df, G_int_nodes, verbose=verbose,
+                                                                             min_genes=min_genes, max_genes=max_genes, name=MP_desc_focal)
+        # test uf OR_p_temp is np.nan:
+        if OR_p_temp is not None and not np.isnan(OR_p_temp):
             OR_p_list.append(OR_p_temp)
             OR_CI_list.append(OR_CI_temp)
             log_OR_list.append(log_OR_temp)
             num_genes_in_term_list.append(len(mgi_genes))
 
             MP_keep_list.append(MP_focal)
-
+        else:
             if verbose:
-                print('\n'+MP_desc_focal)
-                print('number of genes in root node = '+str(len(focal_genes)))
-                print('number of genes in focal MPO term = '+str(len(mgi_genes)))
-                print('number overlapping genes = '+str(q00))
-                print(OR_p_temp)
-                print(OR_CI_temp)
-                print(log_OR_temp)
+                print(f'Number of intersecting genes for {MP_focal} in root node {root_node}: {len(mgi_genes)}')
+                print(f'No genes found for {MP_focal} in root node {root_node}. Skipping enrichment test.')
 
     OR_CI_lower, OR_CI_upper = zip(*OR_CI_list)
 
@@ -344,7 +324,113 @@ def MPO_enrichment_root(hier_df,MPO,mgi_df,MP_focal_list,G_int,verbose=True, use
     return root_KO_df
 
 
-def MPO_enrichment_full(hier_df,MPO,mgi_df,MP_focal_list,G_int, use_ddot=False):
+def get_focal_terms(MPO, MP_focal, use_ddot=False, include_children=True, include_parents=False):
+    """
+    Function to get the focal terms for a given MPO term.
+    :param MPO: DDOT ontology containing the parsed mammalian phenotype ontology
+    :param MP_focal: Focal MPO term to get the description for
+    :param use_ddot: Whether to use the DDOT package
+    :param include_children: Whether to include child terms
+    :param include_parents: Whether to include parent terms
+    :return: Tuple containing the focal terms and their description
+    """
+    if use_ddot:
+        warnings.warn('Use of ddot will be deprecated from version 0.1.9', DeprecationWarning)
+        assert DDOT_LOADED, 'DDOT not successfully loaded. Please check installation or set use_ddot=False'
+
+        MP_desc_focal = dict(MPO.node_attr['description'])[MP_focal]
+        # focus the hierarchy on one branch, and look up all terms within that branch
+        if len(MPO.parent_2_child[MP_focal])>0:
+            MPO_focal = MPO.focus(MP_focal,verbose=False)
+            focal_terms = MPO_focal.terms
+        else:  # if the term has no children, just look at that term
+            focal_terms=[MP_focal]
+    else:
+        MP_desc_focal = MPO.nodes[MP_focal]['name']
+        if MPO.in_degree(MP_focal) > 0:
+            focal_terms = focus_ontology(MPO, MP_focal, include_parents=include_parents, include_children=include_children)
+        else:
+                focal_terms=[MP_focal]
+    return focal_terms, MP_desc_focal
+
+
+def test_single_MPO_term(focal_terms, hier_df, hier_node, mgi_df, G_int_nodes, verbose=False,
+                         min_genes=11, max_genes=2000, name=''):
+    """
+    Function to test for enrichment of genes resulting in selected phenotypes
+    :param focal_terms: List of MPO phenotypes to check for enrichment against
+    :param hier_df: Hierarchical DataFrame containing gene information
+    :param hier_node: Node in the hierarchy to test
+    :param mgi_df: DataFrame containing MGI gene information
+    :param G_int_nodes: List of nodes in the interaction graph
+    :param verbose: Whether to print detailed output
+    :param min_genes: Minimum number of genes required for testing
+    :param max_genes: Maximum number of genes allowed for testing
+    :param name: Name of the test (for output purposes)
+    :return: Tuple containing p-value, confidence interval, log odds ratio, and list of MGI genes
+    """
+
+    # check enrichment in root node
+    focal_genes = hier_df['CD_MemberList'].loc[hier_node].split(' ')
+    mgi_temp = mgi_df[mgi_df['MP'].isin(focal_terms)]
+    mgi_temp = mgi_temp.dropna(subset=['human_ortholog'])
+    mgi_genes = list(np.unique(mgi_temp['human_ortholog']))
+
+    #new_index=[g.upper() for g in mgi_temp.index.tolist()]
+    #mgi_temp.index=new_index
+
+    #mgi_genes = mgi_temp.index.tolist()
+    mgi_genes = list(np.intersect1d(mgi_genes,list(G_int_nodes)))
+
+    # only test if there are at least min genes, and fewer than max genes
+    if (len(mgi_genes)>=min_genes) and (len(mgi_genes) < max_genes):
+        OR_p_temp, OR_CI_temp, log_OR_temp = perform_log_odds_z_test(mgi_genes, focal_genes, G_int_nodes, verbose=verbose, name=name)
+    else:
+        OR_p_temp = np.nan
+        OR_CI_temp = (np.nan, np.nan)
+        log_OR_temp = np.nan    
+        mgi_genes = []
+    return OR_p_temp, OR_CI_temp, log_OR_temp, mgi_genes
+
+
+def perform_hypergeometric_test(hier_df, hier_node, G_int, mgi_genes):
+    focal_genes = hier_df['CD_MemberList'].loc[hier_node].split(' ')
+    n=len(focal_genes)
+    M=len(list(G_int.nodes()))
+    N=len(mgi_genes)
+    x = len(np.intersect1d(focal_genes,mgi_genes))
+    if x > 0:
+        return hypergeom.sf(k=x-1,M=M,n=n,N=N), x, ' '.join(list(np.intersect1d(focal_genes,mgi_genes)))
+    else:
+        return np.nan, 0, ''
+
+def perform_log_odds_z_test(mgi_genes, focal_genes, G_int_nodes, verbose=False, name=''):
+    # is there anything to test?
+    if (len(mgi_genes) == 0) or (len(focal_genes) == 0) or (len(G_int_nodes) == 0):
+        return np.nan, (np.nan, np.nan), np.nan
+    
+    q00 = len(np.intersect1d(mgi_genes, focal_genes))
+    q01 = len(mgi_genes)-q00
+    q10 = len(focal_genes)-q00
+    q11 = len(G_int_nodes)-q00-q01-q10
+    table_temp = [[q00,q01],[q10,q11]]
+
+    CT= contingency_tables.Table2x2(table_temp)
+    OR_p_temp = CT.log_oddsratio_pvalue()
+    OR_CI_temp = CT.log_oddsratio_confint()
+    log_OR_temp = CT.log_oddsratio
+    if verbose:
+        print('\n'+name)
+        print('number of genes in root node = '+str(len(focal_genes)))
+        print('number of genes in focal MPO term = '+str(len(mgi_genes)))
+        print('number overlapping genes = '+str(q00))
+        print(OR_p_temp)
+        print(OR_CI_temp)
+        print(log_OR_temp)
+    return OR_p_temp, OR_CI_temp, log_OR_temp
+
+def MPO_enrichment_full(hier_df,MPO,mgi_df,MP_focal_list,G_int, use_ddot=False,
+                        min_genes=10, max_genes=2000, verbose=False):
     """
     Function to test for enrichment of genes resulting in selected phenotypes
     when knocked out in every NetColoc system (not just root)
@@ -374,23 +460,7 @@ def MPO_enrichment_full(hier_df,MPO,mgi_df,MP_focal_list,G_int, use_ddot=False):
     MP_full_results_df=pd.DataFrame(index=hier_df.index.tolist())
 
     for MP_focal in MP_focal_list:
-        if use_ddot:
-            warnings.warn('Use of ddot will be deprecated from version 0.1.9', DeprecationWarning)
-            assert DDOT_LOADED, 'DDOT not successfully loaded. Please check installation or set use_ddot=False'
-
-            MP_desc_focal = dict(MPO.node_attr['description'])[MP_focal]
-            # focus the hierarchy on one branch, and look up all terms within that branch
-            if len(MPO.parent_2_child[MP_focal])>0:
-                MPO_focal = MPO.focus(MP_focal,verbose=False)
-                focal_terms = MPO_focal.terms
-            else:  # if the term has no children, just look at that term
-                focal_terms=[MP_focal]
-        else:
-            MP_desc_focal = MPO.nodes[MP_focal]['name']
-            if MPO.in_degree(MP_focal) > 0:
-                focal_terms = focus_ontology(MPO, MP_focal)
-            else:
-                 focal_terms=[MP_focal]
+        focal_terms, MP_desc_focal = get_focal_terms(MPO, MP_focal, use_ddot=use_ddot, include_children=True, include_parents=False)
 
         hyper_p_list = []
         num_genes_list = []
@@ -398,60 +468,35 @@ def MPO_enrichment_full(hier_df,MPO,mgi_df,MP_focal_list,G_int, use_ddot=False):
 
         OR_p_list,OR_CI_list,log_OR_list=[],[],[]
         for focal_cluster in hier_df.index.tolist():
-            mFocal_genes = hier_df['CD_MemberList'].loc[focal_cluster].split(' ')
-
-            M=len(list(G_int.nodes())) # only keep genes in PCnet
-            # Look up all entries matching focal_terms, and mFocal_genes
-            mgi_temp = mgi_df[mgi_df['MP'].isin(focal_terms)]
-            mgi_temp = mgi_temp.dropna(subset=['human_ortholog'])
-            mgi_genes = list(np.unique(mgi_temp['human_ortholog']))
-            new_index=[g.upper() for g in mgi_temp.index.tolist()]
-            mgi_temp.index=new_index
-
-            # only keep genes in PCnet
-            N=len(np.intersect1d(list(np.unique(mgi_temp.index.tolist())),
-                                 list(G_int.nodes())))
-
-            if len(np.intersect1d(mFocal_genes,mgi_temp.index.tolist()))>0:
-                mgi_genes = mgi_temp.index.tolist()
-                mgi_genes = list(np.intersect1d(mgi_genes,list(G_int.nodes())))
-                x = len(np.intersect1d(mFocal_genes,mgi_genes))
-                n=len(mFocal_genes)
-
-                hyper_p_list.append(hypergeom.sf(x,M,n,N))
-                num_genes_list.append(x)
-                genes_id_list.append(' '.join(list(np.intersect1d(mFocal_genes,mgi_genes))))
-
-                q00 = len(np.intersect1d(mgi_genes,mFocal_genes))
-                q01 = len(mgi_genes)-q00
-
-                q10 = len(mFocal_genes)-q00
-                q11 = len(list(G_int.nodes()))-q00-q01-q10
-
-                table_temp = [[q00,q01],[q10,q11]]
-
-                CT= contingency_tables.Table2x2(table_temp)
-                OR_p_temp = CT.log_oddsratio_pvalue()
-                OR_CI_temp = CT.log_oddsratio_confint()
-                log_OR_temp = CT.log_oddsratio
-
+            
+            OR_p_temp, OR_CI_temp, log_OR_temp, mgi_genes = test_single_MPO_term(focal_terms, hier_df, focal_cluster, mgi_df, list(G_int.nodes()), verbose=verbose,
+                                                                             min_genes=min_genes, max_genes=max_genes, name=MP_desc_focal)
+            
+            if OR_p_temp is not None and not np.isnan(OR_p_temp):
                 OR_p_list.append(OR_p_temp)
                 OR_CI_list.append(OR_CI_temp)
                 log_OR_list.append(log_OR_temp)
-
             else:
-                hyper_p_list.append(1)
-                num_genes_list.append(0)
-                genes_id_list.append('')
-
                 OR_p_list.append(1)
                 OR_CI_list.append(0)
                 log_OR_list.append(0)
-
+            
+            hyper_p, x, genes_id = perform_hypergeometric_test(hier_df, focal_cluster, G_int, mgi_genes)
+            
+            if hyper_p is not None and not np.isnan(hyper_p):
+                hyper_p_list.append(hyper_p)
+                num_genes_list.append(x)
+                genes_id_list.append(genes_id)
+            else:
+                hyper_p_list.append(1)
+                num_genes_list.append(0)
+                genes_id_list.append('')   
         MP_focal_df = pd.DataFrame({MP_desc_focal+':-log(OR_p)':-np.log10(OR_p_list),
                                     MP_desc_focal+':log_OR':log_OR_list,
                                     MP_desc_focal+':num_genes':num_genes_list,
-                                    MP_desc_focal+':gene_ids':genes_id_list},index=hier_df.index.tolist())
+                                    MP_desc_focal+':gene_ids':genes_id_list,
+                                    MP_desc_focal+':hyper_p':hyper_p_list,
+                                    },index=hier_df.index.tolist())
 
         # check that the column isn't already present in MP_full_results_df
         if MP_desc_focal+':-log(OR_p)' not in MP_full_results_df.columns.tolist():
@@ -461,6 +506,17 @@ def MPO_enrichment_full(hier_df,MPO,mgi_df,MP_focal_list,G_int, use_ddot=False):
 
 
 def find_related_terms(MPO, keywords, use_ddot=False):
+    """Function to find terms in the MPO that match a list of keywords.
+    
+    :param MPO: DDOT ontology containing the parsed mammalian phenotype ontology
+    :type MPO: :py:class:`networkx.MultiDiGraph`
+    :param keywords: List of keywords to search for in the term descriptions
+    :type keywords: list
+    :param use_ddot: Use the deprecated DDOT package to load the MGI ontology. Default False to use obonet
+    :type use_ddot: boolean
+    :return: List of terms that match the keywords
+    :rtype: list
+    """
     focal_list = []
     if use_ddot:
         warnings.warn('Use of ddot will be deprecated from version 0.1.9', DeprecationWarning)
@@ -476,7 +532,16 @@ def find_related_terms(MPO, keywords, use_ddot=False):
                 focal_list.append(t)
     return focal_list
             
+            
 def check_keywords(keywords, description):
+    """Function to check if any of the keywords are present in the description.
+    :param keywords: List of keywords to search for
+    :type keywords: list
+    :param description: Description to search in
+    :type description: str
+    :return: True if any keyword is found, False otherwise
+    :rtype: bool
+    """
     for keyword in keywords:
         if description.find(keyword) >-1:
             return True
@@ -484,6 +549,18 @@ def check_keywords(keywords, description):
 
 
 def get_MP_description(term_id, ontology, use_ddot=False, include_definition=False):
+    """Function to get the description of a given MPO term.
+    :param term_id: ID of the MPO term
+    :type term_id: str
+    :param ontology: The ontology to get the term description from
+    :type ontology: :py:class:`ddot.Ontology` or :py:class:`networkx.MultiDiGraph`
+    :param use_ddot: Use the deprecated DDOT package to load the MGI ontology. Default False to use obonet
+    :type use_ddot: boolean
+    :param include_definition: If True, include the definition in the description
+    :type include_definition: bool
+    :return: Description of the MPO term
+    :rtype: str
+    """
     if use_ddot:
         warnings.warn('Use of ddot will be deprecated from version 0.1.9', DeprecationWarning)
         assert DDOT_LOADED, 'DDOT not successfully loaded. Please check installation or set use_ddot=False'
