@@ -10,13 +10,18 @@ import numpy as np
 
 class Seeds:
     def __init__(self, inputdata, option='score_file', agg_method='mean'):
-        
         if isinstance(inputdata, str):
             # check that file exists
             if not os.path.exists(inputdata):
                 raise FileNotFoundError(f'File {inputdata} not found')
             self.datafile = inputdata
-            self.data = self._read_data(option='score_file')
+            try:
+                self.data = self._read_data(option='score_file')
+                assert 'gene' in self.data.columns
+            except AssertionError:
+                self.data = self._read_data(option='list')
+                assert 'gene' in self.data.columns
+                
         elif isinstance(inputdata, pd.DataFrame):
             self.data = inputdata
         elif isinstance(inputdata, dict):
@@ -25,20 +30,24 @@ class Seeds:
             self.data = pd.DataFrame({'gene': inputdata, 'score': [1]*len(inputdata)})
         
         # check if there are duplicate genes in self.data
-        if len(self.data['gene']) != len(set(self.data['gene'])):
+        if (len(self.data['gene']) != len(set(self.data['gene']))):
             self._aggregate_scores(aggfunc=agg_method)
         
         self.genes = set(self.data['gene'])
+        self.original_genes = self.genes.copy()
         self.scores = dict(zip(self.data['gene'], self.data['score']))    
         self.original_scores = self.scores.copy()
-        self.original_genes = self.genes.copy()
         self.describe_scores()
         
     def _read_data(self, gene_col='Entrez', score_col='P-value', option='score_file'):
-        assert option in ['score_file'], f'Invalid option {option}. Must be `score_file`'
+        assert option in ['score_file', 'list'], f'Invalid option {option}. Must be `score_file` or `list`'
         if option == 'score_file':
             data = pd.read_csv(self.datafile, sep='\t')
             data.rename(columns={gene_col: 'gene', score_col: 'score'}, inplace=True)
+            return data
+        if option == 'list':
+            data = pd.read_csv(self.datafile, header=None, names=['gene'])
+            data['score'] = 1e-10
             return data
     
     def get_genes(self):
