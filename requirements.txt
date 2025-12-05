@@ -14,3 +14,4 @@ ipycytoscape
 ipywidgets
 cdapsutil
 obonet
+ipykernel
