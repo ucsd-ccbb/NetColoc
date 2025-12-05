@@ -222,10 +222,6 @@ def load_MPO(url='http://www.informatics.jax.org/downloads/reports/MPheno_OBO.on
             MPO = obo.read_obo(url)
         else:
             MPO = obo.read_obo(obo_file_target)
-        if update or (not os.path.exists(obo_file_target)):
-            MPO = obo.read_obo(url)
-        else:
-            MPO = obo.read_obo(obo_file_target)
     return MPO
 
 
@@ -253,7 +249,7 @@ def map_genes_to_MPO(MPO, mapping, restrict_to=None, map_col='human_ortholog', M
     nx.set_node_attributes(MPO_mapped, mapping_dict, 'term2genes')
     return MPO_mapped
 
-def MPO_enrichment_root(hier_df,MPO,mgi_df,MP_focal_list,G_int,verbose=True, use_ddot=False,
+def MPO_enrichment_root(hier_df,MPO,mgi_df,MP_focal_list,G_int,verbose=False, use_ddot=False,
                         min_genes=10, max_genes=2000):
     """
     Function to test for enrichment of genes resulting in selected phenotypes

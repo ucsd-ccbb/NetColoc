@@ -180,12 +180,12 @@ class TestNetworkColocalization(unittest.TestCase):
         G_int = nx.Graph()
         G_int.add_nodes_from([str(x) for x in range(0, 10)])
         
-        res_df = MPO_enrichment_root(self.hier_df,mpo,self.mock_assoc,focal_terms,G_int,verbose=True, use_ddot=False,
+        res_df = MPO_enrichment_root(self.hier_df,mpo,self.mock_assoc,focal_terms,G_int,verbose=False, use_ddot=False,
                         min_genes=1, max_genes=2000)
         self.assertIsInstance(res_df, pd.DataFrame)
         self.assertListEqual(res_df.columns.tolist(), ['OR_p', 'log_OR', 'log_OR_CI_lower', 'log_OR_CI_upper','num_genes_in_term', 'MP_description'])
         self.assertEqual(len(res_df), 4)
-        res_df2 = MPO_enrichment_root(self.hier_df,mpo,self.mock_assoc,focal_terms,G_int,verbose=True, use_ddot=False,
+        res_df2 = MPO_enrichment_root(self.hier_df,mpo,self.mock_assoc,focal_terms,G_int,verbose=False, use_ddot=False,
                         min_genes=2, max_genes=2000)
         self.assertEqual(len(res_df2), 3)
         
@@ -195,11 +195,11 @@ class TestNetworkColocalization(unittest.TestCase):
         G_int = nx.Graph()
         G_int.add_nodes_from([str(x) for x in range(0, 10)])
         
-        res_df = MPO_enrichment_full(self.hier_df,mpo,self.mock_assoc,focal_terms,G_int,verbose=True, use_ddot=False,
+        res_df = MPO_enrichment_full(self.hier_df,mpo,self.mock_assoc,focal_terms,G_int,verbose=False, use_ddot=False,
                         min_genes=1, max_genes=2000)
         self.assertIsInstance(res_df, pd.DataFrame)
         self.assertEqual(res_df.shape, (5, 20))
-        res_df2 = MPO_enrichment_full(self.hier_df,mpo,self.mock_assoc,focal_terms,G_int,verbose=True, use_ddot=False,
+        res_df2 = MPO_enrichment_full(self.hier_df,mpo,self.mock_assoc,focal_terms,G_int,verbose=False, use_ddot=False,
                         min_genes=2, max_genes=2000)
         self.assertEqual(res_df2.shape, (5, 20))
 

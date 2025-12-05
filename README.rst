@@ -52,6 +52,8 @@ NetColoc is available on `PyPI <https://pypi.org/>`__
 Version Notes
 ~~~~~~~~~~~~~
 
+Version 1.0.0 incorporates additional functionality developed for the publication Wright, S. N. et al., "`Genome-wide association studies of human and rat BMI converge on synapse, epigenome, and hormone signaling networks <https://doi.org/10.1016/j.celrep.2023.112873>`__." Cell Reports (2023), as outlined at `<https://github.com/sarah-n-wright/CrossSpeciesBMI>`__.  
+
 Prior version `netcoloc v0.1.6 <https://doi.org/10.5281/zenodo.6654561>`__ was utilized in the *NetColoc* publication: Rosenthal, S. B. et al.,
 "`Mapping the common gene networks that underlie related diseases <https://doi.org/10.1038/s41596-022-00797-1>`__." Nature Protocols (2023).
 To install this version, please use the following command:
@@ -68,6 +70,7 @@ The original source code and example notebooks can be acquired from Zenodo: `DOI
 
         git clone git@github.com:ucsd-ccbb/NetColoc.git
         git checkout -b v0.1.6 tags/v0.1.6
+        
 
 
 Documentation
@@ -84,10 +87,10 @@ Dependencies
 NetColoc requires the following python packages (automatically installed via ``pip install netcoloc``)
 
 
-* `click <https://pypi.org/project/click>`__
+* `click >=6.0 <https://pypi.org/project/click>`__
 * `matplotlib <https://pypi.org/project/matplotlib>`__
 * `ndex2 <https://pypi.org/project/ndex2>`__
-* `networkx <https://pypi.org/project/networkx>`__
+* `networkx >=2.0,<3.0 <https://pypi.org/project/networkx>`__
 * `numpy <https://pypi.org/project/numpy>`__
 * `seaborn <https://pypi.org/project/seaborn>`__
 * `tqdm <https://pypi.org/project/tqdm>`__
@@ -97,6 +100,7 @@ NetColoc requires the following python packages (automatically installed via ``p
 * `gprofiler-official >= 1.0.0 <https://pypi.org/project/gprofiler-official/>`__
 * `ipywidgets <https://pypi.org/project/ipywidgets>`__
 * `ipycytoscape <https://ipycytoscape.readthedocs.io/en/latest>`__
+* `ipykernel <https://pypi.org/project/ipykernel/>`__
 * `obonet <https://pypi.org/project/obonet/>`__
 * `cdapsutil <https://pypi.org/project/cdapsutil/>`__
 

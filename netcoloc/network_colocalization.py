@@ -305,6 +305,8 @@ def calculate_mean_z_score_distribution(z1, z2, num_reps=1000, zero_double_negat
         overlap_z1z2 = z1z2.loc[seed_overlap]
         overlap_z1 = np.array(overlap_z1z2.z1)
         z1z2.drop(seed_overlap, axis=0, inplace=True)
+    else:
+        observed_mean = np.mean(z1z2.zz)
 
     z1 = np.array(z1z2.z1)
     z2 = np.array(z1z2.z2)

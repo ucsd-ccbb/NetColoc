@@ -37,11 +37,8 @@ requirements = [
     'ipycytoscape',
     'ipywidgets',
     'cdapsutil',
-    'obonet'
-]
-
-test_requirements = [
-    # TODO: put package test requirements here
+    'obonet',
+    'ipykernel'
 ]
 
 setup(
@@ -78,6 +75,5 @@ setup(
         'Programming Language :: Python :: 3.13'
     ],
     test_suite='tests',
-    tests_require=test_requirements,
     setup_requires=['wheel']
 )
