@@ -104,6 +104,11 @@ def map_mgi_to_human_orthologs(mgi_df, map_using='mygeneinfo', verbose=False, da
         mg_mapped = mg.querymany(mouse_genes,
                                 as_dataframe=True, species=['mouse','human'],
                                 scopes='symbol', fields='symbol')
+        # map mouse genes to human orthologs
+        mouse_genes = list(np.unique(mgi_df['gene_name']))
+        mg_mapped = mg.querymany(mouse_genes,
+                                as_dataframe=True, species=['mouse','human'],
+                                scopes='symbol', fields='symbol')
 
         # drop genes with no human ortholog
         if verbose:
@@ -213,6 +218,10 @@ def load_MPO(url='http://www.informatics.jax.org/downloads/reports/MPheno_OBO.on
         MPO.node_attr=MP2desc.loc[terms_keep]
         
     else:
+        if update or (not os.path.exists(obo_file_target)):
+            MPO = obo.read_obo(url)
+        else:
+            MPO = obo.read_obo(obo_file_target)
         if update or (not os.path.exists(obo_file_target)):
             MPO = obo.read_obo(url)
         else:

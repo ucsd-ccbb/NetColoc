@@ -297,6 +297,7 @@ def calculate_mean_z_score_distribution(z1, z2, num_reps=1000, zero_double_negat
         seed_overlap = list(set(seed1).intersection(set(seed2)))
         print("Overlap seed genes:", len(seed_overlap))
         z1z2.drop(seed_overlap, axis=0, inplace=True)
+        observed_mean = np.mean(z1z2.zz)
     elif overlap_control == "bin":
         seed_overlap = list(set(seed1).intersection(set(seed2)))
         print("Overlap seed genes:", len(seed_overlap))
@@ -329,10 +330,7 @@ def calculate_mean_z_score_distribution(z1, z2, num_reps=1000, zero_double_negat
             perm_z1z2 = np.concatenate([perm_z1z2, overlap_perm_z1z2])
                     
         permutation_means[i] = np.mean(perm_z1z2)
-    if overlap_control == "bin":
-        return observed_mean, permutation_means
-    else:
-        return np.mean(z1z2.zz), permutation_means
+    return observed_mean, permutation_means
 
 
 

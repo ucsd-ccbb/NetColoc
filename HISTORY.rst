@@ -2,18 +2,7 @@
 History
 =======
 
-1.0.1 (2025-07-09)
-------------------
-
-* ``validation.load_MGI_mouseKO_data()`` and ``validation.load_MPO()`` updated to allow re-use of previously downloaded files
-* Added ability to map genes via the MGI database in ``validation.load_MGI_mouse_KO_data()
-* Added functions to map genes to the ontology and restrict to a subset of genes (``validation.map_genes_to_MPO()``)
-* Stabilized *network_colocalization* to accept pd.Series, pd.DataFrame and np.ndarray inputs
-* Added support for overlapping sets of seed genes in ``network_colocalization.calculate_expected_overlap()``, with option to remove the overlapping genes from the analysis, or randomize within the overlapping seed genes. 
-* Added function ``network_colocalization.get_p_from_permutation_results()`` to calculate P-value from Z-test of observed vs permuted results. 
-* Added function ``network_colocalization.calculate_mean_z_score_distribution`` to analyze mean netcoloc z-scores in addition to the size of the colocalized network. 
-
-1.0.0 (2024-10-10)
+1.0.0 (2025-07-09)
 ------------------
 
 * `obonet <https://pypi.org/project/obonet/>`__ added as a dependency, replacing `DDOT <https://github.com/idekerlab/ddot>`__ dependency
@@ -21,6 +10,13 @@ History
 * `network_colocalization` updated for compatability with `pandas>=2.0 <https://pypi.org/project/pandas/>`__
 * `validation` updated for compatability with `obonet <https://pypi.org/project/obonet/>`__. Added ``validation.focus_ontology()`` to replace ``ddot.Ontology.focus()`` functionality, and ``validation.find_related_terms()`` and ``validation.get_MP_description()`` for analyzing Mammalian Phenotype Ontology terms.
 * `example_notebooks` updated for compatibility with `pandas>=2.0 <https://pypi.org/project/pandas/>`__ and `obonet <https://pypi.org/project/obonet/>`__
+* ``validation.load_MGI_mouseKO_data()`` and ``validation.load_MPO()`` updated to allow re-use of previously downloaded files
+* Added ability to map genes via the MGI database in ``validation.load_MGI_mouse_KO_data()
+* Added functions to map genes to the ontology and restrict to a subset of genes (``validation.map_genes_to_MPO()``)
+* Stabilized *network_colocalization* to accept pd.Series, pd.DataFrame and np.ndarray inputs
+* Added support for overlapping sets of seed genes in ``network_colocalization.calculate_expected_overlap()``, with option to remove the overlapping genes from the analysis, or randomize within the overlapping seed genes. 
+* Added function ``network_colocalization.get_p_from_permutation_results()`` to calculate P-value from Z-test of observed vs permuted results. 
+* Added function ``network_colocalization.calculate_mean_z_score_distribution`` to analyze mean netcoloc z-scores in addition to the size of the colocalized network. 
 * `requirements_dev.txt` updated for `python=3.13`
 
 0.1.7 (2022-06-28)

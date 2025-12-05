@@ -16,6 +16,9 @@ from click.testing import CliRunner
 import pickle
 import os
 from unittest import mock
+import pickle
+import os
+from unittest import mock
 
 #from netcoloc import netcoloc
 from netcoloc.netprop_zscore import *
