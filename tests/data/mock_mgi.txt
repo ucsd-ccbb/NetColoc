@@ -1,0 +1,3 @@
+Rb1<tm1Tyj>/Rb1<tm1Tyj>	Rb1<tm1Tyj>	involves: 129S2/SvPas	MP:0000600	12529408	MGI:97874
+Scn2a<tm1Mml>/Scn2a<tm1Mml>	Scn2a<tm1Mml>	involves: 129S1/Sv * 129X1/SvJ * C57BL/6J	MP:0001263	10827969	MGI:98248
+Braf<tm1Tumg>/Braf<tm1Tumg>,Tg(CAG-cre)2Osb/0	Tg(CAG-cre)2Osb|Braf<tm1Tumg>	involves: C57BL * C57BL/6J * DBA * ICR	MP:0011085	26472072	MGI:3046676|MGI:88190

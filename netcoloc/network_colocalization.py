@@ -66,6 +66,13 @@ def calculate_network_overlap(z_scores_1, z_scores_2, z_score_threshold=3,
             z-scores)
     :rtype: list
     """
+    # add a warning if z_score_threshold < z1_threshold or z2_threshold
+    if z_score_threshold <= z1_threshold*z2_threshold:
+        warnings.warn(f'z_score_threshold ({z_score_threshold}) is less than or equal to z1_threshold ({z1_threshold}) * z2_threshold ({z2_threshold}). '
+                      f'The combined threshold will have no effect.')
+    if z1_threshold != z2_threshold:
+        warnings.warn(f'z1_threshold ({z1_threshold}) is not equal to z2_threshold ({z2_threshold}). '
+                      f'Using the same threshold for both individual scores is recommended.')
     if isinstance(z_scores_1, pd.Series):
         z_scores_1 = z_scores_1.to_frame(name='z_scores_1')
         z_scores_2 = z_scores_2.to_frame(name='z_scores_2')
@@ -75,6 +82,8 @@ def calculate_network_overlap(z_scores_1, z_scores_2, z_score_threshold=3,
     else:
         z_scores_1.columns = ["z_scores_1"]
         z_scores_2.columns = ["z_scores_2"]
+        
+    assert len(z_scores_1) == len(z_scores_2), f'z_scores_1 and z_scores_2 must have the same length. Got Z1 :{len(z_scores_1)} and Z2:{len(z_scores_2)}'
     z_scores_joined = z_scores_1.join(z_scores_2)
     z_scores_combined = (z_scores_joined['z_scores_1']
                         * z_scores_joined['z_scores_2']
@@ -107,7 +116,7 @@ def calculate_network_overlap_subgraph(interactome, z_scores_1,
                        propagation. The index consists of gene names
     :type z_scores_1: :py:class:`pandas.Series`
     :param z_scores_2: Similar to **z_scores_1**. This and **z_scores_1**
-                       must contain the same genes (ie. come from the same
+                       must contain the same genes (ie. come celfrom the same
                        interactome network)
     :type z_scores_2: :py:class:`pandas.Series`
     :param z_score_threshold: threshold to determine whether a gene is
@@ -128,7 +137,8 @@ def calculate_network_overlap_subgraph(interactome, z_scores_1,
     """
     network_overlap = calculate_network_overlap(z_scores_1, z_scores_2, z_score_threshold=z_score_threshold,
                                                z1_threshold=z1_threshold,z2_threshold=z2_threshold)
-
+    if len(network_overlap) > 0:
+        assert all(node in interactome.nodes() for node in network_overlap), f'Not all nodes in the network overlap are present in the interactome. Missing nodes: {set(network_overlap) - set(interactome.nodes())}'
     # Create subgraph that has the same type as original graph
     network_overlap_subgraph = interactome.__class__()
     network_overlap_subgraph.add_nodes_from((node, interactome.nodes[node]) for node in network_overlap)
@@ -209,6 +219,18 @@ def calculate_expected_overlap(z_scores_1, z_scores_2, seed1=None, seed2=None,
     
     z1 = np.array(z1z2.z1)
     z2 = np.array(z1z2.z2)
+    network_overlap_size = len(calculate_network_overlap(z1, z2,
+                                                    z_score_threshold=z_score_threshold,
+                                                    z1_threshold=z1_threshold,
+                                                    z2_threshold=z2_threshold))
+    
+    if overlap_control == "bin":  # if overlapping seed genes were separated add their contribution
+        network_overlap_size += len(calculate_network_overlap(overlap_z1z2.z1, overlap_z1z2.z2,
+                                                        z_score_threshold=z_score_threshold,
+                                                        z1_threshold=z1_threshold,
+                                                        z2_threshold=z2_threshold))
+    
+    
     
     random_network_overlap_sizes = np.zeros(num_reps)
     for i in tqdm(range(num_reps)):
@@ -228,15 +250,6 @@ def calculate_expected_overlap(z_scores_1, z_scores_2, seed1=None, seed2=None,
             perm_size += perm_size_overlap  # add to the size
         random_network_overlap_sizes[i] = perm_size
 
-    network_overlap_size = len(calculate_network_overlap(z_scores_1, z_scores_2,
-                                                        z_score_threshold=z_score_threshold,
-                                                        z1_threshold=z1_threshold,
-                                                        z2_threshold=z2_threshold))
-    if overlap_control == "bin":  # if overlapping seed genes were separated add their contribution
-        network_overlap_size += len(calculate_network_overlap(overlap_z1z2.z1, overlap_z1z2.z2,
-                                                        z_score_threshold=z_score_threshold,
-                                                        z1_threshold=z1_threshold,
-                                                        z2_threshold=z2_threshold))
 
     if plot:
         plt.figure(figsize=(5, 4))
@@ -274,29 +287,35 @@ def calculate_mean_z_score_distribution(z1, z2, num_reps=1000, zero_double_negat
         z2 = pd.DataFrame(z2, columns=["z"])
     z1z2 = z1.join(z2, lsuffix="1", rsuffix="2")
     z1z2 = z1z2.assign(zz=z1z2.z1 * z1z2.z2)
-    # get the number of rows with na values
-    if z1z2.isnull().any(axis=1).sum() < 5:
+    # get the number of rows with na values, remove with warning
+    if z1z2.isnull().any(axis=1).sum() > 0:
+        num_nans = z1z2.isnull().any(axis=1).sum()
+        warnings.warn(f'NaN Z-score warning: {num_nans} genes have NaN Z-scores. Genes to be removed: {z1z2[z1z2.isnull().any(axis=1)]}')
         z1z2.dropna(inplace=True)
-    else:
-        print("!!!!!NaN in Z1Z2 (more than 4 rows):")
-        print(z1z2[z1z2.isnull().any(axis=1)])
+    
+    if zero_double_negatives:
+        for node in z1z2.index:
+            if (z1z2.loc[node].z1 < 0 and z1z2.loc[node].z2 < 0):
+                z1z2.loc[node, 'zz'] = 0
     #print(z1z2.head())
     if overlap_control == "remove":
         seed_overlap = list(set(seed1).intersection(set(seed2)))
         print("Overlap seed genes:", len(seed_overlap))
         z1z2.drop(seed_overlap, axis=0, inplace=True)
+        observed_mean = np.mean(z1z2.zz)
     elif overlap_control == "bin":
         seed_overlap = list(set(seed1).intersection(set(seed2)))
         print("Overlap seed genes:", len(seed_overlap))
+        observed_mean = z1z2.zz.mean()
         overlap_z1z2 = z1z2.loc[seed_overlap]
         overlap_z1 = np.array(overlap_z1z2.z1)
         z1z2.drop(seed_overlap, axis=0, inplace=True)
+    else:
+        observed_mean = np.mean(z1z2.zz)
+
     z1 = np.array(z1z2.z1)
     z2 = np.array(z1z2.z2)
-    if zero_double_negatives:
-        for node in z1z2.index:
-            if (z1z2.loc[node].z1 < 0 and z1z2.loc[node].z2 < 0):
-                z1z2.loc[node, 'zz'] = 0
+
     permutation_means = np.zeros(num_reps)
     for i in tqdm(range(num_reps)):
         perm_z1z2 = np.zeros(len(z1))
@@ -316,33 +335,43 @@ def calculate_mean_z_score_distribution(z1, z2, num_reps=1000, zero_double_negat
                 else:
                     overlap_perm_z1z2[node] = overlap_z1[node] * z2[node]
             perm_z1z2 = np.concatenate([perm_z1z2, overlap_perm_z1z2])
-                    
+        
+        # check if NaN values in permutation
+        if perm_z1z2.isnull().any(axis=1).sum() > 0:
+            num_nans = perm_z1z2.isnull().any(axis=1).sum()
+            warnings.warn(f'Permuted Z-score warning: NaN values present in for {num_nans} permuted Z-scores. \
+                          These values will be excluded from the mean calculation. This most likely occurs due to NaN values in original Z-scores.')           
         permutation_means[i] = np.nanmean(perm_z1z2)
-        if np.isnan(permutation_means[i]):
-            print("!!!!!NaN in permutation_means, Z1Z2:")
-            print(z1z2[z1z2.isnull().any(axis=1)])
-            print("!!!PERM Z1Z2:")
-            print([i for i, x in enumerate(perm_z1z2) if np.isnan(x)])
-            break
+
     return np.mean(z1z2.zz), permutation_means
 
 
-def get_p_from_permutation_results(observed, permuted):
-    """Calculates the significance of the observed mean relative to the empirical normal distribution of permuted means.
+def get_p_from_permutation_results(observed, permuted, alternative='greater'):
+    """Calculates the significance of the observed mean relative to the empirical normal distribution of permuted means using a one-sided test or two sided test.
 
     Args:
         observed (float): The observed value to be tested
         permuted (list): List of values that make up the expected distribution
+        alternative (str, optional): The alternative hypothesis to test against. Can be 'greater', 'less', or 'two-sided'. Defaults to 'greater'.
     
     Returns:
         float: p-value from z-test of observed value versus the permuted distribution
     """
-    z = (observed-np.mean(permuted))/np.std(permuted)
-    p = 2 * norm.sf(abs(z))
-    try:
+    assert alternative in ['greater', 'less', 'two-sided'], "Alternative hypothesis must be one of 'greater', 'less', or 'two-sided'."
+    if alternative == 'greater':
+        # One-sided test: p-value is the probability of observing a value greater than or equal to the observed value
+        p = norm.sf((observed - np.mean(permuted)) / np.std(permuted))
+    elif alternative == 'less':
+        # One-sided test: p-value is the probability of observing a value less than or equal to the observed value
+        p = norm.cdf((observed - np.mean(permuted)) / np.std(permuted))
+    elif alternative == 'two-sided':
+        # Two-sided test: p-value is the probability of observing a value as extreme as the observed value in either direction
+        p = 2 * norm.sf(abs((observed - np.mean(permuted)) / np.std(permuted)))
+    try:    #round to four significant figures
         p = round(p, 4 - int(math.floor(math.log10(abs(p)))) - 1)
     except ValueError:
-        print("Cannot round result, p=", p)
+        if np.isnan(p):
+            warnings.warn('p-value is NaN')
     return p
 
 def transform_edges(G, method='cosine_sim', edge_weight_threshold=0.95):
@@ -721,32 +750,3 @@ def calculate_network_enrichment(z_D1,z_D2,zthresh_list = list(np.arange(1,15)),
     netcoloc_enrichment_df['obs_exp']=netcoloc_enrichment_df['observed_overlap']/netcoloc_enrichment_df['expected_overlap_mean']
     
     return netcoloc_enrichment_df
-
-# from netcoloc_utils import Seeds
-
-# if __name__ == '__main__':
-#     datadir = '/cellar/users/snwright/Data/RareCommon/outputs/netcoloc/magma/'
-#     seeds1 = Seeds('/cellar/users/snwright/Data/RareCommon/inputs/magma/magma_all_GCST90428625_EFO_0004769_CV.txt')
-#     seeds2 = Seeds('/cellar/users/snwright/Data/RareCommon/inputs/magma/magma_all_GCST90428625_EFO_0004769_RV.txt')
-    
-#     z1_file = 'magma_all_GCST90428625_EFO_0004769_z_CV_q_neglog10_sum.tsv'
-#     z2_file = 'magma_all_GCST90428625_EFO_0004769_z_RV_q_neglog10_sum.tsv'
-#     zcontrol_file = 'magma_all_GCST010572_EFO_0010156_z_CV_q_neglog10_sum.tsv'
-    
-#     z1 = pd.read_csv(datadir+z1_file,sep='\t', index_col=0, header=None, names=['z'])
-#     z2 = pd.read_csv(datadir+z2_file,sep='\t', index_col=0, header=None, names=['z'])
-#     zcontrol = pd.read_csv(datadir+zcontrol_file,sep='\t', index_col=0, header=None)
-    
-#     genes1 = [x for x in seeds1.genes if x in z1.index]
-#     genes2 = [x for x in seeds2.genes if x in z2.index]
-    
-#     a = calculate_mean_z_score_distribution(z1, z2, num_reps=1000, zero_double_negatives=False, 
-#                                         overlap_control=None, seed1=genes1, seed2=genes2, quant=True)
-    
-#     b = calculate_expected_overlap(z1, z2, seed1=genes1, seed2=genes2,
-#                             z_score_threshold=3, z1_threshold=1.5,
-#                             z2_threshold=1.5, overlap_control=None,
-#                             num_reps=1000, plot=False)
-#     print(z1.head())
-    
-    

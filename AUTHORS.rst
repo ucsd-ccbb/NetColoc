@@ -10,4 +10,6 @@ Development Lead
 Contributors
 ------------
 
+* Sarah N. Wright <snwright@ucsd.edu>
 * Sophie Liu <sol015@ucsd.edu>
+

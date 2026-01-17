@@ -9,6 +9,7 @@ import os
 import warnings
 from tqdm import tqdm
 import ndex2
+import pickle
 # Internal module convenience imports
 from netcoloc.netcoloc_utils import *
 from netcoloc.netprop import *
@@ -105,14 +106,14 @@ def netprop_zscores(seed_gene_file, seed_gene_file_delimiter=None, num_reps=10, 
     #int_file and int_uuid
     if interactome_file is None and interactome_uuid is None:
         raise TypeError("Either interactome_file or interactome_uuid argument must be provided")
-
+    
     # Load interactome
     if verbose:
         print('Loading interactome')
     if interactome_file is not None:
         interactome_file = os.path.abspath(interactome_file)
-        interactome = nx.Graph()
-        interactome = nx.read_gpickle(interactome_file)
+        with open(interactome_file, 'rb') as f:
+            interactome = pickle.load(f)
     else:
         interactome = ndex2.create_nice_cx_from_server(
             ndex_server,
@@ -134,8 +135,12 @@ def netprop_zscores(seed_gene_file, seed_gene_file_delimiter=None, num_reps=10, 
         print('Number of edges: ' + str(len(interactome.edges)))
 
     # Load seed genes
-    seed_file = open(seed_gene_file, 'r')
-    seed_genes = list(np.intersect1d(nodes, seed_file.read().split(seed_gene_file_delimiter)))
+    with open(seed_gene_file, 'r') as seed_file:
+        seed_genes = list(np.intersect1d(nodes, seed_file.read().split(seed_gene_file_delimiter)))
+        try:
+            seed_genes = [int(x) for x in seed_genes]
+        except:
+            seed_genes = [str(x) for x in seed_genes]
     if verbose:
         print('\nNumber of seed genes in interactome: ' + str(len(seed_genes)))
 
@@ -319,11 +324,14 @@ def calculate_heat_zscores(individual_heats_matrix, nodes, degrees, seed_genes, 
         print(nodes)
         print(seed_genes)
         raise e
+    assert len(seed_genes) > 0, "No seed genes found in the interactome. Please check your seed gene file."
+    
     final_heat = network_propagation(individual_heats_matrix, nodes, seed_genes)
 
     # Initialize empty matrix for results of random network propagations
     random_final_heats = np.zeros([num_reps, len(final_heat)])
 
+    assert minimum_bin_size <= len(nodes), "Minimum bin size is larger than the number of nodes."
     # Create bins containing genes of similar degree
     bins, actual_degree_to_bin_index = get_degree_binning(degrees, minimum_bin_size)
 
