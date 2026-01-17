@@ -337,13 +337,13 @@ def calculate_mean_z_score_distribution(z1, z2, num_reps=1000, zero_double_negat
             perm_z1z2 = np.concatenate([perm_z1z2, overlap_perm_z1z2])
         
         # check if NaN values in permutation
-        if perm_z1z2.isnull().any(axis=1).sum() > 0:
-            num_nans = perm_z1z2.isnull().any(axis=1).sum()
+        if pd.DataFrame({"zz" :perm_z1z2}).isnull().any(axis=1).sum() > 0:
+            num_nans = pd.DataFrame({"zz" :perm_z1z2}).isnull().any(axis=1).sum()
             warnings.warn(f'Permuted Z-score warning: NaN values present in for {num_nans} permuted Z-scores. \
                           These values will be excluded from the mean calculation. This most likely occurs due to NaN values in original Z-scores.')           
         permutation_means[i] = np.nanmean(perm_z1z2)
 
-    return np.mean(z1z2.zz), permutation_means
+    return observed_mean, permutation_means
 
 
 def get_p_from_permutation_results(observed, permuted, alternative='greater'):

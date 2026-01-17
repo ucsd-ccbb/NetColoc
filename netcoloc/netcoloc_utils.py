@@ -74,8 +74,8 @@ class Seeds:
             self.scores = {gene: -1 * np.log10(max(score, 1e-250)) for gene, score in self.scores.items()}
         
     def normalize_scores(self, method='max', score_cap=None):
-
-        assert method in ['max', 'minmax', 'zscore', 'sum', 'log'], f'Invalid method {method}. Must be one of `max`, `minmax`, `zscore`, `sum`, `log`'
+        """Performs various normalization procedures on the gene scores"""
+        assert method in ['max', 'minmax', 'sum', 'log'], f'Invalid method {method}. Must be one of `max`, `minmax`, `sum`, `log`'
         if score_cap is not None:
             self.scores = {gene: min(score, score_cap) for gene, score in self.scores.items()}
         if method == 'max':
@@ -92,12 +92,6 @@ class Seeds:
             self.scores = {gene: max(np.log(score), 0) for gene, score in self.scores.items()}
             max_score = max(self.scores.values())
             self.scores = {gene: score/max_score for gene, score in self.scores.items()}
-        elif method == 'zscore':
-            mean_score = np.mean(list(self.scores.values()))
-            std_score = np.std(list(self.scores.values()))
-            self.scores = {gene: (score - mean_score)/std_score for gene, score in self.scores.items()}
-            # remove negative scores (so only keep the top ~50% of genes)
-            self.scores = {gene: score if score > 0  else 0 for gene, score in self.scores.items()}
         
     def reset_seeds(self):
         self.genes = self.original_genes.copy()

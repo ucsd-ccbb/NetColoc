@@ -252,7 +252,7 @@ class TestNetcolocNetProp(unittest.TestCase):
         individual_heats_matrix = np.array([[0.1, 0.2], [0.3, 0.4]])
         nodes = ['A', 'B']
         seed_score_dict = {'A': 0.5, 'B': 0.7}
-        self.assertRaises(AssertionError, netprop.scored_network_propagation, individual_heats_matrix, nodes, seed_score_dict, normalize='invalid')
+        self.assertRaises(AssertionError, netprop.scored_network_propagation, individual_heats_matrix, nodes, seed_score_dict, normalize_heat='invalid')
     
     def test_correct_calculation_score_propagation(self):
         nodes = ['A', 'B', 'C']
@@ -275,8 +275,8 @@ class TestNetcolocNetProp(unittest.TestCase):
         expected_result_count = expected_result/2
         expected_result_total = expected_result/3
         
-        result_count = netprop.scored_network_propagation(individual_heats_matrix, nodes, seed_score_dict, normalize='count')
-        result_total = netprop.scored_network_propagation(individual_heats_matrix, nodes, seed_score_dict, normalize='total_score')
+        result_count = netprop.scored_network_propagation(individual_heats_matrix, nodes, seed_score_dict, normalize_heat='count')
+        result_total = netprop.scored_network_propagation(individual_heats_matrix, nodes, seed_score_dict, normalize_heat='total_score')
         pd.testing.assert_series_equal(expected_result_count, result_count)
         pd.testing.assert_series_equal(expected_result_total, result_total)
     

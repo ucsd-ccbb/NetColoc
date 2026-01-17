@@ -255,7 +255,7 @@ def network_propagation(individual_heats_matrix, nodes, seed_genes):
 def scored_network_propagation(individual_heats_matrix, nodes, seed_score_dict, normalize_heat=None, Timer=None):
     if normalize_heat is not None:
         assert normalize_heat in ['count','total_score'], f'Invalid option normalize=`{normalize_heat}`. Normalize parameter must be `count`, `total_score`, or None'
-    print('USING NEW METHOD')
+    print('RUNNING SCORED NETWORK PROPAGATION')
     assert isinstance(seed_score_dict, dict), "Seed scores must be a dictionary"
     assert len(nodes) == individual_heats_matrix.shape[0], f'Number of nodes must match the size of the individual heats matrix. #Nodes: {len(nodes)}, Matrix size: {individual_heats_matrix.shape}'
     assert len(seed_score_dict) > 0, "Seed scores dictionary must contain at least one gene"
@@ -289,30 +289,3 @@ def scored_network_propagation(individual_heats_matrix, nodes, seed_score_dict, 
             F /= sum(seed_score_dict.values())
             
     return pd.Series(F, index=nodes)
-
-
-
-# if __name__ == '__main__':
-#     # Test case 1: Simple test case
-#     individual_heats_matrix = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
-#     nodes = ['A', 'B', 'C']
-#     seed_score_dict = {'A': 0.5, 'B': 1.0}
-#     normalize_heat = 'count'
-
-#     result = scored_network_propagation(individual_heats_matrix, nodes, seed_score_dict, normalize_heat)
-#     result2 = scored_network_propagation2(individual_heats_matrix, nodes, seed_score_dict, normalize_heat)
-#     print(result, result2)
-
-#     # Test case 2: Test with 'total_score' normalization
-#     seed_score_dict = {'A': 0.5, 'C': 2.0}
-#     normalize_heat = 'total_score'
-#     result = scored_network_propagation(individual_heats_matrix, nodes, seed_score_dict, normalize_heat)
-#     result2 = scored_network_propagation2(individual_heats_matrix, nodes, seed_score_dict, normalize_heat)
-#     print(result, result2)
-
-#     # Test case 3: Test with no normalization
-#     seed_score_dict = {'B': 1.0, 'C': 1.5, 'A': 0.5}
-#     normalize_heat = None
-#     result = scored_network_propagation(individual_heats_matrix, nodes, seed_score_dict, normalize_heat)
-#     result2 = scored_network_propagation2(individual_heats_matrix, nodes, seed_score_dict, normalize_heat)
-#     print(result, result2)

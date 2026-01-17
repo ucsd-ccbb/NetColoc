@@ -165,9 +165,13 @@ class TestNetcolocUtil(unittest.TestCase):
         seeds.normalize_scores(method='minmax')
         self.assertEqual(seeds.scores, {'A':0,  'B':1.0, 'C':2/3.5})
         
-        seeds = netcoloc_utils.Seeds({'A':1, 'B':2, 'C':3, 'D': 4, 'E':5})
-        seeds.normalize_scores(method='zscore')
-        self.assertEqual(seeds.scores, {'A':-2/np.sqrt(2),  'B':-1/np.sqrt(2), 'C':0, 'D':1/np.sqrt(2), 'E': 2/np.sqrt(2)})
+        seeds.reset_seeds()
+        seeds.normalize_scores(method='sum')
+        self.assertEqual(seeds.scores, {'A':1/8.5,  'B':4.5/8.5, 'C':3/8.5})
+        
+        seeds.reset_seeds()
+        seeds.normalize_scores(method='log')
+        self.assertEqual(seeds.scores, {'A':np.log(1)/np.log(4.5),  'B':np.log(4.5)/np.log(4.5), 'C':np.log(3)/np.log(4.5)})
         
     def test_Seeds_normalization_cap(self):
         self.scores = {'A':1, 'B':4.5, 'C':3}
