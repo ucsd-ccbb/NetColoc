@@ -46,6 +46,7 @@ setup(
     version=version,
     description="Analyze network colocalization of gene sets",
     long_description=readme + '\n\n' + history,
+    long_description_content_type='text/x-rst',
     author=author,
     author_email=email,
     url='https://github.com/ucsd-ccbb/netcoloc',
