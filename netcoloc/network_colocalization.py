@@ -28,10 +28,6 @@ import math
 from netcoloc.netprop_zscore import *
 
 
-def __init__(self):
-    pass
-
-
 logger = logging.getLogger(__name__)
 
 

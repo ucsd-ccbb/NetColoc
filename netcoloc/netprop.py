@@ -9,10 +9,6 @@ import pandas as pd
 import warnings
 
 
-def __init__(self):
-    pass
-
-
 def get_normalized_adjacency_matrix(graph, conserve_heat=True, weighted=False):
     """
     Returns normalized adjacency matrix (W'), as detailed in:
