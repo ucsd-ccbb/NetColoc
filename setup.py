@@ -27,7 +27,7 @@ requirements = [
     'networkx>=2.0,<3.0',
     'mygene>=3.2.2',
     'scipy>=1.5.3',
-    'numpy',
+    'numpy>=2.0.0',
     'pandas',
     'tqdm',
     'matplotlib',
@@ -67,12 +67,12 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
-        'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
         'Programming Language :: Python :: 3.12',
         'Programming Language :: Python :: 3.13'
+        'Programming Language :: Python :: 3.14',
     ],
     test_suite='tests',
     setup_requires=['wheel']

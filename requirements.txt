@@ -3,7 +3,7 @@ ndex2>=3.3.2
 networkx>=2.0
 mygene >= 3.2.2
 scipy >= 1.5.3
-numpy
+numpy >= 2.0.0
 pandas
 tqdm
 matplotlib
