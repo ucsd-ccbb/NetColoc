@@ -1,0 +1,104 @@
+format-version: 1.2
+data-version: mock_mpo/1.0
+date: 15:07:2025 18:00
+saved-by: Manus
+auto-generated-by: Manus Agent
+default-namespace: mock_mpo
+ontology: mp
+
+[Term]
+id: MP:0000001
+name: mock phenotype
+def: "A mock phenotype for testing purposes." [MPO:0000001]
+
+[Term]
+id: MP:0000002
+name: abnormal cardiovascular system phenotype
+def: "A mock abnormal cardiovascular system phenotype." [MPO:0000002]
+is_a: MP:0000001 ! mock phenotype
+
+[Term]
+id: MP:0000003
+name: abnormal nervous system phenotype
+def: "A mock abnormal nervous system phenotype." [MPO:0000003]
+is_a: MP:0000001 ! mock phenotype
+
+[Term]
+id: MP:0000004
+name: abnormal heart morphology
+def: "A mock abnormal heart morphology." [MPO:0000004]
+is_a: MP:0000002 ! abnormal cardiovascular system phenotype
+
+[Term]
+id: MP:0000005
+name: abnormal heart rate
+def: "A mock abnormal heart rate." [MPO:0000005]
+is_a: MP:0000002 ! abnormal cardiovascular system phenotype
+
+[Term]
+id: MP:0000006
+name: abnormal brain morphology
+def: "A mock abnormal brain morphology." [MPO:0000006]
+is_a: MP:0000003 ! abnormal nervous system phenotype
+
+[Term]
+id: MP:0000007
+name: abnormal learning/memory
+def: "A mock abnormal learning/memory." [MPO:0000007]
+is_a: MP:0000003 ! abnormal nervous system phenotype
+
+[Term]
+id: MP:0000008
+name: enlarged heart
+def: "A mock enlarged heart." [MPO:0000008]
+is_a: MP:0000004 ! abnormal heart morphology
+
+[Term]
+id: MP:0000009
+name: decreased heart rate
+def: "A mock decreased heart rate." [MPO:0000009]
+is_a: MP:0000005 ! abnormal heart rate
+
+[Term]
+id: MP:0000010
+name: enlarged brain
+def: "A mock enlarged brain." [MPO:0000010]
+is_a: MP:0000006 ! abnormal brain morphology
+
+[Term]
+id: MP:0000011
+name: impaired spatial learning
+def: "A mock impaired spatial learning." [MPO:0000011]
+is_a: MP:0000007 ! abnormal learning/memory
+
+[Term]
+id: MP:0000012
+name: enlarged left ventricle
+def: "A mock enlarged left ventricle." [MPO:0000012]
+is_a: MP:0000008 ! enlarged heart
+
+[Term]
+id: MP:0000013
+name: bradycardia
+def: "A mock bradycardia." [MPO:0000013]
+is_a: MP:0000009 ! decreased heart rate
+
+[Term]
+id: MP:0000014
+name: hydrocephalus
+def: "A mock hydrocephalus." [MPO:0000014]
+is_a: MP:0000010 ! enlarged brain
+
+[Term]
+id: MP:0000015
+name: impaired T-maze learning
+def: "A mock impaired T-maze learning." [MPO:0000015]
+is_a: MP:0000011 ! impaired spatial learning
+
+[Term]
+id: MP:0000016
+name: abnormal fear conditioning
+def: "A mock abnormal fear conditioning." [MPO:0000016]
+is_a: MP:0000011 ! impaired spatial learning
+
+

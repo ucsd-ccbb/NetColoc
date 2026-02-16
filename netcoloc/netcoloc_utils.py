@@ -3,6 +3,8 @@
 '''Utility functions useful across multiple modules.
 '''
 
+import warnings
+
 
 def get_degree_binning(node_to_degree_dict, min_bin_size, lengths=None):
     """
@@ -28,11 +30,21 @@ def get_degree_binning(node_to_degree_dict, min_bin_size, lengths=None):
     :rtype: tuple
     """
     # Create dictionary mapping degrees to nodes
+    assert min_bin_size <= len(node_to_degree_dict), f'Minimum bin size must be less than number of nodes {len(node_to_degree_dict)}'
+
+    if lengths is not None:
+        if len(lengths) == 0:
+            warnings.warn("Lengths is empty. Returning empty bins and degree to bin index dictionary.")
+            return [], {}
+        missing_nodes = [x for x in lengths if x not in node_to_degree_dict]
+        if len(missing_nodes) > 0:
+            warnings.warn(f"The following nodes are not in the degree dictionary: {missing_nodes}")
+
     degree_to_nodes = {}
     for node, degree in node_to_degree_dict.items():
         if lengths is not None and node not in lengths:
             continue
-        degree_to_nodes.setdefault(degree, []).append(node)
+        degree_to_nodes.setdefault(degree, []).append(node)    
     
     # Get sorted list of degrees
     degrees = degree_to_nodes.keys()

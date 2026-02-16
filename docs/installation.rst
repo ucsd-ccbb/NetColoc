@@ -2,34 +2,6 @@
 Installation
 ============
 
-netcoloc depends on `DDOT`_ which has
-to be manually installed.
-
-`DDOT`_ can be installed one of two ways:
-
-  1. To install `DDOT`_ by downloading
-     the zip file of the source tree:
-
-     .. code-block::
-
-        wget https://github.com/idekerlab/ddot/archive/refs/heads/python3.zip
-        unzip python3.zip
-        cd ddot-python3
-        python setup.py bdist_wheel
-        pip install dist/ddot*py3*whl
-
-  2. To install `DDOT`_ by cloning the repo:
-
-     .. code-block::
-
-        git clone --branch python3 https://github.com/idekerlab/ddot.git
-        cd ddot
-        python setup.py bdist_wheel
-        pip install dist/ddot*py3*whl
-
-Stable release
---------------
-
 To install netcoloc, run this command in your terminal:
 
 .. code-block:: console
@@ -41,6 +13,26 @@ you through the process.
 
 .. _pip: https://pip.pypa.io
 .. _Python installation guide: http://docs.python-guide.org/en/latest/starting/installation/
+
+Prior Versions
+--------------
+
+Prior version `netcoloc v0.1.6 <https://doi.org/10.5281/zenodo.6654561>`__ was utilized in the *NetColoc* publication: Rosenthal, S. B. et al.,
+"`Mapping the common gene networks that underlie related diseases <https://doi.org/10.1038/s41596-022-00797-1>`__." Nature Protocols (2023).
+To install this version, please use the following command:
+
+.. code-block:: console
+
+     pip install netcoloc==0.1.6
+
+And follow the additional installation instructions for DDOT at `<https://pypi.org/project/netcoloc/0.1.6/>`__.
+
+The original source code and example notebooks can be acquired from Zenodo: `DOI:6654561 <https://doi.org/10.5281/zenodo.6654561>`__, or from GitHub:
+
+.. code-block:: console
+
+        git clone git@github.com:ucsd-ccbb/NetColoc.git
+        git checkout -b v0.1.6 tags/v0.1.6
 
 
 From sources

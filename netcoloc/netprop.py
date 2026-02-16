@@ -9,10 +9,6 @@ import pandas as pd
 import warnings
 
 
-def __init__(self):
-    pass
-
-
 def get_normalized_adjacency_matrix(graph, conserve_heat=True, weighted=False):
     """
     Returns normalized adjacency matrix (W'), as detailed in:
@@ -52,7 +48,15 @@ def get_normalized_adjacency_matrix(graph, conserve_heat=True, weighted=False):
     :return: Square normalized adjacency matrix
     :rtype: :py:class:`numpy.ndarray`
     """
+    if isinstance(graph, np.ndarray):
+        graph = nx.from_numpy_array(graph)
+    
+    if isinstance(graph, nx.DiGraph) or isinstance(graph, nx.MultiGraph) or isinstance(graph, nx.MultiDiGraph):
+        raise ValueError("Input graph must be a networkx.Graph object. Directed and MultiGraphs are not supported.")
+    
+    
     assert 0 not in dict(graph.degree).values(), "Graph cannot have nodes with degree=zero"
+    # assert graph is nx.Graph object
 
     # Create graph
     if conserve_heat:
