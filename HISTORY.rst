@@ -3,7 +3,7 @@ History
 =======
 
 
-1.0.0 (2025-07-09)
+1.0.0 (2026-02-10)
 ------------------
 
 * `obonet <https://pypi.org/project/obonet/>`__ added as a dependency, replacing `DDOT <https://github.com/idekerlab/ddot>`__ dependency
