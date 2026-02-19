@@ -183,8 +183,90 @@ def netprop_zscore(seed_gene_file, seed_gene_file_delimiter=None, num_reps=10, a
     return z_scores, random_final_heats
 
 
-def calculate_heat_zscores(individual_heats_matrix, nodes, degrees, seed_genes, 
-                           num_reps=10, alpha=0.5, minimum_bin_size=10, random_seed=1):
+def calculate_scored_heat_zscores(individual_heats_matrix, nodes, degrees, seed_scores, 
+                                num_reps=10, minimum_bin_size=20, random_seed=None,
+                                verbose=True, normalize_heat=None, Timer=None):
+    """"""
+    if Timer is not None:
+        Timer.start('Observed heat')
+    observed_heat = scored_network_propagation(individual_heats_matrix, nodes, seed_scores, Timer=None) # returns series
+    random_final_heats = np.zeros([num_reps, len(observed_heat)])
+    if Timer is not None:
+        Timer.end('Observed heat')
+        Timer.start('Random heat')
+    bins, actual_degree_to_bin_index = get_degree_binning(degrees, minimum_bin_size)
+    bin_to_gene = {i: genes for i, genes in enumerate(bins)}
+    for repetition in tqdm(range(num_reps)):
+        random_final_heats[repetition] = perform_randomized_scored_propagation(individual_heats_matrix, nodes, degrees, seed_scores, bin_to_gene, 
+                                                        random_seed=random_seed, verbose=verbose, 
+                                                        normalize_heat=normalize_heat, Timer=None)
+    if Timer is not None:
+        Timer.end('Random heat')
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        z_scores = (np.log(observed_heat) - np.nanmean(np.log(random_final_heats), axis=0)) / np.nanstd(np.log(random_final_heats), axis=0)
+
+    return z_scores, observed_heat, random_final_heats #series, series, array
+        
+        
+def perform_randomized_scored_propagation(individual_heats_matrix, nodes, degrees, seed_scores, bin_to_gene,  
+                                        random_seed=1, verbose=True, normalize_heat=None, Timer=None):
+    if Timer is not None:
+        Timer.start('Random binned scores')
+    random_seed_scores = get_random_binned_scores(bin_to_gene, seed_scores, random_seed=random_seed)
+    if Timer is not None:
+        Timer.end('Random binned scores')
+        Timer.start('Correlations')
+    # TODO: Should I change this to ignore genes with score of 0?
+    if verbose:
+        #print(len(seed_scores), len(random_seed_scores))
+        print( f'Initial corr: {degree_score_correlation(seed_scores, degrees):.5f}; Random corr: {degree_score_correlation(random_seed_scores, degrees):.5f}; Score corr: {score_correlation(seed_scores, random_seed_scores):.5f}')
+    if Timer is not None:
+        Timer.end('Correlations')
+        Timer.start('Scored network propagation')
+    # Perform network propagation with random seed genes
+    randomized_result = scored_network_propagation(individual_heats_matrix, nodes, random_seed_scores,
+                                                    normalize_heat=normalize_heat, Timer=None)
+    if Timer is not None:
+        Timer.end('Scored network propagation')
+    return randomized_result
+    
+    
+def get_random_binned_scores(bin_to_gene, seed_scores, random_seed=None):
+    # shuffle all the bins?
+    # Returns a score for all genes, filling non-seed genes with 0. Should maintain the same correlation of degree and score
+    if random_seed is not None:
+        np.random.seed(random_seed)
+    
+    random_gene_scores = {}
+    for b, genes in bin_to_gene.items():
+        seed_genes = [gene for gene in seed_scores if gene in bin_to_gene[b]]
+        if len(seed_genes) == 0:
+            random_gene_scores.update({gene: 0 for gene in genes})
+            continue
+        non_zero_scores = [seed_scores[gene] for gene in seed_genes]
+        zero_scores = np.zeros(len(genes) - len(seed_genes))
+        all_scores = np.concatenate([non_zero_scores, zero_scores])
+        np.random.shuffle(all_scores)
+        for i, gene in enumerate(genes):
+            random_gene_scores[gene] = all_scores[i]
+
+    return random_gene_scores
+    
+def score_correlation(gene_scores, random_gene_scores):
+    data = pd.DataFrame({'score': {g:s for g, s in gene_scores.items() if s != 0}, 
+                            'random_score': {g:s for g, s in random_gene_scores.items() if s != 0}}).fillna(0)
+    return data['score'].corr(data['random_score'])
+
+
+def degree_score_correlation(gene_scores, gene_degrees, drop_zeros=True):
+    data = pd.DataFrame({'score': gene_scores, 'degree': gene_degrees}).dropna()
+    if drop_zeros:
+        data = data[data['score'] != 0]
+    return data['score'].corr(data['degree'])
+
+
+def calculate_heat_zscores(individual_heats_matrix, nodes, degrees, seed_genes, num_reps=10, alpha=0.5, minimum_bin_size=10,random_seed=1):
     """
     Helper function to perform network heat propagation using the given
     individual heats matrix with the given seed genes and return the z-scores of
@@ -233,7 +315,12 @@ def calculate_heat_zscores(individual_heats_matrix, nodes, degrees, seed_genes,
     np.random.seed(random_seed)
 
     # Calculate network propagation results given gene set
-    seed_genes = list(np.intersect1d(nodes, seed_genes))
+    try:
+        seed_genes = list(set(nodes).intersection(set(seed_genes)))
+    except TypeError as e:
+        print(nodes)
+        print(seed_genes)
+        raise e
     assert len(seed_genes) > 0, "No seed genes found in the interactome. Please check your seed gene file."
     
     final_heat = network_propagation(individual_heats_matrix, nodes, seed_genes)

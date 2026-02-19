@@ -30,9 +30,11 @@ History
 
 * Added function ``network_colocalization.calculate_mean_z_score_distribution()`` to analyze mean netcoloc z-scores in addition to the size of the colocalized network. 
 
-* `requirements_dev.txt` updated for `python=3.13`
+* `requirements_dev.txt` updated for `python>=3.13`
 
-* Expanded unit tests for `netcoloc_utils`, `netprop`, `netprop_zscore`, `network_colocalization` and `validation` modules
+* Expanded unit tests for `netcoloc_utils`, `netprop`, `netprop_zscore`, `network_colocalization` and `validation` modules 
+
+* Deprecated support for `python=3.8`. Netcoloc v1.0.0 requires python>=3.9  
 
 
 0.1.7 (2022-06-28)

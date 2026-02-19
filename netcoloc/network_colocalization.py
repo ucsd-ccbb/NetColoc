@@ -261,7 +261,7 @@ def calculate_expected_overlap(z_scores_1, z_scores_2, seed1=None, seed2=None,
 
 
 def calculate_mean_z_score_distribution(z1, z2, num_reps=1000, zero_double_negatives=True, 
-                                        overlap_control="remove", seed1=[], seed2=[]):
+                                        overlap_control="remove", seed1=[], seed2=[], quant=False):
     """Determines size of expected mean combined `z=z1*z2` by randomly shuffling gene names
 
     Args:
@@ -283,6 +283,11 @@ def calculate_mean_z_score_distribution(z1, z2, num_reps=1000, zero_double_negat
         z2 = pd.DataFrame(z2, columns=["z"])
     z1z2 = z1.join(z2, lsuffix="1", rsuffix="2")
     z1z2 = z1z2.assign(zz=z1z2.z1 * z1z2.z2)
+    # get the number of rows with na values, remove with warning
+    if z1z2.isnull().any(axis=1).sum() > 0:
+        num_nans = z1z2.isnull().any(axis=1).sum()
+        warnings.warn(f'NaN Z-score warning: {num_nans} genes have NaN Z-scores. Genes to be removed: {z1z2[z1z2.isnull().any(axis=1)]}')
+        z1z2.dropna(inplace=True)
     
     if zero_double_negatives:
         for node in z1z2.index:
@@ -326,10 +331,15 @@ def calculate_mean_z_score_distribution(z1, z2, num_reps=1000, zero_double_negat
                 else:
                     overlap_perm_z1z2[node] = overlap_z1[node] * z2[node]
             perm_z1z2 = np.concatenate([perm_z1z2, overlap_perm_z1z2])
-                    
-        permutation_means[i] = np.mean(perm_z1z2)
-    return observed_mean, permutation_means
+        
+        # check if NaN values in permutation
+        if pd.DataFrame({"zz" :perm_z1z2}).isnull().any(axis=1).sum() > 0:
+            num_nans = pd.DataFrame({"zz" :perm_z1z2}).isnull().any(axis=1).sum()
+            warnings.warn(f'Permuted Z-score warning: NaN values present in for {num_nans} permuted Z-scores. \
+                          These values will be excluded from the mean calculation. This most likely occurs due to NaN values in original Z-scores.')           
+        permutation_means[i] = np.nanmean(perm_z1z2)
 
+    return observed_mean, permutation_means
 
 
 def get_p_from_permutation_results(observed, permuted, alternative='greater'):
@@ -736,6 +746,3 @@ def calculate_network_enrichment(z_D1,z_D2,zthresh_list = list(np.arange(1,15)),
     netcoloc_enrichment_df['obs_exp']=netcoloc_enrichment_df['observed_overlap']/netcoloc_enrichment_df['expected_overlap_mean']
     
     return netcoloc_enrichment_df
-
-    
-

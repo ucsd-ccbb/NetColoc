@@ -56,7 +56,7 @@ class TestNetcolocZscore(unittest.TestCase):
         with mock.patch('pickle.load', return_value=nx.Graph()) as mock_read_gpickle:
             with mock.patch('ndex2.create_nice_cx_from_server', return_value=mock.Mock(to_networkx=lambda: nx.Graph())) as mock_create_nice_cx:
                 # Test with interactome_file
-                z_scores, random_final_heats = netprop_zscore(
+                z_scores, random_final_heats = netprop_zscores(
                     seed_gene_file=self.mock_seed_file,
                     interactome_file=self.mock_interactome_file
                 )
@@ -64,7 +64,7 @@ class TestNetcolocZscore(unittest.TestCase):
                 self.assertIsInstance(random_final_heats, np.ndarray)
 
                 # Test with interactome_uuid
-                z_scores, random_final_heats = netprop_zscore(
+                z_scores, random_final_heats = netprop_zscores(
                     seed_gene_file=self.mock_seed_file,
                     interactome_uuid='f93f402c-86d4-11e7-a10d-0ac135e8bacf'
                 )
@@ -78,7 +78,7 @@ class TestNetcolocZscore(unittest.TestCase):
     def test_netprop_zscores_save_z_scores(self):
         # mock to_csv
         with mock.patch('pandas.Series.to_csv') as mock_to_csv:
-            z_scores, random_final_heats = netprop_zscore(
+            z_scores, random_final_heats = netprop_zscores(
                 seed_gene_file=self.mock_seed_file,
                 interactome_file=self.mock_interactome_file,
                 save_z_scores=True, verbose=False
@@ -91,7 +91,7 @@ class TestNetcolocZscore(unittest.TestCase):
     def test_netprop_zscores_save_final_heat(self):
         # mock to_csv
         with mock.patch('pandas.DataFrame.to_csv') as mock_to_csv:
-            z_scores, random_final_heats = netprop_zscore(
+            z_scores, random_final_heats = netprop_zscores(
                 seed_gene_file=self.mock_seed_file,
                 interactome_file=self.mock_interactome_file,
                 save_final_heat=True,verbose=False)
@@ -101,7 +101,7 @@ class TestNetcolocZscore(unittest.TestCase):
     def test_netprop_zscores_save_random_final_heats(self):
         # mock to_csv
         with mock.patch('pandas.DataFrame.to_csv') as mock_to_csv:
-            z_scores, random_final_heats = netprop_zscore(
+            z_scores, random_final_heats = netprop_zscores(
                 seed_gene_file=self.mock_seed_file,
                 interactome_file=self.mock_interactome_file,
                 save_random_final_heats=True, verbose=False
@@ -113,7 +113,7 @@ class TestNetcolocZscore(unittest.TestCase):
     
     def test_netprop_zscore_success(self):
         num_reps=10
-        z_scores, random_final_heats = netprop_zscore(
+        z_scores, random_final_heats = netprop_zscores(
             seed_gene_file=self.mock_seed_file,
             interactome_file=self.mock_interactome_file,
             verbose=False, num_reps=num_reps
@@ -127,7 +127,7 @@ class TestNetcolocZscore(unittest.TestCase):
     # Raises TypeError if neither interactome_file nor interactome_uuid is provided
     def test_netprop_zscore_missing_interactome_source_raises_typeerror(self):
         with self.assertRaises(TypeError):
-            netprop_zscore(seed_gene_file='dummy_seed_file.txt', interactome_uuid=None)
+            netprop_zscores(seed_gene_file='dummy_seed_file.txt', interactome_uuid=None)
             
     def test_calculate_heat_zscores_raises_no_seed_gene_assertion_error(self):
         with self.assertRaises(AssertionError):

@@ -15,6 +15,7 @@ import os
 import ndex2
 import networkx as nx
 import numpy as np
+import pandas as pd
 
 from netcoloc import netprop
 
@@ -244,7 +245,40 @@ class TestNetcolocNetProp(unittest.TestCase):
         expected = [891/980, 9/98, 9/980]
         for i, node in enumerate(F.keys()):
             self.assertAlmostEqual(expected[i], F[node])
-
-
+            
+        # Validates that normalize parameter is either 'count', 'total_score', or None
+    def test_normalize_invalid_scored_propagation(self):
+        # Arrange
+        individual_heats_matrix = np.array([[0.1, 0.2], [0.3, 0.4]])
+        nodes = ['A', 'B']
+        seed_score_dict = {'A': 0.5, 'B': 0.7}
+        self.assertRaises(AssertionError, netprop.scored_network_propagation, individual_heats_matrix, nodes, seed_score_dict, normalize_heat='invalid')
+    
+    def test_correct_calculation_score_propagation(self):
+        nodes = ['A', 'B', 'C']
+        individual_heats_matrix = np.array([[0.1, 0.2, 0.3],
+                                            [0.4, 0.5, 0.6],
+                                            [0.7, 0.8, 0.9]])
+        seed_score_dict = {'A': 1, 'B': 2}
+        expected_result = pd.Series([0.1*1 + 0.2*2, 0.4*1 + 0.5*2, 0.7*1 + 0.8*2], index=nodes)
+    
+        result = netprop.scored_network_propagation(individual_heats_matrix, nodes, seed_score_dict)
+        pd.testing.assert_series_equal(expected_result, result)
+        
+    def test_normalize_count_score_propagation(self):
+        nodes = ['A', 'B', 'C']
+        individual_heats_matrix = np.array([[0.1, 0.2, 0.3],
+                                            [0.4, 0.5, 0.6],
+                                            [0.7, 0.8, 0.9]])
+        seed_score_dict = {'A': 1, 'B': 2}
+        expected_result = pd.Series([0.1*1 + 0.2*2, 0.4*1 + 0.5*2, 0.7*1 + 0.8*2], index=nodes)
+        expected_result_count = expected_result/2
+        expected_result_total = expected_result/3
+        
+        result_count = netprop.scored_network_propagation(individual_heats_matrix, nodes, seed_score_dict, normalize_heat='count')
+        result_total = netprop.scored_network_propagation(individual_heats_matrix, nodes, seed_score_dict, normalize_heat='total_score')
+        pd.testing.assert_series_equal(expected_result_count, result_count)
+        pd.testing.assert_series_equal(expected_result_total, result_total)
+    
 if __name__ == '__main__':
     sys.exit(unittest.main())
