@@ -251,7 +251,6 @@ def network_propagation(individual_heats_matrix, nodes, seed_genes):
 def scored_network_propagation(individual_heats_matrix, nodes, seed_score_dict, normalize_heat=None, Timer=None):
     if normalize_heat is not None:
         assert normalize_heat in ['count','total_score'], f'Invalid option normalize=`{normalize_heat}`. Normalize parameter must be `count`, `total_score`, or None'
-    print('RUNNING SCORED NETWORK PROPAGATION')
     assert isinstance(seed_score_dict, dict), "Seed scores must be a dictionary"
     assert len(nodes) == individual_heats_matrix.shape[0], f'Number of nodes must match the size of the individual heats matrix. #Nodes: {len(nodes)}, Matrix size: {individual_heats_matrix.shape}'
     assert len(seed_score_dict) > 0, "Seed scores dictionary must contain at least one gene"
