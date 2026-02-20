@@ -7,6 +7,8 @@ History
 
 * Added functionality for quantitative NetColoc, allowing direct analysis of scored gene sets. Including: the class ``Seeds`` in ``netcoloc_utils`` to manage import and manipulation of scored gene sets, ``scored_network_propagation`` in ``netprop`` to perform propagation with weighted seeds, ``calculate_scored_heat_zscores`` and associated functions in ``netprop_zscore`` to calculate associated z-scores using randomized inputs with matched degree-score correlation.
 
+* Added ``example_notebook/Quantitative_NetColoc_QNetColoc_example.ipynb`` to demonstrate the usage of quantitative NetColoc
+
 * Updated ``numpy`` requirement to ``numpy>=2.0.0``
 
 * Added support for ``python=3.14``
