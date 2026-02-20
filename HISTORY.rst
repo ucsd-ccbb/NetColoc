@@ -5,8 +5,11 @@ History
 1.1.0 (2026-02-28)
 ------------------
 
-* Added functionality for quantitative NetColoc, allowing direct analysis of scored gene sets. Including: the class `Seeds` in `netcoloc_utils` to manage import and manipulation of scored gene sets. <TODO>
+* Added functionality for quantitative NetColoc, allowing direct analysis of scored gene sets. Including: the class ``Seeds`` in ``netcoloc_utils`` to manage import and manipulation of scored gene sets, ``scored_network_propagation`` in ``netprop`` to perform propagation with weighted seeds, ``calculate_scored_heat_zscores`` and associated functions in ``netprop_zscore`` to calculate associated z-scores using randomized inputs with matched degree-score correlation.
 
+* Updated ``numpy`` requirement to ``numpy>=2.0.0``
+
+* Added support for ``python=3.14``
 
 1.0.0 (2026-02-10)
 ------------------
