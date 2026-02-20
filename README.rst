@@ -59,6 +59,7 @@ Version 1.0.0 incorporates additional functionality developed for the publicatio
 To install this version, please use the following command:
 
 ::
+
     pip install netcoloc==1.0.0
 
 Prior version `netcoloc v0.1.6 <https://doi.org/10.5281/zenodo.6654561>`__ was utilized in the *NetColoc* publication: Rosenthal, S. B. et al.,
