@@ -2,6 +2,11 @@
 History
 =======
 
+1.1.0 (2026-02-28)
+------------------
+
+* Added functionality for quantitative NetColoc, allowing direct analysis of scored gene sets. Including: the class `Seeds` in `netcoloc_utils` to manage import and manipulation of scored gene sets. <TODO>
+
 
 1.0.0 (2026-02-10)
 ------------------

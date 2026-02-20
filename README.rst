@@ -31,7 +31,8 @@ including rare and common variants within the same disease,
 genes associated with two comorbid diseases, genetically
 correlated GWAS phenotypes, GWAS across two different species,
 or gene expression changes after treatment with two different
-drugs, to name a few.
+drugs, to name a few. As of v1.1.0, relevant scores can be included for genes within 
+each gene set.
 
 NetColoc relies on a dual network propagation
 approach to identify the region of network space which is
@@ -52,7 +53,13 @@ NetColoc is available on `PyPI <https://pypi.org/>`__
 Version Notes
 ~~~~~~~~~~~~~
 
-Version 1.0.0 incorporates additional functionality developed for the publication Wright, S. N. et al., "`Genome-wide association studies of human and rat BMI converge on synapse, epigenome, and hormone signaling networks <https://doi.org/10.1016/j.celrep.2023.112873>`__." Cell Reports (2023), as outlined at `<https://github.com/sarah-n-wright/CrossSpeciesBMI>`__.  
+Version 1.1.0 incorporates additional functionality developed for the publication Wright, S. N. et al., Common and rare genetic variants show network convergence for a majority of human traits. EMBO Reports (2026), as outlined at `<https://github.com/sarah-n-wright/CARVA>`__.
+
+Version 1.0.0 incorporates additional functionality developed for the publication Wright, S. N. et al., "`Genome-wide association studies of human and rat BMI converge on synapse, epigenome, and hormone signaling networks <https://doi.org/10.1016/j.celrep.2023.112873>`__." Cell Reports (2023), as outlined at `<https://github.com/sarah-n-wright/CrossSpeciesBMI>`__. 
+To install this version, please use the following command:
+
+::
+    pip install netcoloc==1.0.0
 
 Prior version `netcoloc v0.1.6 <https://doi.org/10.5281/zenodo.6654561>`__ was utilized in the *NetColoc* publication: Rosenthal, S. B. et al.,
 "`Mapping the common gene networks that underlie related diseases <https://doi.org/10.1038/s41596-022-00797-1>`__." Nature Protocols (2023).
@@ -79,7 +86,7 @@ Documentation
 For a quick-start on NetColoc's functionality, please see the
 `example notebooks <https://github.com/ucsd-ccbb/NetColoc/tree/main/example_notebooks>`__.
 
-**Usage Note:** Please follow steps in example notebooks for correct usage of NetColoc. At this time, individual functionalities have not been tested for independent use.
+**Usage Note:** Please follow steps in example notebooks for correct usage of NetColoc. At this time, not all individual functionalities have been tested for independent use.
 
 Dependencies
 --------------
@@ -122,6 +129,7 @@ Other publications utilizing NetColoc:
 
 * Rosenthal, S. B. et al. A convergent molecular network underlying autism and congenital heart disease. Cell Syst. 12, 1094-1107.e6 (2021). `10.1016/j.cels.2021.07.009 <http://dx.doi.org/10.1016/j.cels.2021.07.009>`__
 * Wright, S. N. et al. Genome-wide association studies of human and rat BMI converge on synapse, epigenome, and hormone signaling networks. Cell Rep. 42, 112873 (2023). `10.1016/j.celrep.2023.112873 <http://dx.doi.org/10.1016/j.celrep.2023.112873>`__
+* Wright, S. N. et al. Common and rare genetic variants show network convergence for a majority of human traits. EMBO Reports (2026)
 
 
 

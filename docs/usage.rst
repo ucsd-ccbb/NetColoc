@@ -42,3 +42,11 @@ An example notebook to evaluate NetColoc scores for a range of thresholds on sco
 See `https://github.com/ucsd-ccbb/NetColoc/example_notebooks/Evalute_scored_input_gene_lists.ipynb <https://github.com/ucsd-ccbb/NetColoc/example_notebooks/Evalute_scored_input_gene_lists.ipynb>`__.
 
 
+Introducing Quantitative NetColoc (QNetColoc)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This notebook demonstrates the implementation of quantitative network colocalization which allows input seed genes to be assigned individual scores prior to propagation. 
+
+See `https://github.com/ucsd-ccbb/NetColoc/example_notebooks/Quantitative_NetColoc_QNetColoc_example.ipynb <https://github.com/ucsd-ccbb/NetColoc/example_notebooks/Quantitative_NetColoc_QNetColoc_example.ipynb>`__.
+
+
