@@ -11,7 +11,7 @@ To use netcoloc in a project
 Example Notebooks
 -----------------
 
-For example usage, please see `https://github.com/ucsd-ccbb/NetColoc/example_notebooks <https://github.com/ucsd-ccbb/NetColoc/example_notebooks>`__.  
+For example usage, please see `NetColoc/example_notebooks <https://github.com/ucsd-ccbb/NetColoc/tree/main/example_notebooks>`__.  
 
 For detailed commentary on the NetColoc pipeline see the associated protocal publicaiton at Rosenthal, S.B., Wright, S.N., Liu, S. et al. **Mapping the common gene networks that underlie related diseases.** Nat Protoc 18, 1745–1759 (2023). `https://doi.org/10.1038/s41596-022-00797-1 <https://doi.org/10.1038/s41596-022-00797-1>`__
 
@@ -25,7 +25,7 @@ NetColoc analysis of rare variants in Autism spectrum disorder (ASD) and Congeni
 
 Example of NetColoc workflow on genes associated with rare exome variants across two conditions (ASD and CHD)
 
-See `https://github.com/ucsd-ccbb/NetColoc/example_notebooks/ASD_CHD_NetColoc_analysis.ipynb <https://github.com/ucsd-ccbb/NetColoc/example_notebooks/ASD_CHD_NetColoc_analysis.ipynb>`__.
+See `example_notebooks/ASD_CHD_NetColoc_analysis.ipynb <https://github.com/ucsd-ccbb/NetColoc/tree/main/example_notebooks/ASD_CHD_NetColoc_analysis.ipynb>`__.
 
 
 NetColoc analysis of rare variants in Autism spectrum disorder (ASD)
@@ -33,13 +33,13 @@ NetColoc analysis of rare variants in Autism spectrum disorder (ASD)
 
 Example of NetColoc workflow on genes associated with rare exome variants in ASD only, to demonstrate workflow from single gene set
 
-See `https://github.com/ucsd-ccbb/NetColoc/example_notebooks/ASD_NetColoc_analysis.ipynb <https://github.com/ucsd-ccbb/NetColoc/example_notebooks/ASD_NetColoc_analysis.ipynb>`__.
+See `example_notebooks/ASD_NetColoc_analysis.ipynb <https://github.com/ucsd-ccbb/NetColoc/tree/main/example_notebooks/ASD_NetColoc_analysis.ipynb>`__.
 
 
 An example notebook to evaluate NetColoc scores for a range of thresholds on scored input gene lists
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-See `https://github.com/ucsd-ccbb/NetColoc/example_notebooks/Evalute_scored_input_gene_lists.ipynb <https://github.com/ucsd-ccbb/NetColoc/example_notebooks/Evalute_scored_input_gene_lists.ipynb>`__.
+See `example_notebooks/Evalute_scored_input_gene_lists.ipynb <https://github.com/ucsd-ccbb/NetColoc/tree/main/example_notebooks/Evalute_scored_input_gene_lists.ipynb>`__.
 
 
 Introducing Quantitative NetColoc (QNetColoc)
@@ -47,6 +47,6 @@ Introducing Quantitative NetColoc (QNetColoc)
 
 This notebook demonstrates the implementation of quantitative network colocalization which allows input seed genes to be assigned individual scores prior to propagation. 
 
-See `https://github.com/ucsd-ccbb/NetColoc/example_notebooks/Quantitative_NetColoc_QNetColoc_example.ipynb <https://github.com/ucsd-ccbb/NetColoc/example_notebooks/Quantitative_NetColoc_QNetColoc_example.ipynb>`__.
+See `example_notebooks/Quantitative_NetColoc_QNetColoc_example.ipynb <https://github.com/ucsd-ccbb/NetColoc/tree/v110/example_notebooks/Quantitative_NetColoc_QNetColoc_example.ipynb>`__.
 
 
