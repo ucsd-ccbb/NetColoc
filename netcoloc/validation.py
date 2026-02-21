@@ -83,7 +83,7 @@ def load_MGI_mouseKO_data(url='http://www.informatics.jax.org/downloads/reports/
     mgi_df = pd.read_csv(rpt_file_target, sep='\t',
                         names=['MGI_Allele_Accession_ID',
                                'Allele symbol', 'involves',
-                               'MP', 'PMID', 'MGI_marker_accession_ID'])
+                               'MP', 'PMID', 'MGI_marker_accession_ID', 'MGI_genotype_accession_ID'])
 
     mapping = map_mgi_to_human_orthologs(mgi_df, map_using=map_using, verbose=verbose, data_loc=data_loc, update=update)
 
