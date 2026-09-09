@@ -75,7 +75,7 @@ setup(
         'Programming Language :: Python :: 3.13',
         'Programming Language :: Python :: 3.14',
     ],
-    python_requires='>=3.8',
+    python_requires='>=3.9',
     test_suite='tests',
     setup_requires=['wheel']
 )
