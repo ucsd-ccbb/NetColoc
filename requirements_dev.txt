@@ -9,3 +9,5 @@ cryptography>=3.2
 PyYAML>=4.2b1
 setuptools
 pytest
+twine
+build

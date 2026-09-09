@@ -4,6 +4,132 @@
 '''
 
 import warnings
+import pandas as pd
+import os
+import numpy as np
+
+class Seeds:
+    def __init__(self, inputdata, option='score_file', agg_method='mean'):
+        if isinstance(inputdata, str):
+            # check that file exists
+            if not os.path.exists(inputdata):
+                raise FileNotFoundError(f'File {inputdata} not found')
+            self.datafile = inputdata
+            try:
+                self.data = self._read_data(option='score_file')
+                assert 'gene' in self.data.columns
+            except AssertionError:
+                self.data = self._read_data(option='list')
+                assert 'gene' in self.data.columns
+                
+        elif isinstance(inputdata, pd.DataFrame):
+            self.data = inputdata
+        elif isinstance(inputdata, dict):
+            self.data = pd.DataFrame({'gene': list(inputdata.keys()), 'score': list(inputdata.values())})
+        elif isinstance(inputdata, list):
+            self.data = pd.DataFrame({'gene': inputdata, 'score': [1]*len(inputdata)})
+        
+        # check if there are duplicate genes in self.data
+        if (len(self.data['gene']) != len(set(self.data['gene']))):
+            self._aggregate_scores(aggfunc=agg_method)
+        
+        self.genes = set(self.data['gene'])
+        self.original_genes = self.genes.copy()
+        self.scores = dict(zip(self.data['gene'], self.data['score']))    
+        self.original_scores = self.scores.copy()
+        self.describe_scores()
+        
+    def _read_data(self, gene_col='Entrez', score_col='P-value', option='score_file'):
+        assert option in ['score_file', 'list'], f'Invalid option {option}. Must be `score_file` or `list`'
+        if option == 'score_file':
+            data = pd.read_csv(self.datafile, sep='\t')
+            data.rename(columns={gene_col: 'gene', score_col: 'score'}, inplace=True)
+            return data
+        if option == 'list':
+            data = pd.read_csv(self.datafile, header=None, names=['gene'])
+            data['score'] = 1e-10
+            return data
+    
+    def get_genes(self):
+        return self.genes
+    
+    def get_score(self):
+        return self.scores
+    
+    def describe_scores(self):
+        return pd.Series(self.scores).describe()
+    
+    def get_seed_dict(self):
+        return self.scores
+    
+    def transform_scores(self, method='log'):
+        assert method in ['log', 'log10', 'log2', 'neglog10'], f'Invalid method {method}. Must be one of `log`, `log10`, `log2`, `neglog10`'
+        assert all(score >= 0 for score in self.scores.values()), 'Scores must be positive for log transformation'
+        
+        if method == 'log10':
+            self.scores = {gene: np.log10(score) for gene, score in self.scores.items()}
+        elif method == 'log2':
+            self.scores = {gene: np.log2(score) for gene, score in self.scores.items()}
+        elif method == 'neglog10':
+            self.scores = {gene: -1 * np.log10(max(score, 1e-250)) for gene, score in self.scores.items()}
+        
+    def normalize_scores(self, method='max', score_cap=None):
+        """Performs various normalization procedures on the gene scores"""
+        assert method in ['max', 'minmax', 'sum', 'log'], f'Invalid method {method}. Must be one of `max`, `minmax`, `sum`, `log`'
+        if score_cap is not None:
+            self.scores = {gene: min(score, score_cap) for gene, score in self.scores.items()}
+        if method == 'max':
+            max_score = max(self.scores.values())
+            self.scores = {gene: score/max_score for gene, score in self.scores.items()}
+        elif method == 'minmax':
+            min_score = min([x for x in self.scores.values() if x > 0])
+            max_score = max(self.scores.values())
+            self.scores = {gene: (score - min_score)/(max_score - min_score) for gene, score in self.scores.items()}
+        elif method == 'sum':
+            sum_score = sum(self.scores.values())
+            self.scores = {gene: score/sum_score for gene, score in self.scores.items()}
+        elif method == 'log':
+            self.scores = {gene: max(np.log(score), 0) for gene, score in self.scores.items()}
+            max_score = max(self.scores.values())
+            self.scores = {gene: score/max_score for gene, score in self.scores.items()}
+        
+    def reset_seeds(self):
+        self.genes = self.original_genes.copy()
+        self.scores = self.original_scores.copy()
+    
+    def filter_seeds_by_network(self, network_nodes):
+        filtered_seeds = [seed for seed in list(self.genes) if seed in network_nodes]
+        print(f'{len(self.genes) - len(filtered_seeds)}/{len(self.genes)} seeds not found in network')
+        self.genes = set(filtered_seeds)
+        self.scores = {gene: self.scores[gene] for gene in self.genes}
+    
+    def filter_seeds_by_score(self, min_score=None, max_score=None):
+        if min_score is not None:
+            filtered_seeds_min = [seed for seed in self.genes if self.scores[seed] >= min_score]
+        else:
+            filtered_seeds_min = self.genes.copy()
+        if max_score is not None:
+            filtered_seeds_max = [seed for seed in self.genes if self.scores[seed] <= max_score]
+        else:
+            filtered_seeds_max = self.genes.copy()
+        filtered_seeds = set(filtered_seeds_min).intersection(filtered_seeds_max)
+        
+        print(f'{len(self.genes) - len(filtered_seeds)}/{len(self.genes)} seeds removed due to low/high score(s)')
+        self.genes = set(filtered_seeds)
+        self.scores = {gene: self.scores[gene] for gene in self.genes}
+    
+    def _aggregate_scores(self, aggfunc='mean'):
+        # Check and aggregate multiple scores for the same gene?
+        duplicate_genes = self.data[self.data.duplicated(subset='gene', keep=False)]['gene']
+        if len(duplicate_genes) > 0:
+            print(f'{len(duplicate_genes)} genes have multiple scores. Aggregating scores using `{aggfunc}`. To change aggregation method, use `agg_method` parameter')
+            duplicated_data = self.data[self.data['gene'].isin(duplicate_genes)]
+            unduplicated_data = self.data[~self.data['gene'].isin(duplicate_genes)]
+            agg_data = duplicated_data.groupby('gene').agg(aggfunc).reset_index()
+            self.data = pd.concat([unduplicated_data, agg_data], axis=0).reset_index(drop=True)
+    
+    def get_top_ranked_genes(self, k=500, ascending=False):
+        return self.data.sort_values(by='score', ascending=ascending).gene[:k]
 
 
 def get_degree_binning(node_to_degree_dict, min_bin_size, lengths=None):
@@ -85,3 +211,49 @@ def get_degree_binning(node_to_degree_dict, min_bin_size, lengths=None):
         degree_index += 1 
 
     return bins, degree_to_bin_index
+
+from datetime import datetime
+
+class Timer:
+    """ This class is a simple timer that allows for the tracking of time elapsed between starting and ending tasks.
+    It is useful for tracking time spent in different parts of a program or for timing different processes.
+    """
+    def __init__(self):
+        self.start_times = {}
+        self.finish_times = {}
+        self.elapsed_times = {}
+        self.tasks = []
+        self.current_task_stack = []
+        self.indents = {}
+        
+    def start(self, taskstr):
+        if taskstr in self.start_times.keys():
+            taskstr=taskstr + "1"
+            i=1
+            while taskstr in self.start_times.keys():
+                i += 1
+                taskstr = taskstr[0:-1] + str(i) 
+        self.current_task_stack.append(taskstr)
+        self.indents[taskstr] = len(self.current_task_stack) - 1
+        self.tasks.append(taskstr)
+        self.start_times[taskstr] = datetime.now()
+        
+    def end(self, taskstr):
+        if taskstr in self.finish_times:
+            matching_tasks = [task for task in self.start_times.keys() if taskstr in task]
+            taskstr = matching_tasks[-1]
+        self.current_task_stack.remove(taskstr)
+        self.finish_times[taskstr] = datetime.now()
+        self.elapsed_times[taskstr] = str(self.finish_times[taskstr] - self.start_times[taskstr])
+        
+    def print_all_times(self):
+        try:
+            for task in self.tasks:
+                if task not in self.elapsed_times:
+                    self.end(task)
+                if self.indents[task] > 0:
+                    print("".join(["|", "---"*self.indents[task], ">"]),self.elapsed_times[task], task)
+                else:
+                    print(self.elapsed_times[task], task)
+        except:
+            print(self.elapsed_times)

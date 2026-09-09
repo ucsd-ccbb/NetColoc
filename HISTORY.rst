@@ -2,6 +2,16 @@
 History
 =======
 
+1.1.0 (2026-09-09)
+--------------------
+
+* Added functionality for quantitative NetColoc, allowing direct analysis of scored gene sets. Including: the class ``Seeds`` in ``netcoloc_utils`` to manage import and manipulation of scored gene sets, ``scored_network_propagation`` in ``netprop`` to perform propagation with weighted seeds, ``calculate_scored_heat_zscores`` and associated functions in ``netprop_zscore`` to calculate associated z-scores using randomized inputs with matched degree-score correlation.
+
+* Added ``example_notebook/Quantitative_NetColoc_QNetColoc_example.ipynb`` to demonstrate the usage of quantitative NetColoc
+
+* Updated ``numpy`` requirement to ``numpy>=2.0.0``
+
+* Added support for ``python=3.14``
 
 1.0.0 (2026-02-10)
 ------------------
@@ -30,9 +40,11 @@ History
 
 * Added function ``network_colocalization.calculate_mean_z_score_distribution()`` to analyze mean netcoloc z-scores in addition to the size of the colocalized network. 
 
-* `requirements_dev.txt` updated for `python=3.13`
+* `requirements_dev.txt` updated for `python>=3.13`
 
-* Expanded unit tests for `netcoloc_utils`, `netprop`, `netprop_zscore`, `network_colocalization` and `validation` modules
+* Expanded unit tests for `netcoloc_utils`, `netprop`, `netprop_zscore`, `network_colocalization` and `validation` modules 
+
+* Deprecated support for `python=3.8`. Netcoloc v1.0.0 requires python>=3.9  
 
 
 0.1.7 (2022-06-28)
