@@ -9,17 +9,20 @@ import os
 import numpy as np
 
 class Seeds:
-    def __init__(self, inputdata, option='score_file', agg_method='mean'):
+    def __init__(self, inputdata, option='score_file', agg_method='mean',
+                 gene_col='Entrez', score_col='P-value'):
         if isinstance(inputdata, str):
             # check that file exists
             if not os.path.exists(inputdata):
                 raise FileNotFoundError(f'File {inputdata} not found')
             self.datafile = inputdata
             try:
-                self.data = self._read_data(option='score_file')
+                self.data = self._read_data(option=option, gene_col=gene_col,
+                                            score_col = score_col)
                 assert 'gene' in self.data.columns
             except AssertionError:
-                self.data = self._read_data(option='list')
+                self.data = self._read_data(option='list',gene_col=gene_col,
+                                            score_col = score_col)
                 assert 'gene' in self.data.columns
                 
         elif isinstance(inputdata, pd.DataFrame):

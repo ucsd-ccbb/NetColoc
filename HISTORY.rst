@@ -2,6 +2,11 @@
 History
 =======
 
+1.1.1 (2026-09-09)
+------------------
+
+* Fixed bug in the utility class Seeds. Now allows passing of non-default columns names for seed gene files.
+
 1.1.0 (2026-09-09)
 --------------------
 

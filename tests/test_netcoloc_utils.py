@@ -9,6 +9,7 @@ Tests for `netcoloc` module.
 """
 
 
+import os
 import sys
 import unittest
 from contextlib import contextmanager
@@ -20,7 +21,7 @@ import numpy as np
 class TestNetcolocUtil(unittest.TestCase):
 
     def setUp(self):
-        pass
+        self.data_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
     def tearDown(self):
         pass
@@ -178,6 +179,24 @@ class TestNetcolocUtil(unittest.TestCase):
         seeds = netcoloc_utils.Seeds(self.scores)
         seeds.normalize_scores(method='max', score_cap=3)
         self.assertEqual(seeds.scores, {'A':1/3,  'B':3/3, 'C':3/3})
+
+    def test_Seeds_read_data_score_file(self):
+        score_file = os.path.join(self.data_path, 'mock_score_file.tsv')
+
+        # default gene/score column names match the file's header
+        seeds = netcoloc_utils.Seeds(score_file)
+        self.assertEqual(seeds.genes, {17, 5, 31, 4, 56})
+        self.assertEqual(seeds.scores[17], 0.01)
+
+        # specifying gene_col/score_col explicitly should give the same result
+        seeds = netcoloc_utils.Seeds(score_file, gene_col='Entrez', score_col='P-value')
+        self.assertEqual(seeds.genes, {17, 5, 31, 4, 56})
+        self.assertEqual(seeds.scores[56], 0.05)
+        
+        score_file2 = os.path.join(self.data_path, 'mock_score_file2.tsv')
+        seeds = netcoloc_utils.Seeds(score_file2, gene_col='Gene', score_col='Score')
+        self.assertEqual(seeds.genes, {17, 5, 31, 4, 56})
+        self.assertEqual(seeds.scores[56], 0.05)
 
     def test_Seeds_reset(self):
         self.scores = {'A':1, 'B':4.5, 'C':3}
